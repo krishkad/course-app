@@ -2,7 +2,6 @@ import { Calendar, Clock, User, Users, ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-
 const UpcomingEventsSection = () => {
   const events = [
     {
@@ -136,6 +135,7 @@ const UpcomingEventsSection = () => {
                 </div>
                 <div className="absolute top-4 right-4">
                   <Badge
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     variant={getStatusColor(event.status) as any}
                     className="shadow-sm"
                   >
@@ -213,7 +213,7 @@ const UpcomingEventsSection = () => {
           <div className="inline-flex w-full items-center justify-center p-8 bg-transparent rounded-2xl">
             <div className="text-center">
               <p className="text-4xl font-semibold mb-4">
-                Don't miss out on future events
+                Don&apos;t miss out on future events
               </p>
               <Button
                 variant="outline"
