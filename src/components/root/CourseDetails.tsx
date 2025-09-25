@@ -185,7 +185,7 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl font-bold mb-4">Course Not Found</h1>
             <p className="text-muted-foreground mb-8">
-              The course you're looking for doesn't exist.
+              The course you&apos;re looking for doesn&apos;t exist.
             </p>
             <Link href="/courses">
               <Button>
@@ -286,7 +286,7 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="what-you-learn">
                     <AccordionTrigger className="text-xl font-semibold">
-                      What You'll Learn
+                      What You&apos;ll Learn
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
