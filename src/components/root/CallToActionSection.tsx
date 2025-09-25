@@ -33,7 +33,7 @@ const CallToActionSection = () => {
             </div>
             <blockquote className="text-lg md:text-xl text-primary-foreground/95 italic mb-4">
               &quot;LearnPro transformed my career. Within 6 months of completing their courses, 
-              I landed my dream job with a 40% salary increase."\&quot;
+              I landed my dream job with a 40% salary increase.&quot;
             </blockquote>
             <cite className="text-primary-foreground/80 font-medium">
               - Sarah Chen, Software Engineer at TechCorp
