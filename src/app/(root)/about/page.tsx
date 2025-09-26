@@ -92,7 +92,7 @@ const About = () => {
               About LearnPro 
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-              We're on a mission to democratize education and empower
+              We&apos;re on a mission to democratize education and empower
               individuals worldwide to achieve their career goals through
               innovative online learning experiences.
             </p>
@@ -136,14 +136,14 @@ const About = () => {
                 </h2>
                 <p className="text-muted-foreground text-lg leading-relaxed mb-6">
                   At EduPlatform, we believe that quality education should be
-                  accessible to everyone, everywhere. We're breaking down
+                  accessible to everyone, everywhere. We&apos;re breaking down
                   barriers and creating pathways for individuals to unlock their
                   potential and transform their careers.
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-8">
                   Through our comprehensive curriculum, expert instructors, and
-                  supportive community, we've helped thousands of students
-                  achieve their professional goals and build the careers they've
+                  supportive community, we&apos;ve helped thousands of students
+                  achieve their professional goals and build the careers they&apos;ve
                   always dreamed of.
                 </p>
                 <Button size="lg" className="shadow-glow">

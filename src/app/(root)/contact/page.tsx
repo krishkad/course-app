@@ -121,7 +121,7 @@ const Contact = () => {
               Contact Us
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              We're here to help you succeed. Reach out to our team for support,
+              We&apos;re here to help you succeed. Reach out to our team for support,
               questions, or just to say hello.
             </p>
           </div>
@@ -139,7 +139,7 @@ const Contact = () => {
                   Send us a Message
                 </CardTitle>
                 <p className="text-muted-foreground">
-                  Fill out the form below and we'll get back to you as soon as
+                  Fill out the form below and we&apos;ll get back to you as soon as
                   possible.
                 </p>
               </CardHeader>
