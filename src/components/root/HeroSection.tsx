@@ -29,13 +29,13 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center bg-gradient-hero">
+    <section className="relative min-h-screen flex items-center bg-black">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src={"/images/hero-image.png"}
           alt="Professional learning environment"
-          className="w-full h-full object-cover opacity-10"
+          className="w-full h-full object-cover opacity-60"
         />
       </div>
 
@@ -48,12 +48,12 @@ const HeroSection = () => {
           {/* <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
             Learn from Industry Experts
           </h2> */}
-          <p className="text-xl md:text-2xl text-muted-foreground  max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-white  max-w-2xl mx-auto">
             Learn from Industry Experts
           </p>
 
           {/* Subheading */}
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-white mb-12 max-w-2xl mx-auto">
             Courses tailored to your profession, goals, and schedule
           </p>
 
@@ -76,7 +76,7 @@ const HeroSection = () => {
           </div> */}
 
           <div className="w-full max-w-xl mx-auto mb-16">
-            <div className="flex items-center shadow-card rounded-full bg-white overflow-hidden border border-border focus-within:ring-1 focus-within:ring-primary transition">
+            <div className="flex items-center shadow-card rounded-full bg-white overflow-hidden focus-within:ring-1 focus-within:ring-primary transition">
               {/* Search Icon */}
               <div className="pl-4">
                 <Search className="h-5 w-5 text-muted-foreground" />
@@ -101,22 +101,27 @@ const HeroSection = () => {
           </div>
 
           {/* Benefits Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-5xl mx-auto">
-            {benefits.map((benefit, index) => (
-              <div
-                key={index}
-                className="flex flex-col w-[170px] items-center justify-center p-6 bg-gradient-card aspect-square rounded-full shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 border border-white hover:border-primary"
-              >
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-primary rounded-lg mb-1.5">
-                  <benefit.icon className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <p className="text-sm font-medium text-center leading-snug">
-                  {benefit.text}
-                </p>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+        {benefits.map((benefit, index) => (
+          <div key={index} >
+            <div
+              className="flex flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 hover:shadow-blue-500/50"
+              // whileHover={{ scale: 1.05, rotate: 2 }}
+              // whileTap={{ scale: 0.95 }}
+              // initial={{ opacity: 0, y: 20 }}
+              // animate={{ opacity: 1, y: 0 }}
+              // transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl mb-3">
+                <benefit.icon className="h-7 w-7 text-white" />
               </div>
-            ))}
+              <p className="text-sm font-semibold text-center text-white leading-snug">
+                {benefit.text}
+              </p>
+            </div>
           </div>
-
+        ))}
+      </div>
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
             <Button
@@ -125,11 +130,11 @@ const HeroSection = () => {
             >
               Start Learning Now
             </Button>
-            <Link href={"/courses"}>
+            <Link href={"/courses"} className="max-sm:w-full">
               <Button
                 size="lg"
                 variant="outline"
-                className="px-8 py-4 text-lg border-2"
+                className="max-sm:w-full px-8 py-4 text-lg border-2"
               >
                 Browse Courses
               </Button>

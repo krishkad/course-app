@@ -29,35 +29,39 @@ const Navigation = () => {
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
-            <span className="text-sm font-bold text-primary-foreground">L</span>
+        <Link href={"/"}>
+          <div className="flex items-center space-x-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
+              <span className="text-sm font-bold text-primary-foreground">
+                L
+              </span>
+            </div>
+            <span className="text-xl font-bold">LearnPro</span>
           </div>
-          <span className="text-xl font-bold">LearnPro</span>
-        </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           <NavigationMenuDemo />
 
-          <a
-            href="#about"
+          <Link
+            href="/about"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
             About Us
-          </a>
-          <a
-            href="#events"
+          </Link>
+          <Link
+            href="/events"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
             Events
-          </a>
-          <a
-            href="#contact"
+          </Link>
+          <Link
+            href="/contact"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
             Contact
-          </a>
+          </Link>
         </div>
 
         {/* Desktop Auth Buttons */}
@@ -104,52 +108,36 @@ const Navigation = () => {
 
               {/* Mobile Links */}
               <div className="flex flex-col space-y-4 mt-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-                    COURSES
-                  </h3>
-                  <div className="flex flex-col space-y-2 pl-2">
-                    {courseCategories.map((category) => (
-                      <a
-                        key={category}
-                        href="#"
-                        className="text-sm hover:text-primary transition-colors"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {category}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-
-                <a
-                  href="#pricing"
-                  className="text-sm font-medium hover:text-primary transition-colors"
+                <Link
+                  href="/courses"
+                  className="text-sm hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  Pricing
-                </a>
-                <a
-                  href="#about"
+                  COURSES
+                </Link>
+
+               
+                <Link
+                  href="/about"
                   className="text-sm font-medium hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   About Us
-                </a>
-                <a
-                  href="#events"
+                </Link>
+                <Link
+                  href="/events"
                   className="text-sm font-medium hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   Events
-                </a>
-                <a
-                  href="#contact"
+                </Link>
+                <Link
+                  href="/contact"
                   className="text-sm font-medium hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   Contact
-                </a>
+                </Link>
               </div>
 
               {/* Mobile Auth */}

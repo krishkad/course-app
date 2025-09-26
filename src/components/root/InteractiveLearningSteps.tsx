@@ -10,11 +10,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 const InteractiveLearningSteps = () => {
   const [activeStep, setActiveStep] = useState(0);
-
- 
 
   // useEffect(() => {
   //   if (isVisible) {
@@ -32,8 +31,8 @@ const InteractiveLearningSteps = () => {
       title: "Choose Your Profession",
       description:
         "Identify your career goals and select the profession you want to advance in",
-      details:
-        "Browse through 50+ career paths with detailed requirements and growth prospects.",
+      color:
+        "from-green-500 to-green-600",
     },
     {
       number: "02",
@@ -41,8 +40,8 @@ const InteractiveLearningSteps = () => {
       title: "Pick a Learning Path",
       description:
         "Select from curated learning paths designed by industry experts",
-      details:
-        "Each path includes 5-12 courses with progressive difficulty and hands-on projects.",
+      color:
+        "from-violet-500 to-violet-600",
     },
     {
       number: "03",
@@ -50,8 +49,8 @@ const InteractiveLearningSteps = () => {
       title: "Learn from Experts",
       description:
         "Access high-quality content created by top professionals in your field",
-      details:
-        "Video lessons, interactive exercises, and real-world case studies from industry leaders.",
+      color:
+        "from-pink-500 to-pink-600",
     },
     {
       number: "04",
@@ -59,8 +58,8 @@ const InteractiveLearningSteps = () => {
       title: "Build Real-World Projects",
       description:
         "Apply your knowledge through hands-on projects and practical exercises",
-      details:
-        "Portfolio-worthy projects that demonstrate your skills to potential employers.",
+      color:
+        "from-gray-500 to-gray-600",
     },
     {
       number: "05",
@@ -68,8 +67,8 @@ const InteractiveLearningSteps = () => {
       title: "Get Certified & Get Hired",
       description:
         "Earn industry-recognized certificates and advance your career",
-      details:
-        "Digital certificates, LinkedIn endorsements, and career support to land your dream job.",
+      color:
+        "from-orange-500 to-orange-600",
     },
   ];
 
@@ -86,7 +85,7 @@ const InteractiveLearningSteps = () => {
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
             Grow Your Knowledge in{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               Five Simple Steps
@@ -101,7 +100,7 @@ const InteractiveLearningSteps = () => {
         {/* Interactive Steps */}
         <div className="max-w-6xl mx-auto">
           {/* Desktop Interactive Layout */}
-          <div className="hidden lg:block">
+          <div className="block">
             <div className="relative">
               {/* Animated Progress Line */}
               {/* <div className="absolute top-1/2 left-0 right-0 h-2 bg-muted rounded-full transform -translate-y-1/2 overflow-hidden">
@@ -114,64 +113,31 @@ const InteractiveLearningSteps = () => {
               </div> */}
 
               {/* Steps */}
-              <div className="flex justify-between items-center relative z-10">
+              <div className="flex flex-col md:flex-row justify-between items-center relative z-10 w-full mx-auto gap-8 md:gap-6 perspective-1000">
                 {steps.map((step, index) => (
                   <div
                     key={index}
-                    className={`flex flex-col items-center max-w-xs cursor-pointer transition-all duration-500`}
-                    // onClick={() => setActiveStep(index)}
+                    className="relative flex flex-col items-center max-w-xs bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-3xl transform md:-skew-y-6 transition-all duration-700 hover:scale-110 hover:ring-8 hover:ring-primary/40 hover:shadow-[0_0_50px_rgba(168,85,247,0.5)] hover:rotate-y-15 animate-orbit-burst"
+                    style={{ animationDelay: `${index * 0.4}s` }}
                   >
-                    {/* Step Circle */}
-                    <div className="relative mb-8">
-                      <div
-                        className={`w-24 h-24 rounded-full flex items-center justify-center shadow-glow mb-4 transition-all duration-500 ${
-                          true
-                            ? "bg-gradient-primary scale-110"
-                            : "bg-muted hover:bg-gradient-primary/20"
-                        }`}
-                      >
-                        {false ? (
-                          <CheckCircle className="h-10 w-10 text-primary-foreground" />
-                        ) : (
-                          <step.icon
-                            className={`h-10 w-10 ${
-                              true
-                                ? "text-primary-foreground"
-                                : "text-muted-foreground"
-                            }`}
-                          />
-                        )}
+                    {/* Step Circle with Glow Pulse */}
+                    <div className="relative mb-8 animate-glow-pulse">
+                      <div className={cn("w-28 h-28 rounded-full flex items-center justify-center shadow-2xl mb-4 transition-all duration-500 bg-gradient-to-br animate-pulse-gradient-fast", step.color)}>
+                        <step.icon className="h-12 w-12 text-white transform hover:scale-125 hover:rotate-180 transition-all duration-500" />
                       </div>
-                      <div
-                        className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 ${
-                         false
-                            ? "bg-accent text-accent-foreground scale-110"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
+                      {/* <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full flex items-center justify-center text-base font-extrabold bg-purple-500 text-white shadow-lg animate-bounce-slow">
                         {step.number}
-                      </div>
+                      </div> */}
                     </div>
 
-                    {/* Step Content */}
-                    <div className="text-center">
-                      <h3
-                        className={`text-lg font-bold mb-3 transition-colors duration-300 ${
-                          true
-                            ? "text-primary"
-                            : "text-muted-foreground"
-                        }`}
-                      >
+                    {/* Step Content with Text Glow */}
+                    <div className="text-center transform md:skew-y-6">
+                      <h3 className="text-lg font-extrabold mb-3 text-primary tracking-wide animate-text-glow">
                         {step.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+                      <p className="text-sm text-gray-700 leading-relaxed mb-2 animate-fade-slide">
                         {step.description}
                       </p>
-                      {/* {true && (
-                        <p className="text-xs text-primary leading-relaxed animate-fade-in">
-                          {step.details}
-                        </p>
-                      )} */}
                     </div>
                   </div>
                 ))}
@@ -180,7 +146,7 @@ const InteractiveLearningSteps = () => {
           </div>
 
           {/* Mobile Interactive Layout */}
-          <div className="lg:hidden">
+          <div className="hidden">
             <div className="space-y-6">
               {steps.map((step, index) => (
                 <div
@@ -224,11 +190,7 @@ const InteractiveLearningSteps = () => {
                     <p className="text-sm leading-relaxed mb-2 opacity-90">
                       {step.description}
                     </p>
-                    {index === activeStep && (
-                      <p className="text-xs leading-relaxed opacity-80 animate-fade-in">
-                        {step.details}
-                      </p>
-                    )}
+                   
                   </div>
 
                   {/* Arrow for active step */}
@@ -257,7 +219,7 @@ const InteractiveLearningSteps = () => {
         </div> */}
 
         {/* Bottom CTA */}
-         <div className="text-center w-full mt-14">
+        {/* <div className="text-center w-full mt-14">
           <div className="w-full inline-flex items-center justify-center p-8 py-12 bg-gradient-primary rounded-2xl shadow-hero">
             <div className="text-center text-primary-foreground">
               <p className="text-4xl font-semibold mb-4">
@@ -269,7 +231,7 @@ const InteractiveLearningSteps = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </div> */}
         {/* <div className="text-center mt-16">
           <div className="inline-flex items-center justify-center p-8 bg-gradient-primary rounded-2xl shadow-hero">
             <div className="text-center text-primary-foreground">

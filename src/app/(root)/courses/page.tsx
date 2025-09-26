@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Clock, Users, Star, ArrowRight, Filter } from "lucide-react";
+import { Clock, Users, Star, ArrowRight, Filter, Search } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +14,12 @@ import {
 import Navigation from "@/components/root/Navigation";
 import Link from "next/link";
 import Footer from "@/components/root/Footer";
+import { Input } from "@/components/ui/input";
 
 const AllCourses = () => {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedDuration, setSelectedDuration] = useState("all");
-  const [selectedPrice, setSelectedPrice] = useState("all");
-  const [selectedRating, setSelectedRating] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   const courses = [
     {
@@ -127,41 +127,41 @@ const AllCourses = () => {
   ];
 
   // Filter courses based on selected filters
-  const filteredCourses = courses.filter((course) => {
-    if (selectedCategory !== "all" && course.category !== selectedCategory)
-      return false;
-    if (selectedDuration !== "all") {
-      if (selectedDuration === "short" && course.durationValue > 6)
-        return false;
-      if (
-        selectedDuration === "medium" &&
-        (course.durationValue <= 6 || course.durationValue > 10)
-      )
-        return false;
-      if (selectedDuration === "long" && course.durationValue <= 10)
-        return false;
-    }
-    if (selectedPrice !== "all") {
-      if (selectedPrice === "free" && course.priceValue > 0) return false;
-      if (
-        selectedPrice === "low" &&
-        (course.priceValue <= 0 || course.priceValue > 100)
-      )
-        return false;
-      if (
-        selectedPrice === "medium" &&
-        (course.priceValue <= 100 || course.priceValue > 150)
-      )
-        return false;
-      if (selectedPrice === "high" && course.priceValue <= 150) return false;
-    }
-    if (selectedRating !== "all") {
-      if (selectedRating === "4+" && course.rating < 4.0) return false;
-      if (selectedRating === "4.5+" && course.rating < 4.5) return false;
-      if (selectedRating === "4.8+" && course.rating < 4.8) return false;
-    }
-    return true;
-  });
+  // const filteredCourses = courses.filter((course) => {
+  //   if (selectedCategory !== "all" && course.category !== selectedCategory)
+  //     return false;
+  //   if (selectedDuration !== "all") {
+  //     if (selectedDuration === "short" && course.durationValue > 6)
+  //       return false;
+  //     if (
+  //       selectedDuration === "medium" &&
+  //       (course.durationValue <= 6 || course.durationValue > 10)
+  //     )
+  //       return false;
+  //     if (selectedDuration === "long" && course.durationValue <= 10)
+  //       return false;
+  //   }
+  //   if (selectedPrice !== "all") {
+  //     if (selectedPrice === "free" && course.priceValue > 0) return false;
+  //     if (
+  //       selectedPrice === "low" &&
+  //       (course.priceValue <= 0 || course.priceValue > 100)
+  //     )
+  //       return false;
+  //     if (
+  //       selectedPrice === "medium" &&
+  //       (course.priceValue <= 100 || course.priceValue > 150)
+  //     )
+  //       return false;
+  //     if (selectedPrice === "high" && course.priceValue <= 150) return false;
+  //   }
+  //   if (selectedRating !== "all") {
+  //     if (selectedRating === "4+" && course.rating < 4.0) return false;
+  //     if (selectedRating === "4.5+" && course.rating < 4.5) return false;
+  //     if (selectedRating === "4.8+" && course.rating < 4.8) return false;
+  //   }
+  //   return true;
+  // });
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,13 +169,13 @@ const AllCourses = () => {
 
       <main className="">
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-primary">
-          <div className="container mx-auto px-4">
-            <div className="text-center text-primary-foreground">
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+        <section className="pt-24 pb-16 px-4">
+          <div className="container mx-auto text-center">
+            <div className="animate-fade-in">
+              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-6">
                 All Courses
               </h1>
-              <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed opacity-90">
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                 Discover our complete collection of professional development
                 courses
               </p>
@@ -184,70 +184,45 @@ const AllCourses = () => {
         </section>
 
         {/* Filters Section */}
-        <section className="py-8 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center gap-4 mb-4">
-              <Filter className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">Filter Courses</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl">
-              <Select
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="development">Development</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="data-science">Data Science</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={selectedDuration}
-                onValueChange={setSelectedDuration}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Duration</SelectItem>
-                  <SelectItem value="short">Short (1-6 weeks)</SelectItem>
-                  <SelectItem value="medium">Medium (7-10 weeks)</SelectItem>
-                  <SelectItem value="long">Long (10+ weeks)</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedPrice} onValueChange={setSelectedPrice}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Price Range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Price</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="low">$1 - $100</SelectItem>
-                  <SelectItem value="medium">$101 - $150</SelectItem>
-                  <SelectItem value="high">$150+</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedRating} onValueChange={setSelectedRating}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Rating" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Rating</SelectItem>
-                  <SelectItem value="4+">4.0+ Stars</SelectItem>
-                  <SelectItem value="4.5+">4.5+ Stars</SelectItem>
-                  <SelectItem value="4.8+">4.8+ Stars</SelectItem>
-                </SelectContent>
-              </Select>
+        <section className="px-4 pb-12">
+          <div className="container mx-auto">
+            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 shadow-elegant border border-border/50">
+              <div className="flex flex-col md:flex-row gap-4 items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Search profession, skill, hobbies..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="w-[150px]">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Course Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="workshop">Self Improvement</SelectItem>
+                      <SelectItem value="seminar">Career</SelectItem>
+                      <SelectItem value="conference">AI</SelectItem>
+                      <SelectItem value="course">AI Business</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Cost" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="upcoming">Free</SelectItem>
+                      <SelectItem value="completed">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -257,11 +232,11 @@ const AllCourses = () => {
           <div className="container mx-auto px-4">
             <div className="mb-6">
               <p className="text-muted-foreground">
-                Showing {filteredCourses.length} of {courses.length} courses
+                Showing {courses.length} of {courses.length} courses
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-              {filteredCourses.map((course) => (
+              {courses.map((course) => (
                 <Link
                   key={course.id}
                   href={`/courses/${course.id}`}
@@ -321,7 +296,7 @@ const AllCourses = () => {
                       {/* Course Footer */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-2xl font-bold text-primary">
+                          <span className="text-2xl font-bold !text-primary">
                             {course.price}
                           </span>
                         </div>

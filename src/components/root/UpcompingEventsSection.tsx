@@ -1,6 +1,7 @@
 import { Calendar, Clock, User, Users, ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 const UpcomingEventsSection = () => {
   const events = [
@@ -96,7 +97,7 @@ const UpcomingEventsSection = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
             Upcoming{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               Events
@@ -215,14 +216,16 @@ const UpcomingEventsSection = () => {
               <p className="text-4xl font-semibold mb-4">
                 Don&apos;t miss out on future events
               </p>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 bg-gradient-primary text-white hover:bg-primary hover:text-white"
-              >
-                View Event Calendar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link href={"/events"}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-2 bg-gradient-primary text-white hover:bg-primary hover:text-white"
+                >
+                  View Event Calendar
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

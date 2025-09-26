@@ -81,7 +81,7 @@ const CareerGrowthSection = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
             Helping People Grow Their Careers.{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               Every Day!

@@ -1,41 +1,42 @@
 "use client";
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-    ArrowLeft,
-    CheckCircle,
-    Clock,
-    Lock,
-    Play,
-    Star,
-    Users,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Lock,
+  Play,
+  Star,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import Footer from "./Footer";
 import Navigation from "./Navigation";
 import YouTubeEmbed from "./YoutubeEmbed";
+import { useRouter } from "next/navigation";
 
 const CourseDetail = ({ courseId }: { courseId: string }) => {
-
+  const router = useRouter();
   // Simulate video progress - in real app this would be from video player events
-//   useEffect(() => {
-//     const interval = setInterval(() => {
-//       setWatchProgress((prev) => {
-//         const newProgress = prev + 1;
-//         return newProgress > 100 ? 0 : newProgress;
-//       });
-//     }, 3000);
+  //   useEffect(() => {
+  //     const interval = setInterval(() => {
+  //       setWatchProgress((prev) => {
+  //         const newProgress = prev + 1;
+  //         return newProgress > 100 ? 0 : newProgress;
+  //       });
+  //     }, 3000);
 
-//     return () => clearInterval(interval);
-//   }, []);
+  //     return () => clearInterval(interval);
+  //   }, []);
 
   // Course data - in a real app, this would come from an API
   const courseData = {
@@ -187,12 +188,10 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
             <p className="text-muted-foreground mb-8">
               The course you&apos;re looking for doesn&apos;t exist.
             </p>
-            <Link href="/courses">
-              <Button>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to All Courses
-              </Button>
-            </Link>
+            <Button onClick={() => router.back()}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to All Courses
+            </Button>
           </div>
         </main>
         <Footer />
@@ -208,13 +207,10 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
         {/* Breadcrumb */}
         <div className="border-b border-border/50">
           <div className="container mx-auto px-4 py-4">
-            <Link
-              href="/courses"
-              className="inline-flex items-center text-primary hover:text-primary/80 transition-colors"
-            >
+            <Button onClick={() => router.back()} variant={"ghost"}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               All Courses
-            </Link>
+            </Button>
           </div>
         </div>
 
@@ -226,9 +222,88 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
               <div className="relative  bg-black rounded-lg overflow-hidden mb-6">
                 <YouTubeEmbed videoId={course.videoUrl.split("embed/")[1]} />
               </div>
+              <Card className=" md:hidden shadow-none border-none p-0 pb-10">
+                <CardContent className="px-0">
+                  {/* Course Image */}
+                  {/* <img
+                    src={course.image}
+                    alt={course.title}
+                    className="w-full h-48 object-cover rounded-lg mb-6"
+                  /> */}
 
+                  {/* Badge */}
+                  <div className="mb-4">
+                    <Badge variant="default" className="shadow-sm">
+                      {course.badge}
+                    </Badge>
+                  </div>
+
+                  {/* Title and Description */}
+                  <h1 className="text-2xl font-bold mb-4 text-card-foreground">
+                    {course.title}
+                  </h1>
+
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    {course.fullDescription}
+                  </p>
+
+                  {/* Price */}
+                  <div className="mb-6">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <span className="text-3xl font-bold text-primary">
+                        {course.price}
+                      </span>
+                      <span className="text-lg text-muted-foreground line-through">
+                        {course.originalPrice}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Limited time offer
+                    </p>
+                  </div>
+
+                  {/* CTA Button */}
+                  <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
+                    Enroll Now
+                  </Button>
+
+                  {/* Course Stats */}
+                  <div className="space-y-4 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Instructor:</span>
+                      <span className="font-medium">
+                        {course.instructor.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Duration:</span>
+                      <div className="flex items-center space-x-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{course.duration}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Students:</span>
+                      <div className="flex items-center space-x-1">
+                        <Users className="h-4 w-4" />
+                        <span>{course.students}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Rating:</span>
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span>{course.rating}</span>
+                        <span className="text-muted-foreground">
+                          ({course.reviews} reviews)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               {/* Progress Section */}
-              <Card className="mb-6">
+              <Card className="mb-6 p-0">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Your Progress</h3>
@@ -352,7 +427,7 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
 
             {/* Sidebar - Right Side */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="hidden md:block sticky top-24">
                 <CardContent className="px-6">
                   {/* Course Image */}
                   <img
