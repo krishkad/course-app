@@ -1,7 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { decodeCustomJWT } from "./lib/utils";
-import { CustomJWTPayload } from "./types/types";
 
 // Optional: Add your secret in `.env` as NEXTAUTH_SECRET
 const secret = process.env.NEXTAUTH_SECRET;
