@@ -98,7 +98,7 @@ const CareerGrowthSection = () => {
           {growthCards.map((card, index) => (
             <div
               key={index}
-              className="group bg-background rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] border border-border/50 hover:border-primary/20 overflow-hidden"
+              className="group bg-background dark:bg-background/30 rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] border border-border/50 hover:border-primary/20 overflow-hidden"
             >
               {/* Card Image */}
               <div className="relative overflow-hidden h-48">
@@ -116,7 +116,7 @@ const CareerGrowthSection = () => {
               </div>
 
               {/* Card Content */}
-              <div className="p-6">
+              <div className="p-6 bg-background/50">
                 <h3 className="text-lg font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors">
                   {card.title}
                 </h3>

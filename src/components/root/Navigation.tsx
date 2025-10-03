@@ -8,22 +8,37 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { LogIn, Menu } from "lucide-react";
+import { LogIn, LogOutIcon, Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { NavigationMenuDemo } from "./NavigationMenu";
+import AuthComponent from "../auth/AuthComponent";
+import { useRouter } from "next/navigation";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
-  const courseCategories = [
-    "Business & Finance",
-    "Technology & Programming",
-    "Marketing & Sales",
-    "Design & Creative",
-    "Healthcare & Medicine",
-    "Personal Development",
-  ];
+  const handleLogOut = async () => {
+    try {
+      const response = await fetch("/api/auth/sign-out", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        router.refresh()
+        return;
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.log("error while log out: ", error);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -66,17 +81,32 @@ const Navigation = () => {
 
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link href={"/sign-in"}>
-            <Button variant="ghost" size="sm">
-              <LogIn className="h-4 w-4 mr-2" />
-              Login
-            </Button>
-          </Link>
-          <Link href={"/sign-up"}>
-            <Button size="sm" className="bg-gradient-primary hover:opacity-90">
-              Sign Up
-            </Button>
-          </Link>
+          <AuthComponent
+            signIn={
+              <>
+                <Link href={"/sign-in"}>
+                  <Button variant="ghost" size="sm">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Login
+                  </Button>
+                </Link>
+                <Link href={"/sign-up"}>
+                  <Button
+                    size="sm"
+                    className="bg-gradient-primary hover:opacity-90"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            }
+            signOut={
+              <Button size={"sm"} variant={"ghost"} onClick={handleLogOut}>
+                <LogOutIcon className="inline-flex mr-1.5" />
+                Log out
+              </Button>
+            }
+          />
         </div>
 
         {/* Mobile Menu */}
@@ -116,7 +146,6 @@ const Navigation = () => {
                   COURSES
                 </Link>
 
-               
                 <Link
                   href="/about"
                   className="text-sm font-medium hover:text-primary transition-colors"
@@ -142,13 +171,25 @@ const Navigation = () => {
 
               {/* Mobile Auth */}
               <div className="flex flex-col space-y-3 pt-4 border-t">
-                <Button variant="ghost" className="justify-start">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
-                </Button>
-                <Button className="bg-gradient-primary hover:opacity-90">
-                  Sign Up
-                </Button>
+                <AuthComponent
+                  signIn={
+                    <>
+                      <Button variant="ghost" className="justify-start">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Login
+                      </Button>
+                      <Button className="bg-gradient-primary hover:opacity-90">
+                        Sign Up
+                      </Button>
+                    </>
+                  }
+                  signOut={
+                    <Button size={"sm"} variant={"ghost"}>
+                      <LogOutIcon className="inline-flex mr-1.5" />
+                      Log out
+                    </Button>
+                  }
+                />
               </div>
             </div>
           </SheetContent>

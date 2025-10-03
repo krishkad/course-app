@@ -1,4 +1,6 @@
 import CourseDetail from "@/components/root/CourseDetails";
+import { decodeJwt } from "@/lib/utils";
+import { cookies } from "next/headers";
 import React from "react";
 
 const SingleCoursePage = async ({
@@ -7,7 +9,11 @@ const SingleCoursePage = async ({
   params: Promise<{ course: string }>;
 }) => {
     const {course } = await params;
-  return <CourseDetail courseId={course} />;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("course-app-authentication")?.value;
+
+    const {header, payload, signature} = decodeJwt(token|| "");
+  return <CourseDetail courseId={course} userId={payload.id} />;
 };
 
 export default SingleCoursePage;

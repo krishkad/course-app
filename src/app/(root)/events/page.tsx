@@ -25,11 +25,14 @@ import Navigation from "@/components/root/Navigation";
 import Link from "next/link";
 import Footer from "@/components/root/Footer";
 import { Input } from "@/components/ui/input";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const redux_events = useSelector((state: RootState) => state.events.events);
 
   const events = [
     {
@@ -192,20 +195,6 @@ const AllCourses = () => {
                   />
                 </div>
                 <div className="flex gap-4">
-                  <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-[150px]">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Event Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="workshop">Workshop</SelectItem>
-                      <SelectItem value="seminar">Seminar</SelectItem>
-                      <SelectItem value="conference">Conference</SelectItem>
-                      <SelectItem value="course">Course</SelectItem>
-                      <SelectItem value="networking">Networking</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Status" />
@@ -233,102 +222,112 @@ const AllCourses = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {events.map((event, index) => (
-                <div
+                <Link
                   key={index}
-                  className="group bg-background rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20"
+                  href={`/events/${
+                    redux_events[index + 1]?.slug ?? event.title
+                  }`}
                 >
-                  {/* Event Image */}
-                  <div className="relative overflow-hidden h-48">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                  <div
+                    key={index}
+                    className="group bg-background rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20"
+                  >
+                    {/* Event Image */}
+                    <div className="relative overflow-hidden h-48">
+                      <img
+                        src={
+                          redux_events[index + 1]?.thumbnailUrl ?? event.image
+                        }
+                        alt={event.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
 
-                    {/* Event Badges */}
-                    <div className="absolute top-4 left-4">
-                      <Badge
-                        variant="outline"
-                        className="bg-white/90 backdrop-blur-sm text-primary border-none shadow-sm"
-                      >
-                        {event.type}
-                      </Badge>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <Badge
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        variant={getStatusColor(event.status) as any}
-                        className="shadow-sm"
-                      >
-                        {event.status}
-                      </Badge>
-                    </div>
-
-                    {/* Play Button Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-glow">
-                        <Play className="h-6 w-6 text-primary ml-1" />
+                      {/* Event Badges */}
+                      <div className="absolute top-4 left-4">
+                        <Badge
+                          variant="outline"
+                          className="bg-white/90 backdrop-blur-sm text-primary border-none shadow-sm"
+                        >
+                          {event.type}
+                        </Badge>
                       </div>
+                      <div className="absolute top-4 right-4">
+                        <Badge
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          variant={getStatusColor(event.status) as any}
+                          className="shadow-sm"
+                        >
+                          {event.status}
+                        </Badge>
+                      </div>
+
+                      {/* Play Button Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-glow">
+                          <Play className="h-6 w-6 text-primary ml-1" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Event Content */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
+                        {redux_events[index + 1]?.title ?? event.title}
+                      </h3>
+
+                      <p className="text-muted-foreground mb-6 text-sm leading-relaxed line-clamp-2">
+                        {event.description}
+                      </p>
+
+                      {/* Event Details */}
+                      <div className="space-y-3 mb-6">
+                        <div className="flex items-center space-x-3 text-sm">
+                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Calendar className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-foreground font-medium">
+                            {event.date}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-3 text-sm">
+                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Clock className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-muted-foreground">
+                            {event.time}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-3 text-sm">
+                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <User className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-muted-foreground">
+                            {redux_events[index + 1]?.organizer_name ??
+                              event.speaker}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-3 text-sm">
+                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Users className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-muted-foreground">
+                            {event.attendees} registered
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Event Footer */}
+                      <Button className="w-full bg-gradient-primary hover:opacity-90 shadow-glow group/btn">
+                        Register Now
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                      </Button>
                     </div>
                   </div>
-
-                  {/* Event Content */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
-                      {event.title}
-                    </h3>
-
-                    <p className="text-muted-foreground mb-6 text-sm leading-relaxed line-clamp-2">
-                      {event.description}
-                    </p>
-
-                    {/* Event Details */}
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center space-x-3 text-sm">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <Calendar className="h-4 w-4 text-primary" />
-                        </div>
-                        <span className="text-foreground font-medium">
-                          {event.date}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-3 text-sm">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <Clock className="h-4 w-4 text-primary" />
-                        </div>
-                        <span className="text-muted-foreground">
-                          {event.time}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-3 text-sm">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                        <span className="text-muted-foreground">
-                          {event.speaker}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-3 text-sm">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <Users className="h-4 w-4 text-primary" />
-                        </div>
-                        <span className="text-muted-foreground">
-                          {event.attendees} registered
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Event Footer */}
-                    <Button className="w-full bg-gradient-primary hover:opacity-90 shadow-glow group/btn">
-                      Register Now
-                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                    </Button>
-                  </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

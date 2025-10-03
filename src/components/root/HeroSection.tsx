@@ -2,31 +2,37 @@ import { Search, CheckCircle, Award, Users, Clock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 // import heroImage from "@/assets/hero-image.jpg";
 
 const HeroSection = () => {
-  const benefits = [
-    {
-      icon: CheckCircle,
-      text: "Learn at your own pace",
-    },
-    {
-      icon: Award,
-      text: "Industry recognized",
-    },
-    {
-      icon: Users,
-      text: "Courses by top professionals",
-    },
-    {
-      icon: Zap,
-      text: "Career focused learning",
-    },
-    {
-      icon: Clock,
-      text: "Lifetime course access",
-    },
-  ];
+ const benefits = [
+  {
+    icon: CheckCircle,
+    text: "Learn at your own pace",
+    gradient: "from-green-400 via-green-300 to-emerald-400", // fresh green
+  },
+  {
+    icon: Award,
+    text: "Industry recognized",
+    gradient: "from-yellow-400 via-yellow-300 to-orange-400", // sunny yellow-orange
+  },
+  {
+    icon: Users,
+    text: "Courses by top professionals",
+    gradient: "from-blue-400 via-sky-300 to-cyan-400", // cool blue-cyan
+  },
+  {
+    icon: Zap,
+    text: "Career focused learning",
+    gradient: "from-pink-400 via-rose-300 to-fuchsia-400", // energetic pink-fuchsia
+  },
+  {
+    icon: Clock,
+    text: "Lifetime course access",
+    gradient: "from-purple-400 via-violet-300 to-indigo-400", // calm purple-indigo
+  },
+];
 
   return (
     <section className="relative min-h-screen flex items-center bg-black">
@@ -76,7 +82,7 @@ const HeroSection = () => {
           </div> */}
 
           <div className="w-full max-w-xl mx-auto mb-16">
-            <div className="flex items-center shadow-card rounded-full bg-white overflow-hidden focus-within:ring-1 focus-within:ring-primary transition">
+            <div className="flex items-center shadow-card rounded-full bg-background overflow-hidden focus-within:ring-1 focus-within:ring-primary transition">
               {/* Search Icon */}
               <div className="pl-4">
                 <Search className="h-5 w-5 text-muted-foreground" />
@@ -112,7 +118,7 @@ const HeroSection = () => {
               // animate={{ opacity: 1, y: 0 }}
               // transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl mb-3">
+              <div className={cn("flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl mb-3", benefit.gradient)}>
                 <benefit.icon className="h-7 w-7 text-white" />
               </div>
               <p className="text-sm font-semibold text-center text-white leading-snug">

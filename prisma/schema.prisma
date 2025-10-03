@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  fname             String
+  lname             String
+  password          String // hashed password
+  profession        String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  role              Role                @default(STUDENT)
+  courses           Course[]            @relation("InstructorCourses") // Courses created by this user
+  purchases         Purchase[]
+  payments          Payment[]
+  LessonProgress    LessonProgress[]
+  Event             Event[]
+  EventRegistration EventRegistration[]
+}
+
+model Course {
+  id           String    @id @default(uuid())
+  slug         String    @unique
+  title        String    @unique
+  description  String
+  price        Float
+  thumbnailUrl String
+  duration     String?
+  students     String?
+  rating       Int?
+  reviews      Int?
+  published    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  keywords     String[]
+  category     String
+  tag          CourseTag @default(new)
+  updatedAt    DateTime  @updatedAt
+  instructorId String
+  instructor   User      @relation("InstructorCourses", fields: [instructorId], references: [id])
+
+  lessons        Lesson[]
+  purchases      Purchase[]
+  LessonProgress LessonProgress[]
+}
+
+model Lesson {
+  id             String           @id @default(uuid())
+  title          String
+  content        String? // Could be text or a video URL
+  order          Int
+  videoUrl       String?
+  videoDuration  String?
+  isPaid         Boolean          @default(true)
+  courseId       String
+  course         Course           @relation(fields: [courseId], references: [id])
+  LessonProgress LessonProgress[]
+}
+
+model Purchase {
+  id          String   @id @default(uuid())
+  userId      String
+  courseId    String
+  paymentId   String?
+  purchasedAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id])
+  course  Course   @relation(fields: [courseId], references: [id])
+  payment Payment? @relation(fields: [paymentId], references: [id])
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  userId     String
+  amount     Float
+  currency   String        @default("USD")
+  provider   String // e.g., 'stripe', 'razorpay'
+  providerId String // e.g., Stripe charge ID
+  status     PaymentStatus
+  createdAt  DateTime      @default(now())
+
+  user              User                @relation(fields: [userId], references: [id])
+  purchases         Purchase[]
+  EventRegistration EventRegistration[]
+}
+
+model LessonProgress {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  lessonId  String
+  watchedAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId]) // Prevent duplicate progress for same lesson
+}
+
+model Display {
+  id           String   @id @default(uuid())
+  view_courses Boolean  @default(true)
+  view_events  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Event {
+  id            String              @id @default(uuid())
+  slug          String              @unique
+  title         String              @unique
+  description   String
+  location      String
+  date          DateTime
+  isPaid        Boolean             @default(false)
+  price         Float? // Required if isPaid is true
+  capacity      Int? // Max number of attendees
+  thumbnailUrl  String?
+  type          EventType
+  status        EventStatus         @default(upcomming)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  organizerId   String
+  keywords      String[]
+  organizer     User                @relation(fields: [organizerId], references: [id])
+  registered    Int?                @default(0)
+  registrations EventRegistration[]
+
+  @@index([date])
+}
+
+model EventRegistration {
+  id           String   @id @default(uuid())
+  userId       String
+  eventId      String
+  paymentId    String? // Only for paid events
+  registeredAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id])
+  event   Event    @relation(fields: [eventId], references: [id])
+  payment Payment? @relation(fields: [paymentId], references: [id])
+
+  @@unique([userId, eventId]) // A user can't register for the same event twice
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum EventType {
+  webinar
+  workshop
+  live
+  conference
+}
+
+enum EventStatus {
+  upcomming
+  today
+  draft
+  completed
+}
+
+enum CourseTag {
+  new
+  best_seller
+  most_popular
+  trending
+}

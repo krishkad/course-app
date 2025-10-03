@@ -23,22 +23,30 @@ import Footer from "./Footer";
 import Navigation from "./Navigation";
 import YouTubeEmbed from "./YoutubeEmbed";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useEffect, useState } from "react";
+import { ICourse } from "@/redux/slices/courses";
+import { Lesson } from "@prisma/client";
+import { cn } from "@/lib/utils";
+import RazorpayButton from "./RazorpayButton";
 
-const CourseDetail = ({ courseId }: { courseId: string }) => {
+function sortByIdAscending(arr: Lesson[]) {
+  return arr.sort((a, b) => a.order - b.order);
+}
+
+const CourseDetail = ({
+  courseId,
+  userId,
+}: {
+  courseId: string;
+  userId: string | undefined;
+}) => {
   const router = useRouter();
-  // Simulate video progress - in real app this would be from video player events
-  //   useEffect(() => {
-  //     const interval = setInterval(() => {
-  //       setWatchProgress((prev) => {
-  //         const newProgress = prev + 1;
-  //         return newProgress > 100 ? 0 : newProgress;
-  //       });
-  //     }, 3000);
-
-  //     return () => clearInterval(interval);
-  //   }, []);
-
-  // Course data - in a real app, this would come from an API
+  const courses = useSelector((state: RootState) => state.courses.courses);
+  const [activeLesson, setActiveLesson] = useState<Lesson>({} as Lesson);
+  const [current_course, setCurrent_course] = useState<ICourse>();
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const courseData = {
     "digital-marketing-mastery": {
       title: "Digital Marketing Mastery",
@@ -176,9 +184,60 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
     // Add other courses as needed...
   };
 
-  const course = courseData[courseId as keyof typeof courseData];
+  const static_course =
+    courseData["digital-marketing-mastery" as keyof typeof courseData];
 
-  if (!course) {
+  useEffect(() => {
+    const findCourse = () => {
+      const reduxCourse = courses.find((c) => c.slug === courseId);
+      if (reduxCourse) {
+        setCurrent_course(reduxCourse);
+        return reduxCourse;
+      }
+      return null;
+    };
+
+    const fetchLessons = async (course: ICourse) => {
+      try {
+        const response = await fetch(
+          `/api/course/get-course?courseId=${course.id}&userId=${userId}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        const res = await response.json();
+
+        if (!res.success) {
+          console.warn("Failed to fetch course lessons:", res.message);
+          return;
+        }
+
+        setLessons(sortByIdAscending(res.lessons));
+        console.log({
+          course: res.course,
+          lessons: sortByIdAscending(res.lessons),
+          message: res.message,
+        });
+
+        const show_lesson = res.lessons.find(
+          (less: Lesson) => less.isPaid === false
+        );
+        setActiveLesson(show_lesson!);
+        console.log({ show_lesson });
+      } catch (error) {
+        console.error("Error fetching lessons:", error);
+      }
+    };
+    const courseFound = findCourse();
+
+    if (courseFound) {
+      fetchLessons(courseFound);
+    }
+  }, [courseId, courses]);
+
+  if (!current_course || !static_course || !activeLesson.videoUrl) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
@@ -207,7 +266,7 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
         {/* Breadcrumb */}
         <div className="border-b border-border/50">
           <div className="container mx-auto px-4 py-4">
-            <Button onClick={() => router.back()} variant={"ghost"}>
+            <Button onClick={() => router.push("/courses")} variant={"ghost"}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               All Courses
             </Button>
@@ -220,7 +279,9 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
             <div className="lg:col-span-2">
               {/* Video Player */}
               <div className="relative  bg-black rounded-lg overflow-hidden mb-6">
-                <YouTubeEmbed videoId={course.videoUrl.split("embed/")[1]} />
+                <YouTubeEmbed
+                  videoId={activeLesson.videoUrl?.split("embed/")[1] as string}
+                />
               </div>
               <Card className=" md:hidden shadow-none border-none p-0 pb-10">
                 <CardContent className="px-0">
@@ -234,27 +295,27 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                   {/* Badge */}
                   <div className="mb-4">
                     <Badge variant="default" className="shadow-sm">
-                      {course.badge}
+                      {/* {course.badge} */}
                     </Badge>
                   </div>
 
                   {/* Title and Description */}
                   <h1 className="text-2xl font-bold mb-4 text-card-foreground">
-                    {course.title}
+                    {current_course?.title}
                   </h1>
 
                   <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {course.fullDescription}
+                    {current_course?.description}
                   </p>
 
                   {/* Price */}
                   <div className="mb-6">
                     <div className="flex items-center space-x-3 mb-2">
                       <span className="text-3xl font-bold text-primary">
-                        {course.price}
+                        {current_course?.price}
                       </span>
                       <span className="text-lg text-muted-foreground line-through">
-                        {course.originalPrice}
+                        {static_course.originalPrice}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -272,30 +333,30 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Instructor:</span>
                       <span className="font-medium">
-                        {course.instructor.name}
+                        {current_course?.instructor}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Duration:</span>
                       <div className="flex items-center space-x-1">
                         <Clock className="h-4 w-4" />
-                        <span>{course.duration}</span>
+                        <span>{current_course?.duration}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Students:</span>
                       <div className="flex items-center space-x-1">
                         <Users className="h-4 w-4" />
-                        <span>{course.students}</span>
+                        <span>{current_course?.students}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Rating:</span>
                       <div className="flex items-center space-x-1">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{course.rating}</span>
+                        <span>{current_course?.rating}</span>
                         <span className="text-muted-foreground">
-                          ({course.reviews} reviews)
+                          ({static_course.reviews} reviews)
                         </span>
                       </div>
                     </div>
@@ -328,25 +389,34 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                       Course Content
                     </h2>
                     <div className="space-y-3">
-                      {course.lessons.map((lesson, index) => (
+                      {lessons.map((lesson, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                          className={cn(
+                            "flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
+                            activeLesson.id === lesson.id
+                              ? "border border-primary bg-primary/10 hover:bg-primary/10"
+                              : "border-none"
+                          )}
+                          onClick={() => {
+                            if (!lesson.videoUrl) return;
+                            setActiveLesson(lesson);
+                          }}
                         >
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-primary font-medium text-sm">
-                              {index + 1}
+                              {lesson.order}
                             </div>
                             <div>
                               <h3 className="font-medium text-card-foreground">
                                 {lesson.title}
                               </h3>
                               <p className="text-sm text-muted-foreground">
-                                {lesson.duration}
+                                {lesson.videoDuration}
                               </p>
                             </div>
                           </div>
-                          {lesson.locked ? (
+                          {lesson.isPaid && !lesson.videoUrl ? (
                             <Lock className="h-4 w-4 text-muted-foreground" />
                           ) : (
                             <Play className="h-4 w-4 text-primary" />
@@ -365,7 +435,7 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {course.whatYouLearn.map((item, index) => (
+                        {static_course.whatYouLearn.map((item, index) => (
                           <div
                             key={index}
                             className="flex items-start space-x-3"
@@ -386,15 +456,15 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="flex items-start space-x-4">
-                        <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
-                          {course.instructor.name.charAt(0)}
+                        <div className="w-16 h-16 shrink-0 bg-gradient-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
+                          {current_course?.instructor.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <h4 className="font-semibold text-lg">
-                            {course.instructor.name}
+                            {current_course?.instructor}
                           </h4>
                           <p className="text-muted-foreground">
-                            {course.instructor.bio}
+                            {static_course.instructor.bio}
                           </p>
                         </div>
                       </div>
@@ -407,17 +477,19 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                     </AccordionTrigger>
                     <AccordionContent>
                       <ul className="space-y-2">
-                        {course.requirements.map((requirement, index) => (
-                          <li
-                            key={index}
-                            className="flex items-start space-x-3"
-                          >
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                            <span className="text-sm text-muted-foreground">
-                              {requirement}
-                            </span>
-                          </li>
-                        ))}
+                        {static_course.requirements.map(
+                          (requirement, index) => (
+                            <li
+                              key={index}
+                              className="flex items-start space-x-3"
+                            >
+                              <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                              <span className="text-sm text-muted-foreground">
+                                {requirement}
+                              </span>
+                            </li>
+                          )
+                        )}
                       </ul>
                     </AccordionContent>
                   </AccordionItem>
@@ -431,76 +503,83 @@ const CourseDetail = ({ courseId }: { courseId: string }) => {
                 <CardContent className="px-6">
                   {/* Course Image */}
                   <img
-                    src={course.image}
-                    alt={course.title}
+                    src={current_course?.thumbnailUrl}
+                    alt={current_course?.title}
                     className="w-full h-48 object-cover rounded-lg mb-6"
                   />
 
                   {/* Badge */}
                   <div className="mb-4">
                     <Badge variant="default" className="shadow-sm">
-                      {course.badge}
+                      {static_course.badge}
                     </Badge>
                   </div>
 
                   {/* Title and Description */}
                   <h1 className="text-2xl font-bold mb-4 text-card-foreground">
-                    {course.title}
+                    {current_course?.title}
                   </h1>
 
                   <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {course.fullDescription}
+                    {current_course?.description}
                   </p>
 
                   {/* Price */}
                   <div className="mb-6">
                     <div className="flex items-center space-x-3 mb-2">
                       <span className="text-3xl font-bold text-primary">
-                        {course.price}
+                        {current_course?.price}
                       </span>
                       <span className="text-lg text-muted-foreground line-through">
-                        {course.originalPrice}
+                        {static_course.originalPrice}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Limited time offer
                     </p>
                   </div>
+                  <>
+                    <RazorpayButton
+                      userId={userId || ""}
+                      courseId={current_course.id}
+                      price={current_course.price}
+                    />
 
-                  {/* CTA Button */}
-                  <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
-                    Enroll Now
-                  </Button>
+                    {/* CTA Button */}
+                    {/* <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
+                      Enroll Now
+                    </Button> */}
+                  </>
 
                   {/* Course Stats */}
                   <div className="space-y-4 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Instructor:</span>
                       <span className="font-medium">
-                        {course.instructor.name}
+                        {current_course?.instructor}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Duration:</span>
                       <div className="flex items-center space-x-1">
                         <Clock className="h-4 w-4" />
-                        <span>{course.duration}</span>
+                        <span>{current_course?.duration}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Students:</span>
                       <div className="flex items-center space-x-1">
                         <Users className="h-4 w-4" />
-                        <span>{course.students}</span>
+                        <span>{current_course?.students}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Rating:</span>
                       <div className="flex items-center space-x-1">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{course.rating}</span>
+                        <span>{current_course?.rating}</span>
                         <span className="text-muted-foreground">
-                          ({course.reviews} reviews)
+                          ({static_course.reviews} reviews)
                         </span>
                       </div>
                     </div>

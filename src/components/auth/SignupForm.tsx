@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export function SignupForm({
   className,
@@ -17,13 +17,32 @@ export function SignupForm({
         </p>
       </div>
       <div className="grid gap-6">
+        <div className="w-full grid grid-cols-2 gap-4">
+          <div className="grid gap-3">
+            <Label htmlFor="fname">First Name*</Label>
+            <Input id="fname" type="text" placeholder="rohan" required />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="lname">Last Name*</Label>
+            <Input id="lname" type="text" placeholder="sharma" required />
+          </div>
+        </div>
         <div className="grid gap-3">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Email*</Label>
           <Input id="email" type="email" placeholder="m@example.com" required />
         </div>
         <div className="grid gap-3">
+          <Label htmlFor="profession">Profession*</Label>
+          <Input
+            id="profession"
+            type="text"
+            placeholder="Laywer, Engineer, etc"
+            required
+          />
+        </div>
+        <div className="grid gap-3">
           <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Password*</Label>
             <a
               href="#"
               className="ml-auto text-sm underline-offset-4 hover:underline"
@@ -41,10 +60,14 @@ export function SignupForm({
             Or continue with
           </span>
         </div>
-        <Button variant="outline" className="w-full">
-          <img src={"/google-icon-logo.svg"} className="size-5 shrink-0" alt="google icon"/>
+        {/* <Button variant="outline" className="w-full">
+          <img
+            src={"/google-icon-logo.svg"}
+            className="size-5 shrink-0"
+            alt="google icon"
+          />
           Login with Google
-        </Button>
+        </Button> */}
       </div>
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
@@ -53,5 +76,5 @@ export function SignupForm({
         </Link>
       </div>
     </form>
-  )
+  );
 }

@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@/lib/utils";
 import {
   ArrowRight,
   Award,
@@ -9,8 +10,6 @@ import {
   Search,
 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
 
 const InteractiveLearningSteps = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -113,7 +112,7 @@ const InteractiveLearningSteps = () => {
               </div> */}
 
               {/* Steps */}
-              <div className="flex flex-col md:flex-row justify-between items-center relative z-10 w-full mx-auto gap-8 md:gap-6 perspective-1000">
+              <div className="flex flex-col md:flex-row max-lg:flex-wrap justify-between items-center relative z-10 w-full mx-auto gap-8 md:gap-6 perspective-1000">
                 {steps.map((step, index) => (
                   <div
                     key={index}
@@ -135,7 +134,7 @@ const InteractiveLearningSteps = () => {
                       <h3 className="text-lg font-extrabold mb-3 text-primary tracking-wide animate-text-glow">
                         {step.title}
                       </h3>
-                      <p className="text-sm text-gray-700 leading-relaxed mb-2 animate-fade-slide">
+                      <p className="text-sm text-secondary-foreground leading-relaxed mb-2 animate-fade-slide">
                         {step.description}
                       </p>
                     </div>
@@ -187,7 +186,7 @@ const InteractiveLearningSteps = () => {
                   {/* Step Content */}
                   <div className="flex-1 pt-2">
                     <h3 className="text-lg font-bold mb-2">{step.title}</h3>
-                    <p className="text-sm leading-relaxed mb-2 opacity-90">
+                    <p className="text-sm text-secondary-foreground leading-relaxed mb-2 opacity-90">
                       {step.description}
                     </p>
                    

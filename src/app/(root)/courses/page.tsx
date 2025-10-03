@@ -15,116 +15,120 @@ import Navigation from "@/components/root/Navigation";
 import Link from "next/link";
 import Footer from "@/components/root/Footer";
 import { Input } from "@/components/ui/input";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const courses = [
-    {
-      id: "digital-marketing-mastery",
-      title: "Digital Marketing Mastery",
-      description:
-        "Learn modern marketing strategies and tools to grow your business online with comprehensive hands-on projects",
-      instructor: "Sarah Johnson",
-      price: "$89",
-      priceValue: 89,
-      duration: "8 weeks",
-      durationValue: 8,
-      students: "2,341",
-      rating: 4.8,
-      badge: "Best Seller",
-      badgeVariant: "default" as const,
-      category: "marketing",
-      image: "/images/course-digital-marketing.jpeg",
-    },
-    {
-      id: "full-stack-web-development",
-      title: "Full-Stack Web Development",
-      description:
-        "Build complete web applications with React, Node.js, and modern tools from scratch to deployment",
-      instructor: "Mike Chen",
-      price: "$129",
-      priceValue: 129,
-      duration: "12 weeks",
-      durationValue: 12,
-      students: "1,876",
-      rating: 4.9,
-      badge: "Most Popular",
-      badgeVariant: "secondary" as const,
-      category: "development",
-      image: "/images/course-web-development.jpeg",
-    },
-    {
-      id: "project-management-pro",
-      title: "Project Management Pro",
-      description:
-        "Master Agile, Scrum, and traditional project management methodologies with real-world case studies",
-      instructor: "Lisa Rodriguez",
-      price: "$79",
-      priceValue: 79,
-      duration: "6 weeks",
-      durationValue: 6,
-      students: "3,102",
-      rating: 4.7,
-      badge: "Trending",
-      badgeVariant: "outline" as const,
-      category: "business",
-      image: "/images/course-project-management.jpeg",
-    },
-    {
-      id: "data-science-fundamentals",
-      title: "Data Science Fundamentals",
-      description:
-        "Python, statistics, and machine learning for beginners to advanced with industry datasets",
-      instructor: "Dr. James Wilson",
-      price: "$149",
-      priceValue: 149,
-      duration: "10 weeks",
-      durationValue: 10,
-      students: "1,543",
-      rating: 4.9,
-      badge: "New",
-      badgeVariant: "destructive" as const,
-      category: "data-science",
-      image: "/images/course-data-science.jpeg",
-    },
-    {
-      id: "ui-ux-design-principles",
-      title: "UI/UX Design Principles",
-      description:
-        "Create beautiful and user-friendly interfaces with design thinking and modern tools",
-      instructor: "Emma Thompson",
-      price: "$99",
-      priceValue: 99,
-      duration: "7 weeks",
-      durationValue: 7,
-      students: "2,087",
-      rating: 4.8,
-      badge: "Editor's Choice",
-      badgeVariant: "default" as const,
-      category: "design",
-      image: "/images/course-ui-ux-design.jpeg",
-    },
-    {
-      id: "financial-planning-analysis",
-      title: "Financial Planning & Analysis",
-      description:
-        "Corporate finance, budgeting, and financial modeling for professionals in modern business",
-      instructor: "Robert Kim",
-      price: "$119",
-      priceValue: 119,
-      duration: "9 weeks",
-      durationValue: 9,
-      students: "1,234",
-      rating: 4.6,
-      badge: "Professional",
-      badgeVariant: "secondary" as const,
-      category: "finance",
-      image: "/images/course-financial-planing.jpeg",
-    },
-  ];
+  const courses = useSelector((state: RootState) => state.courses.courses);
+
+  // const courses = [
+  //   {
+  //     id: "digital-marketing-mastery",
+  //     title: "Digital Marketing Mastery",
+  //     description:
+  //       "Learn modern marketing strategies and tools to grow your business online with comprehensive hands-on projects",
+  //     instructor: "Sarah Johnson",
+  //     price: "$89",
+  //     priceValue: 89,
+  //     duration: "8 weeks",
+  //     durationValue: 8,
+  //     students: "2,341",
+  //     rating: 4.8,
+  //     badge: "Best Seller",
+  //     badgeVariant: "default" as const,
+  //     category: "marketing",
+  //     image: "/images/course-digital-marketing.jpeg",
+  //   },
+  //   {
+  //     id: "full-stack-web-development",
+  //     title: "Full-Stack Web Development",
+  //     description:
+  //       "Build complete web applications with React, Node.js, and modern tools from scratch to deployment",
+  //     instructor: "Mike Chen",
+  //     price: "$129",
+  //     priceValue: 129,
+  //     duration: "12 weeks",
+  //     durationValue: 12,
+  //     students: "1,876",
+  //     rating: 4.9,
+  //     badge: "Most Popular",
+  //     badgeVariant: "secondary" as const,
+  //     category: "development",
+  //     image: "/images/course-web-development.jpeg",
+  //   },
+  //   {
+  //     id: "project-management-pro",
+  //     title: "Project Management Pro",
+  //     description:
+  //       "Master Agile, Scrum, and traditional project management methodologies with real-world case studies",
+  //     instructor: "Lisa Rodriguez",
+  //     price: "$79",
+  //     priceValue: 79,
+  //     duration: "6 weeks",
+  //     durationValue: 6,
+  //     students: "3,102",
+  //     rating: 4.7,
+  //     badge: "Trending",
+  //     badgeVariant: "outline" as const,
+  //     category: "business",
+  //     image: "/images/course-project-management.jpeg",
+  //   },
+  //   {
+  //     id: "data-science-fundamentals",
+  //     title: "Data Science Fundamentals",
+  //     description:
+  //       "Python, statistics, and machine learning for beginners to advanced with industry datasets",
+  //     instructor: "Dr. James Wilson",
+  //     price: "$149",
+  //     priceValue: 149,
+  //     duration: "10 weeks",
+  //     durationValue: 10,
+  //     students: "1,543",
+  //     rating: 4.9,
+  //     badge: "New",
+  //     badgeVariant: "destructive" as const,
+  //     category: "data-science",
+  //     image: "/images/course-data-science.jpeg",
+  //   },
+  //   {
+  //     id: "ui-ux-design-principles",
+  //     title: "UI/UX Design Principles",
+  //     description:
+  //       "Create beautiful and user-friendly interfaces with design thinking and modern tools",
+  //     instructor: "Emma Thompson",
+  //     price: "$99",
+  //     priceValue: 99,
+  //     duration: "7 weeks",
+  //     durationValue: 7,
+  //     students: "2,087",
+  //     rating: 4.8,
+  //     badge: "Editor's Choice",
+  //     badgeVariant: "default" as const,
+  //     category: "design",
+  //     image: "/images/course-ui-ux-design.jpeg",
+  //   },
+  //   {
+  //     id: "financial-planning-analysis",
+  //     title: "Financial Planning & Analysis",
+  //     description:
+  //       "Corporate finance, budgeting, and financial modeling for professionals in modern business",
+  //     instructor: "Robert Kim",
+  //     price: "$119",
+  //     priceValue: 119,
+  //     duration: "9 weeks",
+  //     durationValue: 9,
+  //     students: "1,234",
+  //     rating: 4.6,
+  //     badge: "Professional",
+  //     badgeVariant: "secondary" as const,
+  //     category: "finance",
+  //     image: "/images/course-financial-planing.jpeg",
+  //   },
+  // ];
 
   // Filter courses based on selected filters
   // const filteredCourses = courses.filter((course) => {
@@ -198,19 +202,6 @@ const AllCourses = () => {
                   />
                 </div>
                 <div className="flex gap-4">
-                  <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-[150px]">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Course Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="workshop">Self Improvement</SelectItem>
-                      <SelectItem value="seminar">Career</SelectItem>
-                      <SelectItem value="conference">AI</SelectItem>
-                      <SelectItem value="course">AI Business</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Cost" />
@@ -239,24 +230,25 @@ const AllCourses = () => {
               {courses.map((course) => (
                 <Link
                   key={course.id}
-                  href={`/courses/${course.id}`}
+                  href={`/courses/${course.slug}`}
                   className="group block"
                 >
                   <div className="bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
                     {/* Course Image */}
                     <div className="relative overflow-hidden">
                       <img
-                        src={course.image}
+                        src={course.thumbnailUrl}
                         alt={course.title}
                         className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <div className="absolute top-4 left-4">
                         <Badge
-                          variant={course.badgeVariant}
+                          variant={"default"}
                           className="shadow-sm"
                         >
-                          {course.badge}
+                          {/* {course.badge} */}
+                          Best Seller
                         </Badge>
                       </div>
                       <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
