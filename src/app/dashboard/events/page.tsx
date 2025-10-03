@@ -163,6 +163,7 @@ export default function AdminEvents() {
   };
 
   const getTypeBadge = (type: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const variants: Record<string, any> = {
       webinar: "default",
       workshop: "secondary",
