@@ -1,27 +1,27 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Upload, Plus, X } from "lucide-react";
-import { ChangeEvent, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Course } from "@prisma/client";
+import { AnimatePresence, motion } from "framer-motion";
+import { Plus, X } from "lucide-react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 const categories = ["Web Development", "Design", "Marketing", "Photography"];
 
@@ -40,7 +40,7 @@ export default function CreateCourseModal({
   const [direction, setDirection] = useState(0); // 1 for next, -1 for back
   const [courseImage, setCourseImage] = useState<File | null>(null);
   const [lessons, setLessons] = useState([
-    { id: Date.now(), title: "", duration: "" },
+    { id: Date.now(), title: "", duration: "", vidoeUrl: "" },
   ]);
   const [course, setCourse] = useState<Course>({} as Course);
 
@@ -56,7 +56,7 @@ export default function CreateCourseModal({
   };
 
   const handleAddLesson = () => {
-    setLessons([...lessons, { id: Date.now(), title: "", duration: "" }]);
+    setLessons([...lessons, { id: Date.now(), title: "", duration: "", vidoeUrl: "" }]);
   };
 
   const handleRemoveLesson = (id: number) => {
@@ -201,7 +201,7 @@ export default function CreateCourseModal({
                 step="60"
                 value={lesson.duration}
                 onChange={(e) =>
-                  handleLessonChange(lesson.id, "duration", e.target.value)
+                  handleLessonChange(lesson.id, "videoUrl", e.target.value)
                 }
               />
             </div>

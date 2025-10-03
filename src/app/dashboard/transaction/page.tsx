@@ -302,13 +302,13 @@ export default function AdminTransactions() {
                     <TableHead>Course</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Payment Method</TableHead>
+                    {/* <TableHead>Payment Method</TableHead> */}
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredTransactions.map((transaction, i) => {
+                  {all_transactions.map((transaction, i) => {
                     const trans = all_transactions[i];
                     const student = students.filter(
                       (sud) => sud.id === trans?.userId
@@ -319,49 +319,43 @@ export default function AdminTransactions() {
                     console.log({ trans, student });
 
                     const student_name = `${student[0]?.fname} ${student[0]?.lname}`;
-                    const student_email = student[0]?.email
+                    const student_email = student[0]?.email;
                     return (
                       <TableRow key={transaction.id}>
                         <TableCell className="font-mono text-sm">
-                          {transaction.id}
+                          {transaction.id.slice(0,5)}
                         </TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium text-foreground">
-                              {!student_name.includes("undefined")
-                                ? student_name
-                                : transaction.student}
+                              {!student_name.includes("undefined") &&
+                                student_name}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {student_email ?? transaction.email}
+                              {student_email}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="max-w-xs">
-                          <p className="w-full truncate">
-                            {course[0]?.title ?? transaction.course}
-                          </p>
+                          <p className="w-full truncate">{course[0]?.title}</p>
                         </TableCell>
                         <TableCell className="font-semibold">
-                          ${displayRazorpayAmount(trans?.amount) ?? transaction.amount.toFixed(2)}
+                          ${displayRazorpayAmount(trans?.amount)}
                         </TableCell>
                         <TableCell>
                           {getStatusBadge(trans?.status ?? transaction.status)}
                         </TableCell>
-                        <TableCell className="capitalize">
+                        {/* <TableCell className="capitalize">
                           {transaction.paymentMethod.replace("_", " ")}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell className="text-sm text-muted-foreground">
-                          {format(
-                            trans?.createdAt ?? transaction.date,
-                            "MMM dd yyyy h:mm a"
-                          ) }
+                          {format(trans?.createdAt, "MMM dd yyyy h:mm a")}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setSelectedTransaction(transaction)}
+                            // onClick={() => setSelectedTransaction(transaction)}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
