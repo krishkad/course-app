@@ -57,7 +57,7 @@ const UpcomingEventsSection = () => {
                 {/* Event Image */}
                 <div className="relative overflow-hidden h-48">
                   <img
-                    src={event?.thumbnailUrl!}
+                    src={event?.thumbnailUrl as string}
                     alt={event.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -76,6 +76,7 @@ const UpcomingEventsSection = () => {
                     <Badge
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       variant={
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         getStatusColor(event?.status ?? event.status) as any
                       }
                       className="shadow-sm"

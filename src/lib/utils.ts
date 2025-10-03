@@ -38,7 +38,7 @@ export function decodeJwt(token: string) {
   if (!headerB64 || !payloadB64) {
     return { header: "", payload: "", signature: "" };
   }
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const base64UrlDecode = (b64Url: string): any => {
     const base64 = b64Url.replace(/-/g, "+").replace(/_/g, "/");
     const padded = base64.padEnd(

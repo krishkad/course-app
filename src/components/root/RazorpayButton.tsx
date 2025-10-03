@@ -27,12 +27,14 @@ export default function RazorpayButton({
   }, []);
 
   const handlePayment = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options: any = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // from env, exposed
       amount: price * 100,
       currency: "USD",
       name: "My App",
       description: "Test Transaction",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handler: function (response: any) {
         alert("Payment Successful!");
         console.log(response);
@@ -47,7 +49,7 @@ export default function RazorpayButton({
         color: "#3399cc",
       },
     };
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const razor = new (window as any).Razorpay(options);
     razor.open();
     const res = await fetch("/api/payment/buy", {
