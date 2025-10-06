@@ -88,9 +88,9 @@ model Payment {
   currency            String        @default("USD")
   provider            String // e.g., 'stripe', 'razorpay'
   providerId          String // e.g., Stripe charge ID
-  razorpay_order_id   String
-  razorpay_payment_id String?
-  razorpay_signature  String?
+  // razorpay_order_id   String
+  // razorpay_payment_id String?
+  // razorpay_signature  String?
   status              PaymentStatus
   createdAt           DateTime      @default(now())
 
