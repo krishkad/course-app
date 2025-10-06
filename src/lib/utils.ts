@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { jwtVerify } from "jose";
 import { CustomJWTPayload } from "@/types/types";
+import { Lesson } from "@prisma/client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -74,4 +75,8 @@ export function displayRazorpayAmount(amountInPaisa: number) {
 
   // Return the amount as a float
   return parseFloat(amountInINR);
+}
+
+export function sortByIdAscending(arr: Lesson[]) {
+  return arr.sort((a, b) => a.order - b.order);
 }

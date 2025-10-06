@@ -108,12 +108,7 @@ const students = [
   },
 ];
 
-const stats = [
-  { label: "Total Students", value: "2,847", change: "+12.5%" },
-  { label: "Active This Week", value: "1,234", change: "+5.2%" },
-  { label: "Premium Members", value: "892", change: "+8.1%" },
-  { label: "Course Completions", value: "1,567", change: "+15.3%" },
-];
+
 
 export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -142,6 +137,14 @@ export default function StudentsPage() {
       setDisplay_students(all_students);
     }
   }, [all_students]);
+
+
+  const stats = [
+  { label: "Total Students", value: all_students.length, change: "+12.5%" },
+  { label: "Active This Week", value: "1,234", change: "+5.2%" },
+  { label: "Premium Members", value: "892", change: "+8.1%" },
+  { label: "Course Completions", value: "1,567", change: "+15.3%" },
+];
 
   return (
     <div className="w-full">

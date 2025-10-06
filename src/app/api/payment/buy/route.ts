@@ -13,7 +13,14 @@ export async function POST(req: NextRequest) {
   try {
     const { userId, courseId, price, provider, providerId } = await req.json();
     const token = req.cookies.get("course-app-authentication")?.value;
-    console.log({ userId, courseId, price, provider, providerId });
+    console.log({
+      userId,
+      courseId,
+      price,
+      provider,
+      providerId,
+      amount: price * 100,
+    });
     if (!userId || !courseId || !price || !provider || !providerId) {
       return NextResponse.json({
         success: false,
@@ -62,7 +69,7 @@ export async function POST(req: NextRequest) {
     }
 
     const options = {
-      amount: price * 100, // amount in smallest currency unit (paise)
+      amount: Math.round(is_course_exist.price * 100), // amount in smallest currency unit (paise)
       currency: "USD",
       receipt: `receipt_${Date.now()}`,
     };
@@ -76,13 +83,13 @@ export async function POST(req: NextRequest) {
         amount: parseFloat(`${order.amount}`),
         provider,
         providerId,
-        status: "SUCCESS",
+        status: "PENDING",
       },
     });
 
     console.log({ payment });
 
-    if (!payment || payment.status !== "SUCCESS") {
+    if (!payment) {
       return NextResponse.json({
         success: false,
         message: "failed to create payment",
@@ -120,6 +127,7 @@ export async function POST(req: NextRequest) {
       message: "ok",
       payment,
       purchase,
+      order,
     });
   } catch (error) {
     console.log("ERROR WHILE BUYING COURSE: ", error);

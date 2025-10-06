@@ -13,32 +13,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { NavigationMenuDemo } from "./NavigationMenu";
 import AuthComponent from "../auth/AuthComponent";
-import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
-
-  const handleLogOut = async () => {
-    try {
-      const response = await fetch("/api/auth/sign-out", {
-        method: "GET",
-        credentials: "include",
-      });
-
-      const res = await response.json();
-
-      if (!res.success) {
-        console.log(res.message);
-        router.refresh()
-        return;
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.log("error while log out: ", error);
-    }
-  };
+  const user = useSelector((state: RootState) => state.user.user);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -101,10 +82,14 @@ const Navigation = () => {
               </>
             }
             signOut={
-              <Button size={"sm"} variant={"ghost"} onClick={handleLogOut}>
-                <LogOutIcon className="inline-flex mr-1.5" />
-                Log out
-              </Button>
+              <Link href={"/profile"}>
+                <Avatar>
+                  <AvatarImage src="" />
+                  <AvatarFallback>
+                    {user.fname?.slice(0, 1).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             }
           />
         </div>

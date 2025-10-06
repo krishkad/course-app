@@ -12,6 +12,7 @@ const PROTECTED_ROUTES = [
   "/dashboard/events",
   "/dashboard/settings",
   "/dashboard/transaction",
+  "/profile"
 ];
 
 export async function middleware(request: NextRequest) {
@@ -46,5 +47,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/sign-in", "/sign-up", "/dashboard/:path*"],
+  matcher: ["/sign-in", "/sign-up", "/dashboard/:path*", "/profile"],
 };

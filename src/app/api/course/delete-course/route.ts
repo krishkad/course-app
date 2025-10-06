@@ -28,8 +28,24 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ success: false, message: "token expired" });
     }
 
+    if (token_data.role !== "ADMIN") {
+      return NextResponse.json({ success: false, message: "not authorized" });
+    }
+
+    const delete_course_lessons = await prisma.lesson.deleteMany({
+      where: { courseId: courseId },
+    });
+
+    if (!delete_course_lessons) {
+      return NextResponse.json({
+        success: false,
+        message: "failed to delete course",
+      });
+    }
+    console.log({ courseId, userId: token_data.id });
+
     const delete_course = await prisma.course.delete({
-      where: { instructorId: token_data.id, id: courseId },
+      where: { id: courseId },
     });
 
     if (!delete_course) {

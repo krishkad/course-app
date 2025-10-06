@@ -80,7 +80,10 @@ export async function POST(req: NextRequest) {
       data: {
         title: courseDetail.title,
         description: courseDetail.description,
-        price: courseDetail.price,
+        price:
+          typeof courseDetail.price !== "number"
+            ? parseFloat(courseDetail.price)
+            : courseDetail.price,
         duration: courseDetail.duration,
         published: courseDetail.published ?? false,
         slug,

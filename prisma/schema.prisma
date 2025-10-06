@@ -73,7 +73,7 @@ model Purchase {
   id          String   @id @default(uuid())
   userId      String
   courseId    String
-  paymentId   String?
+  paymentId   String
   purchasedAt DateTime @default(now())
 
   user    User     @relation(fields: [userId], references: [id])
@@ -82,14 +82,17 @@ model Purchase {
 }
 
 model Payment {
-  id         String        @id @default(uuid())
-  userId     String
-  amount     Float
-  currency   String        @default("USD")
-  provider   String // e.g., 'stripe', 'razorpay'
-  providerId String // e.g., Stripe charge ID
-  status     PaymentStatus
-  createdAt  DateTime      @default(now())
+  id                  String        @id @default(uuid())
+  userId              String
+  amount              Float
+  currency            String        @default("USD")
+  provider            String // e.g., 'stripe', 'razorpay'
+  providerId          String // e.g., Stripe charge ID
+  razorpay_order_id   String
+  razorpay_payment_id String?
+  razorpay_signature  String?
+  status              PaymentStatus
+  createdAt           DateTime      @default(now())
 
   user              User                @relation(fields: [userId], references: [id])
   purchases         Purchase[]

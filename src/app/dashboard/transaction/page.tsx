@@ -44,7 +44,7 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { format } from "date-fns";
-import { displayRazorpayAmount } from "@/lib/utils";
+import { cn, displayRazorpayAmount } from "@/lib/utils";
 
 // Mock transaction data
 const transactions = [
@@ -116,37 +116,6 @@ const transactions = [
   },
 ];
 
-const stats = [
-  {
-    title: "Total Revenue",
-    value: "$45,820",
-    change: "+12.5%",
-    trend: "up",
-    icon: DollarSign,
-  },
-  {
-    title: "Transactions (Today)",
-    value: "128",
-    change: "+8.2%",
-    trend: "up",
-    icon: ArrowUpRight,
-  },
-  {
-    title: "Success Rate",
-    value: "96.8%",
-    change: "+2.1%",
-    trend: "up",
-    icon: CheckCircle2,
-  },
-  {
-    title: "Processing Fees",
-    value: "$1,248",
-    change: "-3.5%",
-    trend: "down",
-    icon: CreditCard,
-  },
-];
-
 export default function AdminTransactions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -160,6 +129,37 @@ export default function AdminTransactions() {
   const all_courses = useSelector(
     (state: RootState) => state.all_courses.all_courses
   );
+
+  const stats = [
+    {
+      title: "Total Revenue",
+      value: `$45,820`,
+      change: "+12.5%",
+      trend: "up",
+      icon: DollarSign,
+    },
+    {
+      title: "Transactions (Today)",
+      value: "128",
+      change: "+8.2%",
+      trend: "up",
+      icon: ArrowUpRight,
+    },
+    {
+      title: "Success Rate",
+      value: "96.8%",
+      change: "+2.1%",
+      trend: "up",
+      icon: CheckCircle2,
+    },
+    {
+      title: "Processing Fees",
+      value: "$1,248",
+      change: "-3.5%",
+      trend: "down",
+      icon: CreditCard,
+    },
+  ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -233,7 +233,7 @@ export default function AdminTransactions() {
           {stats.map((stat, index) => (
             <Card
               key={index}
-              className="hover:shadow-card-hover transition-shadow"
+              className="hover:shadow-card-hover transition-shadow gap-2"
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -308,61 +308,75 @@ export default function AdminTransactions() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {all_transactions.map((transaction, i) => {
-                    const trans = all_transactions[i];
-                    const student = students.filter(
-                      (sud) => sud.id === trans?.userId
-                    );
-                    const course = all_courses.filter(
-                      (cour) => cour.id === trans?.purchases[0]?.courseId
-                    );
-                    console.log({ trans, student });
+                  {all_transactions
+                    .slice()
+                    .reverse()
+                    .map((transaction, i) => {
+                      const trans = all_transactions[i];
+                      const student = students.filter(
+                        (sud) => sud.id === trans?.userId
+                      );
+                      const course = all_courses.filter(
+                        (cour) => cour.id === trans?.purchases[0]?.courseId
+                      );
+                      console.log({ trans, student });
 
-                    const student_name = `${student[0]?.fname} ${student[0]?.lname}`;
-                    const student_email = student[0]?.email;
-                    return (
-                      <TableRow key={transaction.id}>
-                        <TableCell className="font-mono text-sm">
-                          {transaction.id.slice(0,5)}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium text-foreground">
-                              {!student_name.includes("undefined") &&
-                                student_name}
+                      const student_name = `${student[0]?.fname} ${student[0]?.lname}`;
+                      const student_email = student[0]?.email;
+                      return (
+                        <TableRow key={transaction.id}>
+                          <TableCell className="font-mono text-sm">
+                            {transaction.id.slice(0, 5)}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-foreground">
+                                {!student_name.includes("undefined") &&
+                                  student_name}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {student_email}
+                              </div>
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              {student_email}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <p className="w-full truncate">{course[0]?.title}</p>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          ${displayRazorpayAmount(trans?.amount)}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(trans?.status ?? transaction.status)}
-                        </TableCell>
-                        {/* <TableCell className="capitalize">
+                          </TableCell>
+                          <TableCell className="max-w-xs">
+                            <p className="w-full truncate">
+                              {course[0]?.title}
+                            </p>
+                          </TableCell>
+                          <TableCell className="font-semibold">
+                            ${displayRazorpayAmount(trans?.amount)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              className={cn(
+                                trans.status === "SUCCESS"
+                                  ? "bg-green-600 text-white"
+                                  : "bg-amber-400 text-white"
+                              )}
+                            >
+                              {trans.status.slice(0, 1).toUpperCase()}
+                              {trans.status.slice(1).toLowerCase()}
+                            </Badge>
+                          </TableCell>
+                          {/* <TableCell className="capitalize">
                           {transaction.paymentMethod.replace("_", " ")}
                         </TableCell> */}
-                        <TableCell className="text-sm text-muted-foreground">
-                          {format(trans?.createdAt, "MMM dd yyyy h:mm a")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            // onClick={() => setSelectedTransaction(transaction)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                          <TableCell className="text-sm text-muted-foreground">
+                            {format(trans?.createdAt, "MMM dd yyyy h:mm a")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              // onClick={() => setSelectedTransaction(transaction)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </div>

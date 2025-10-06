@@ -8,7 +8,8 @@ import UserSlice from "./slices/user";
 import StudentsSlice from "./admin/slice/all-students";
 import AllCourses from "./admin/slice/all-courses";
 import AllEvents from "./admin/slice/all-events";
-import PaymentsSlice from "./admin/slice/payment"
+import PaymentsSlice from "./admin/slice/payment";
+import LessonProgressSlice from "./slices/lessons-progress";
 
 export const makeStore = () =>
   configureStore({
@@ -22,6 +23,7 @@ export const makeStore = () =>
       display: DisplaySlice,
       lessons: LessonsSlice,
       user: UserSlice,
+      lessonsProgress: LessonProgressSlice,
     },
   });
 

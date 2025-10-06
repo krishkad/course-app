@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,10 +50,12 @@ import {
   Video,
   MapPin,
   Download,
+  UploadCloud,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { format } from "date-fns";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // Mock data
 // const events = [
@@ -131,6 +133,32 @@ export default function AdminEvents() {
   const all_events = useSelector(
     (state: RootState) => state.all_events.all_events
   );
+  const [file, setFile] = useState<File | null>(null);
+  const [formData, setFormData] = useState<{
+    title: string;
+    type: string;
+    description: string;
+    date: string;
+    time: string;
+    duration: string;
+    capacity: string;
+    course: string;
+    instructor: string;
+    image: File | null;
+    status: "draft" | "published";
+  }>({
+    title: "",
+    type: "",
+    description: "",
+    date: "",
+    time: "",
+    duration: "",
+    capacity: "",
+    course: "",
+    instructor: "",
+    image: null,
+    status: "draft",
+  });
 
   const filteredEvents = all_events.filter((event) => {
     const matchesSearch = event.title
@@ -173,107 +201,17 @@ export default function AdminEvents() {
     return <Badge variant={variants[type] || "outline"}>{type}</Badge>;
   };
 
+  const handleOnChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   useEffect(() => {
     if (all_events) {
       console.log({ all_events });
     }
   }, [all_events]);
-
-  const CreateEventModal = () => (
-    <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-      <DialogContent className="w-[90%] max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Create New Event</DialogTitle>
-          <DialogDescription>
-            Add a new event to your calendar
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="title">Event Title</Label>
-              <Input id="title" placeholder="Enter event title" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="type">Event Type</Label>
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {eventTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <Label htmlFor="description">Description</Label>
-            <Textarea id="description" placeholder="Enter event description" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="date">Date</Label>
-              <Input id="date" type="date" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="time">Time</Label>
-              <Input id="time" type="time" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="duration">Duration</Label>
-              <Input id="duration" placeholder="2 hours" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="capacity">Max Capacity</Label>
-              <Input id="capacity" type="number" placeholder="100" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="course">
-                Associated Course{" "}
-                <span className="max-sm:hidden">(Optional)</span>
-              </Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select course" />
-                </SelectTrigger>
-                <SelectContent>
-                  {courses.map((course) => (
-                    <SelectItem key={course} value={course}>
-                      {course}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <Label htmlFor="instructor">Instructor</Label>
-            <Input id="instructor" placeholder="Enter instructor name" />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setCreateModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={() => setCreateModalOpen(false)}>
-            Create Event
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
 
   return (
     <div className="w-full">
@@ -341,7 +279,11 @@ export default function AdminEvents() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {all_events.filter((e) => e.date.toString().startsWith("2024-04")).length}
+                {
+                  all_events.filter((e) =>
+                    e.date.toString().startsWith("2024-04")
+                  ).length
+                }
               </div>
             </CardContent>
           </Card>
@@ -495,8 +437,263 @@ export default function AdminEvents() {
           </CardContent>
         </Card>
 
-        <CreateEventModal />
+        <CreateEventModal
+          createModalOpen={createModalOpen}
+          setCreateModalOpen={setCreateModalOpen}
+          handleOnChange={handleOnChange}
+          formData={formData}
+          setFormData={setFormData}
+          file={file}
+          setFile={setFile}
+        />
       </div>
     </div>
   );
 }
+
+const CreateEventModal = ({
+  createModalOpen,
+  setCreateModalOpen,
+  handleOnChange,
+  formData,
+  setFormData,
+  file,
+  setFile,
+}: {
+  createModalOpen: boolean;
+  setCreateModalOpen: (value: boolean) => void;
+  handleOnChange: (
+    value: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  formData: {
+    title: string;
+    type: string;
+    description: string;
+    date: string;
+    time: string;
+    duration: string;
+    capacity: string;
+    course: string;
+    instructor: string;
+    image: File | null;
+    status: "draft" | "published";
+  };
+  setFormData: (value: {
+    title: string;
+    type: string;
+    description: string;
+    date: string;
+    time: string;
+    duration: string;
+    capacity: string;
+    course: string;
+    instructor: string;
+    image: File | null;
+    status: "draft" | "published";
+  }) => void;
+  file: File | null;
+  setFile: (value: File) => void;
+}) => {
+  return (
+    <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+      <DialogContent className="w-[90%] max-w-2xl h-[90vh] overflow-y-scroll">
+        <DialogHeader>
+          <DialogTitle>Create New Event</DialogTitle>
+          <DialogDescription>
+            Add a new event to your calendar
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="title">Event Title</Label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleOnChange}
+                placeholder="Enter event title"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="type">Event Type</Label>
+              <Select
+                onValueChange={(value) =>
+                  setFormData({ ...formData, type: value })
+                }
+                value={formData.type}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eventTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleOnChange}
+              placeholder="Enter event description"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                name="date"
+                value={formData.date}
+                onChange={handleOnChange}
+                type="date"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="time">Time</Label>
+              <Input
+                id="time"
+                name="time"
+                value={formData.time}
+                onChange={handleOnChange}
+                type="time"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="duration">Duration</Label>
+              <Input
+                id="duration"
+                name="duration"
+                value={formData.duration}
+                onChange={handleOnChange}
+                placeholder="2 hours"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="capacity">Max Capacity</Label>
+              <Input
+                id="capacity"
+                name="capacity"
+                value={formData.capacity}
+                onChange={handleOnChange}
+                type="number"
+                placeholder="100"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="course">
+                Associated Course{" "}
+                <span className="max-sm:hidden">(Optional)</span>
+              </Label>
+              <Select
+                onValueChange={(value) =>
+                  setFormData({ ...formData, course: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map((course) => (
+                    <SelectItem key={course} value={course}>
+                      {course}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* <div className="space-y-1">
+          <Label htmlFor="instructor">Instructor</Label>
+          <Input id="instructor" placeholder="Enter instructor name" />
+        </div> */}
+        </div>
+        {/* Upload Section */}
+        <div className="space-y-2 border border-dashed border-gray-300 p-4 rounded-md text-center">
+          <Label
+            htmlFor="file-upload"
+            className="flex flex-col items-center gap-2 cursor-pointer"
+          >
+            <UploadCloud className="w-8 h-8 text-gray-500" />
+            <span className="text-sm text-gray-600">
+              Click to upload event image
+            </span>
+            <span className="text-xs text-muted-foreground">
+              PNG, JPG or GIF up to 10MB
+            </span>
+            <Input
+              id="file-upload"
+              type="file"
+              name="file"
+              onChange={(e) => {
+                const selectedFile = e.target.files[0];
+                if (!selectedFile) return;
+                setFile(selectedFile);
+                console.log("Selected file:", selectedFile.name);
+                // Optional: Add validation or other logic
+                if (selectedFile && !selectedFile.type.startsWith("image/")) {
+                  alert("Please select an image file.");
+                }
+              }}
+              className="hidden"
+              accept="image/*"
+            />
+          </Label>
+        </div>
+
+        {/* Status Radio Group */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Event Status</Label>
+          <RadioGroup
+            defaultValue="draft"
+            className="flex gap-4"
+            onValueChange={(value) =>
+              setFormData({
+                ...formData,
+                status: value as "draft" | "published",
+              })
+            }
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="draft" id="draft" />
+              <Label htmlFor="draft">Draft</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="published" id="published" />
+              <Label htmlFor="published">Publish</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setCreateModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setCreateModalOpen(false);
+              console.log({ formData });
+            }}
+          >
+            Create Event
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};

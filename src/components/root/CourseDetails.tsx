@@ -23,17 +23,15 @@ import Footer from "./Footer";
 import Navigation from "./Navigation";
 import YouTubeEmbed from "./YoutubeEmbed";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
 import { ICourse } from "@/redux/slices/courses";
 import { Lesson } from "@prisma/client";
-import { cn } from "@/lib/utils";
+import { cn, sortByIdAscending } from "@/lib/utils";
 import RazorpayButton from "./RazorpayButton";
-
-function sortByIdAscending(arr: Lesson[]) {
-  return arr.sort((a, b) => a.order - b.order);
-}
+import { initializeLessonProgress } from "@/redux/slices/lessons-progress";
+import { Skeleton } from "../ui/skeleton";
 
 const CourseDetail = ({
   courseId,
@@ -47,6 +45,10 @@ const CourseDetail = ({
   const [activeLesson, setActiveLesson] = useState<Lesson>({} as Lesson);
   const [current_course, setCurrent_course] = useState<ICourse>();
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const lessonProgress = useSelector(
+    (state: RootState) => state.lessonsProgress.lessonProgress
+  );
   const courseData = {
     "digital-marketing-mastery": {
       title: "Digital Marketing Mastery",
@@ -183,11 +185,13 @@ const CourseDetail = ({
     },
     // Add other courses as needed...
   };
+  const dispatch = useDispatch();
 
   const static_course =
     courseData["digital-marketing-mastery" as keyof typeof courseData];
 
   useEffect(() => {
+    setIsFetching(true);
     const findCourse = () => {
       const reduxCourse = courses.find((c) => c.slug === courseId);
       if (reduxCourse) {
@@ -199,26 +203,38 @@ const CourseDetail = ({
 
     const fetchLessons = async (course: ICourse) => {
       try {
-        const response = await fetch(
-          `/api/course/get-course?courseId=${course.id}&userId=${userId}`,
-          {
+        const [lessonsResponse, lessonsProgressResponse] = await Promise.all([
+          fetch(
+            `/api/course/get-course?courseId=${course.id}&userId=${userId}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          ),
+          fetch(`/api/lesson-progress/get-all?userId=${userId}`, {
             method: "GET",
             credentials: "include",
-          }
-        );
+          }),
+        ]);
 
-        const res = await response.json();
+        const res = await lessonsResponse.json();
+        const lessonsProgressJson = await lessonsProgressResponse.json();
+
+        const lessonsprogressData = lessonsProgressJson.success
+          ? lessonsProgressJson.data
+          : [];
 
         if (!res.success) {
           console.warn("Failed to fetch course lessons:", res.message);
           return;
         }
-
+        dispatch(initializeLessonProgress(lessonsprogressData));
         setLessons(sortByIdAscending(res.lessons));
         console.log({
           course: res.course,
           lessons: sortByIdAscending(res.lessons),
           message: res.message,
+          lessonsprogressData,
         });
 
         const show_lesson = res.lessons.find(
@@ -228,6 +244,8 @@ const CourseDetail = ({
         console.log({ show_lesson });
       } catch (error) {
         console.error("Error fetching lessons:", error);
+      } finally {
+        setIsFetching(false);
       }
     };
     const courseFound = findCourse();
@@ -237,7 +255,11 @@ const CourseDetail = ({
     }
   }, [courseId, courses]);
 
-  if (!current_course || !static_course || !activeLesson.videoUrl) {
+  useEffect(() => {
+    console.log({ activeLesson, lessonProgress });
+  }, [activeLesson, lessonProgress]);
+
+  if (!current_course) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
@@ -257,6 +279,11 @@ const CourseDetail = ({
       </div>
     );
   }
+
+  console.log(
+    lessonProgress.filter((lesp) => lesp.courseId === current_course.id).length,
+    lessons.length
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -278,10 +305,21 @@ const CourseDetail = ({
             {/* Main Content - Left Side */}
             <div className="lg:col-span-2">
               {/* Video Player */}
-              <div className="relative  bg-black rounded-lg overflow-hidden mb-6">
-                <YouTubeEmbed
-                  videoId={activeLesson.videoUrl?.split("embed/")[1] as string}
-                />
+              <div className="relative bg-black rounded-lg overflow-hidden mb-6">
+                {isFetching ? (
+                  <Skeleton className="w-full aspect-[16/9]" />
+                ) : (
+                  <YouTubeEmbed
+                    videoId={
+                      activeLesson.videoUrl
+                        ?.split("embed/")[1]
+                        .split("?")[0] as string
+                    }
+                    courseId={current_course.id}
+                    userId={userId || ""}
+                    lessonId={activeLesson.id}
+                  />
+                )}
               </div>
               <Card className=" md:hidden shadow-none border-none p-0 pb-10">
                 <CardContent className="px-0">
@@ -295,7 +333,7 @@ const CourseDetail = ({
                   {/* Badge */}
                   <div className="mb-4">
                     <Badge variant="default" className="shadow-sm">
-                      {/* {course.badge} */}
+                      {current_course.tag}
                     </Badge>
                   </div>
 
@@ -369,10 +407,26 @@ const CourseDetail = ({
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Your Progress</h3>
                     <span className="text-sm font-medium text-primary">
-                      {Math.round(20)}% Complete
+                      {Math.round(
+                        (lessonProgress.filter(
+                          (lesp) => lesp.courseId === current_course.id
+                        ).length /
+                          lessons.length) *
+                          100
+                      )}
+                      % Complete
                     </span>
                   </div>
-                  <Progress value={20} className="h-3 mb-2" />
+                  <Progress
+                    value={Math.round(
+                      (lessonProgress.filter(
+                        (lesp) => lesp.courseId === current_course.id
+                      ).length /
+                        lessons.length) *
+                        100
+                    )}
+                    className="h-3 mb-2"
+                  />
                   <p className="text-sm text-muted-foreground">
                     Keep watching to track your learning progress
                   </p>
@@ -389,40 +443,62 @@ const CourseDetail = ({
                       Course Content
                     </h2>
                     <div className="space-y-3">
-                      {lessons.map((lesson, index) => (
-                        <div
-                          key={index}
-                          className={cn(
-                            "flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
-                            activeLesson.id === lesson.id
-                              ? "border border-primary bg-primary/10 hover:bg-primary/10"
-                              : "border-none"
-                          )}
-                          onClick={() => {
-                            if (!lesson.videoUrl) return;
-                            setActiveLesson(lesson);
-                          }}
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-primary font-medium text-sm">
-                              {lesson.order}
+                      {isFetching ? (
+                        <>
+                          {[1, 2, 3, 4].map((item) => {
+                            return (
+                              <Skeleton key={item} className="w-full h-12" />
+                            ); // Example operation
+                          })}
+                        </>
+                      ) : (
+                        lessons.map((lesson, index) => {
+                          const progress = lessonProgress.filter(
+                            (less) => less.lessonId === lesson.id
+                          );
+                          console.log({ progress, order: lesson.order });
+                          return (
+                            <div
+                              key={index}
+                              className={cn(
+                                "flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
+                                activeLesson.id === lesson.id
+                                  ? "border border-primary bg-primary/10 hover:bg-primary/10"
+                                  : "border-none"
+                              )}
+                              onClick={() => {
+                                if (!lesson.videoUrl) return;
+                                setActiveLesson(lesson);
+                              }}
+                            >
+                              <div className="flex items-center space-x-4">
+                                <div
+                                  className={cn(
+                                    "flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-primary font-medium text-sm",
+                                    progress.length === 1 &&
+                                      "bg-primary text-white"
+                                  )}
+                                >
+                                  {lesson.order}
+                                </div>
+                                <div>
+                                  <h3 className="font-medium text-card-foreground">
+                                    {lesson.title}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {lesson.videoDuration}
+                                  </p>
+                                </div>
+                              </div>
+                              {lesson.isPaid && !lesson.videoUrl ? (
+                                <Lock className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Play className="h-4 w-4 text-primary" />
+                              )}
                             </div>
-                            <div>
-                              <h3 className="font-medium text-card-foreground">
-                                {lesson.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {lesson.videoDuration}
-                              </p>
-                            </div>
-                          </div>
-                          {lesson.isPaid && !lesson.videoUrl ? (
-                            <Lock className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Play className="h-4 w-4 text-primary" />
-                          )}
-                        </div>
-                      ))}
+                          );
+                        })
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -502,33 +578,64 @@ const CourseDetail = ({
               <Card className="hidden md:block sticky top-24">
                 <CardContent className="px-6">
                   {/* Course Image */}
-                  <img
-                    src={current_course?.thumbnailUrl}
-                    alt={current_course?.title}
-                    className="w-full h-48 object-cover rounded-lg mb-6"
-                  />
+
+                  {isFetching ? (
+                    <Skeleton className="w-full h-48 mb-6" />
+                  ) : (
+                    <img
+                      src={current_course?.thumbnailUrl}
+                      alt={current_course?.title}
+                      className="w-full h-48 object-cover rounded-lg mb-6"
+                    />
+                  )}
 
                   {/* Badge */}
-                  <div className="mb-4">
-                    <Badge variant="default" className="shadow-sm">
-                      {static_course.badge}
-                    </Badge>
-                  </div>
+                  {isFetching ? (
+                    <Skeleton className="mb-4 w-32 h-6" />
+                  ) : (
+                    <div className="mb-4">
+                      <Badge variant="default" className="shadow-sm">
+                        {static_course.badge}
+                      </Badge>
+                    </div>
+                  )}
 
                   {/* Title and Description */}
-                  <h1 className="text-2xl font-bold mb-4 text-card-foreground">
-                    {current_course?.title}
-                  </h1>
+                  {isFetching ? (
+                    <Skeleton className="h-12 w-full mb-4" />
+                  ) : (
+                    <h1 className="text-2xl font-bold mb-4 text-card-foreground">
+                      {current_course?.title}
+                    </h1>
+                  )}
 
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {current_course?.description}
-                  </p>
+                  {isFetching ? (
+                    <div className="space-y-1 mb-6">
+                      <span className="pb-2">
+                        <Skeleton className="w-full h-4" />
+                      </span>
+                      <span className="pb-2">
+                        <Skeleton className="w-[80%] h-4 my-2" />
+                      </span>
+                      <span className="pb-2">
+                        <Skeleton className="w-[50%] h-4" />
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground mb-6 leading-relaxed">
+                      {current_course?.description}
+                    </p>
+                  )}
 
                   {/* Price */}
                   <div className="mb-6">
                     <div className="flex items-center space-x-3 mb-2">
                       <span className="text-3xl font-bold text-primary">
-                        {current_course?.price}
+                        {isFetching ? (
+                          <Skeleton className="h-12 aspect-square" />
+                        ) : (
+                          <>{current_course?.price}</>
+                        )}
                       </span>
                       <span className="text-lg text-muted-foreground line-through">
                         {static_course.originalPrice}
@@ -542,7 +649,7 @@ const CourseDetail = ({
                     <RazorpayButton
                       userId={userId || ""}
                       courseId={current_course.id}
-                      price={current_course.price}
+                      price={current_course?.price}
                     />
 
                     {/* CTA Button */}

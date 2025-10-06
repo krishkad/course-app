@@ -1,281 +1,518 @@
 "use client";
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Mail, User, BookOpen, DollarSign, MapPin, Phone, Edit2, Calendar } from 'lucide-react';
 
-// Mock data types
-interface Course {
-  id: string;
-  title: string;
-  progress: number;
-  lastAccessed: string;
-  price: number;
-  purchaseDate: string;
-}
+import {
+  BookOpen,
+  Award,
+  CreditCard,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Edit,
+  LogOutIcon,
+  UserIcon,
+} from "lucide-react";
+import Navigation from "@/components/root/Navigation";
+import Footer from "@/components/root/Footer";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { Payment } from "@prisma/client";
 
-interface User {
-  name: string;
-  email: string;
-  avatarUrl?: string;
-  joinDate: string;
-  bio?: string;
-  location?: string;
-  phone?: string;
-  courses: Course[];
-}
+const Profile = () => {
+  // Mock user data - replace with actual data from backend
+  const [userData] = useState({
+    name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "+1 (555) 123-4567",
+    joinDate: "January 2024",
+    location: "San Francisco, CA",
+    avatar: "",
+    bio: "Passionate learner focused on technology and personal development",
+  });
+  const user = useSelector((state: RootState) => state.user.user);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const courses = useSelector((state: RootState) => state.courses.courses);
+  const lessons = useSelector((state: RootState) => state.lessons.lessons);
+  const router = useRouter();
 
-// Mock user data
-const initialUserData: User = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  avatarUrl: "/avatar.jpg",
-  joinDate: "January 15, 2023",
-  bio: "Passionate learner and software developer with a focus on web technologies.",
-  location: "San Francisco, CA",
-  phone: "+1 (555) 123-4567",
-  courses: [
-    { id: "1", title: "React Mastery", progress: 75, lastAccessed: "2025-09-20", price: 199.99, purchaseDate: "2023-02-10" },
-    { id: "2", title: "TypeScript Fundamentals", progress: 40, lastAccessed: "2025-09-18", price: 149.99, purchaseDate: "2023-03-05" },
-    { id: "3", title: "Next.js Advanced", progress: 90, lastAccessed: "2025-09-25", price: 249.99, purchaseDate: "2023-04-20" },
-  ],
-};
+  const [purchasedCourses] = useState([
+    {
+      id: 1,
+      title: "Complete Web Development Bootcamp",
+      thumbnail: "/placeholder.svg",
+      progress: 75,
+      status: "In Progress",
+      enrolled: "Feb 2024",
+      instructor: "Sarah Johnson",
+      lessonsCompleted: 45,
+      totalLessons: 60,
+    },
+    {
+      id: 2,
+      title: "UI/UX Design Masterclass",
+      thumbnail: "/placeholder.svg",
+      progress: 100,
+      status: "Completed",
+      enrolled: "Jan 2024",
+      instructor: "Mike Chen",
+      lessonsCompleted: 40,
+      totalLessons: 40,
+    },
+    {
+      id: 3,
+      title: "Data Science Fundamentals",
+      thumbnail: "/placeholder.svg",
+      progress: 30,
+      status: "In Progress",
+      enrolled: "Mar 2024",
+      instructor: "Dr. Emily Roberts",
+      lessonsCompleted: 18,
+      totalLessons: 60,
+    },
+  ]);
 
-export default function Profile() {
-  const [user, setUser] = useState<User>(initialUserData);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState<User>(user);
+  const [transactions] = useState([
+    {
+      id: "TXN-001",
+      course: "Complete Web Development Bootcamp",
+      amount: "$199.00",
+      date: "Feb 15, 2024",
+      status: "Completed",
+      method: "Credit Card",
+    },
+    {
+      id: "TXN-002",
+      course: "UI/UX Design Masterclass",
+      amount: "$149.00",
+      date: "Jan 20, 2024",
+      status: "Completed",
+      method: "PayPal",
+    },
+    {
+      id: "TXN-003",
+      course: "Data Science Fundamentals",
+      amount: "$179.00",
+      date: "Mar 5, 2024",
+      status: "Completed",
+      method: "Credit Card",
+    },
+  ]);
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEditedUser({ ...editedUser, [e.target.name]: e.target.value });
+  useEffect(() => {
+    const fetch_lessons = async () => {
+      console.log({userId: user?.id})
+      const response = await fetch(
+        `/api/payment/get-user-payments?userId=${user?.id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        return;
+      }
+
+      setPayments(res.data);
+      console.log({ user_payments: res.data });
+    };
+
+    fetch_lessons();
+  }, [user]);
+
+  const getStatusColor = (status: string) => {
+    return status === "Completed" ? "default" : "secondary";
   };
 
-  const handleSave = () => {
-    setUser(editedUser);
-    setIsEditing(false);
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
+  const handleLogOut = async () => {
+    try {
+      const response = await fetch("/api/auth/sign-out", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        router.refresh();
+        return;
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.log("error while log out: ", error);
+    }
   };
 
   return (
-    <div className="container mx-auto max-w-5xl bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
-      <Card className="shadow-xl rounded-2xl border-none bg-white/90 backdrop-blur-sm">
-        <CardHeader className="flex flex-col items-center sm:flex-row sm:justify-between gap-4 sm:gap-6 p-4 sm:p-6 md:p-8">
-          <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 sm:gap-6">
-            <Avatar className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 ring-4 ring-blue-100 transition-transform hover:scale-105">
-              <AvatarImage src={user.avatarUrl} alt={user.name} />
-              <AvatarFallback className="bg-blue-500 text-white text-lg sm:text-xl md:text-2xl">{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="text-center sm:text-left space-y-2">
-              <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900">{user.name}</CardTitle>
-              <CardDescription className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
-                <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                {user.email}
-              </CardDescription>
-              <CardDescription className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
-                <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                {user.phone || 'Not provided'}
-              </CardDescription>
-              <CardDescription className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
-                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                {user.location || 'Not provided'}
-              </CardDescription>
-              <CardDescription className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                Joined: {user.joinDate}
-              </CardDescription>
-              <CardDescription className="mt-2 text-gray-700 text-sm sm:text-base max-w-md">
-                {user.bio || 'No bio provided.'}
-              </CardDescription>
-            </div>
-          </div>
-          <Dialog open={isEditing} onOpenChange={setIsEditing}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2 text-sm sm:text-base">
-                <Edit2 className="h-4 w-4" />
-                Edit Profile
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="w-[90vw] max-w-[425px] p-4 sm:p-6">
-              <DialogHeader>
-                <DialogTitle className="text-lg sm:text-xl">Edit Profile</DialogTitle>
-                <DialogDescription className="text-sm sm:text-base">
-                  Update your personal information below.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-3 sm:gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name" className="text-sm sm:text-base">Name</Label>
-                  <Input id="name" name="name" value={editedUser.name} onChange={handleEditChange} className="text-sm sm:text-base" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
-                  <Input id="email" name="email" type="email" value={editedUser.email} onChange={handleEditChange} className="text-sm sm:text-base" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="phone" className="text-sm sm:text-base">Phone</Label>
-                  <Input id="phone" name="phone" value={editedUser.phone} onChange={handleEditChange} className="text-sm sm:text-base" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="location" className="text-sm sm:text-base">Location</Label>
-                  <Input id="location" name="location" value={editedUser.location} onChange={handleEditChange} className="text-sm sm:text-base" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="bio" className="text-sm sm:text-base">Bio</Label>
-                  <Textarea id="bio" name="bio" value={editedUser.bio} onChange={handleEditChange} className="text-sm sm:text-base" />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={handleSave} className="text-sm sm:text-base">Save Changes</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navigation />
 
-        <Separator className="my-4 sm:my-6 bg-gray-200" />
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 mt-16">
+        {/* Profile Header */}
+        <div className="mb-8 md:mb-12">
+          <Card className="border-none shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background shadow-xl">
+                  <AvatarImage src={userData.avatar} alt={userData.name} />
+                  <AvatarFallback className="text-2xl md:text-3xl font-bold bg-primary text-primary-foreground">
+                    {getInitials(`${user.fname} ${user.lname}`)}
+                  </AvatarFallback>
+                </Avatar>
 
-        <CardContent className="p-4 sm:p-6 md:p-8">
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-100 rounded-xl p-1 gap-1 sm:gap-2">
-              <TabsTrigger
-                value="overview"
-                className="rounded-lg py-2 sm:py-3 text-xs sm:text-sm font-semibold data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="courses"
-                className="rounded-lg py-2 sm:py-3 text-xs sm:text-sm font-semibold data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all"
-              >
-                Course Progress
-              </TabsTrigger>
-              <TabsTrigger
-                value="history"
-                className="rounded-lg py-2 sm:py-3 text-xs sm:text-sm font-semibold data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all"
-              >
-                Purchase History
-              </TabsTrigger>
-            </TabsList>
+                <div className="flex-1 text-center md:text-left space-y-4 w-full">
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                      {`${user.fname} ${user.lname}`}
+                    </h1>
+                    <p className="text-muted-foreground">{userData.bio}</p>
+                  </div>
 
-            <TabsContent value="overview" className="mt-4 sm:mt-6">
-              <div className="space-y-4 sm:space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold flex items-center gap-2 text-gray-900">
-                  <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
-                  Learning Summary
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                  <Card className="border-none bg-gradient-to-br from-blue-50 to-white shadow-md hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="text-xs sm:text-sm font-medium text-gray-700">Total Courses</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">{user.courses.length}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-none bg-gradient-to-br from-blue-50 to-white shadow-md hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="text-xs sm:text-sm font-medium text-gray-700">Courses Completed</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                        {user.courses.filter((course) => course.progress === 100).length}
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-none bg-gradient-to-br from-blue-50 to-white shadow-md hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="text-xs sm:text-sm font-medium text-gray-700">Total Spent</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                        ${user.courses.reduce((sum, course) => sum + course.price, 0).toFixed(2)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="courses" className="mt-4 sm:mt-6">
-              <div className="space-y-4 sm:space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Enrolled Courses</h3>
-                {user.courses.map((course) => (
-                  <Card
-                    key={course.id}
-                    className="p-4 sm:p-6 border-none bg-white shadow-md hover:shadow-xl transition-all duration-300 rounded-xl"
-                  >
-                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-6">
-                      <div className="space-y-2">
-                        <h4 className="font-semibold text-base sm:text-lg text-gray-900">{course.title}</h4>
-                        <p className="text-xs sm:text-sm flex items-center gap-2 text-gray-600">
-                          <Calendar className="h-4 w-4 text-blue-500" />
-                          Purchased: {new Date(course.purchaseDate).toLocaleDateString()}
-                        </p>
-                        <p className="text-xs sm:text-sm text-gray-500">
-                          Last accessed: {new Date(course.lastAccessed).toLocaleDateString()}
-                        </p>
-                        <p className="text-xs sm:text-sm flex items-center gap-2 text-gray-600">
-                          <DollarSign className="h-4 w-4 text-green-500" />
-                          Price: ${course.price.toFixed(2)}
-                        </p>
-                      </div>
-                      <div className="w-full sm:w-1/3">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <Progress
-                            value={course.progress}
-                            className="w-full h-2 bg-gray-200"
-                            // indicatorClassName="bg-blue-500"
-                          />
-                          <span className="text-xs sm:text-sm font-medium text-gray-700">{course.progress}%</span>
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                    <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                      <Mail className="h-4 w-4" />
+                      <span className="truncate">{user.email}</span>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
+                    <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                      <Phone className="h-4 w-4" />
+                      <span>{userData.phone}</span>
+                    </div>
+                    <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span>Joined {userData.joinDate}</span>
+                    </div>
+                    <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                      <UserIcon className="h-4 w-4" />
+                      <span>{user.profession}</span>
+                    </div>
+                  </div>
+                </div>
 
-            <TabsContent value="history" className="mt-4 sm:mt-6">
-              <div className="space-y-4 sm:space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Purchase History</h3>
-                <div className="grid gap-4">
-                  {user.courses
-                    .slice()
-                    .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime())
-                    .map((course) => (
-                      <Card
-                        key={course.id}
-                        className="p-4 sm:p-6 border-none bg-white shadow-md hover:shadow-xl transition-all duration-300 rounded-xl"
-                      >
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-base sm:text-lg text-gray-900">{course.title}</h4>
-                          <p className="text-xs sm:text-sm flex items-center gap-2 text-gray-600">
-                            <Calendar className="h-4 w-4 text-blue-500" />
-                            Purchase Date: {new Date(course.purchaseDate).toLocaleDateString()}
-                          </p>
-                          <p className="text-xs sm:text-sm flex items-center gap-2 text-gray-600">
-                            <DollarSign className="h-4 w-4 text-green-500" />
-                            Price: ${course.price.toFixed(2)}
-                          </p>
-                          <p className="text-xs sm:text-sm flex items-center gap-2 text-gray-600">
-                            <BookOpen className="h-4 w-4 text-purple-500" />
-                            Progress: {course.progress}%
-                          </p>
-                        </div>
-                      </Card>
-                    ))}
+                <Button variant="outline" className="gap-2 mt-4 md:mt-0">
+                  <Edit className="h-4 w-4" />
+                  Edit Profile
+                </Button>
+                <Button
+                  variant="outline"
+                  className="gap-2 mt-4 md:mt-0"
+                  onClick={handleLogOut}
+                >
+                  <LogOutIcon className="h-4 w-4" />
+                  Log Out
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
+          <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Total Courses
+                  </p>
+                  <p className="text-3xl font-bold text-foreground">
+                    {payments.length}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-primary" />
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Completed
+                  </p>
+                  <p className="text-3xl font-bold text-foreground">
+                    {
+                      purchasedCourses.filter((c) => c.status === "Completed")
+                        .length
+                    }
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <Award className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    In Progress
+                  </p>
+                  <p className="text-3xl font-bold text-foreground">
+                    {
+                      purchasedCourses.filter((c) => c.status === "In Progress")
+                        .length
+                    }
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Total Spent
+                  </p>
+                  <p className="text-3xl font-bold text-foreground">$527</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <CreditCard className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs Section */}
+        <Tabs defaultValue="courses" className="space-y-6">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 h-auto p-1">
+            <TabsTrigger value="courses" className="gap-2 py-3">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">My Courses</span>
+              <span className="sm:hidden">Courses</span>
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="gap-2 py-3">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Transactions</span>
+              <span className="sm:hidden">Payments</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="courses" className="space-y-4 md:space-y-6">
+            {purchasedCourses.map((course) => (
+              <Card
+                key={course.id}
+                className="border-none shadow-md hover:shadow-xl transition-all overflow-hidden"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="w-full md:w-48 lg:w-64 h-48 md:h-auto bg-muted flex-shrink-0">
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="flex-1 p-6 md:p-8">
+                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-4">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <Badge variant={getStatusColor(course.status)}>
+                            {course.status}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            Enrolled {course.enrolled}
+                          </span>
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+                          {course.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Instructor: {course.instructor}
+                        </p>
+                      </div>
+                      <Button className="w-full lg:w-auto">
+                        Continue Learning
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Progress: {course.lessonsCompleted} of{" "}
+                          {course.totalLessons} lessons
+                        </span>
+                        <span className="font-semibold text-foreground">
+                          {course.progress}%
+                        </span>
+                      </div>
+                      <Progress value={course.progress} className="h-2" />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="transactions" className="space-y-4">
+            {/* Desktop Table View */}
+            <Card className="border-none shadow-md hidden md:block overflow-hidden">
+              <CardHeader className="bg-muted/50">
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Transaction History
+                </CardTitle>
+                <CardDescription>
+                  View all your course purchases and payment details
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/30">
+                      <tr className="border-b">
+                        <th className="text-left p-4 font-semibold text-sm">
+                          Transaction ID
+                        </th>
+                        <th className="text-left p-4 font-semibold text-sm">
+                          Course
+                        </th>
+                        <th className="text-left p-4 font-semibold text-sm">
+                          Amount
+                        </th>
+                        <th className="text-left p-4 font-semibold text-sm">
+                          Date
+                        </th>
+                        <th className="text-left p-4 font-semibold text-sm">
+                          Method
+                        </th>
+                        <th className="text-left p-4 font-semibold text-sm">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((transaction) => (
+                        <tr
+                          key={transaction.id}
+                          className="border-b hover:bg-muted/30 transition-colors"
+                        >
+                          <td className="p-4">
+                            <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                              {transaction.id}
+                            </code>
+                          </td>
+                          <td className="p-4 font-medium">
+                            {transaction.course}
+                          </td>
+                          <td className="p-4 font-semibold text-primary">
+                            {transaction.amount}
+                          </td>
+                          <td className="p-4 text-muted-foreground">
+                            {transaction.date}
+                          </td>
+                          <td className="p-4 text-muted-foreground">
+                            {transaction.method}
+                          </td>
+                          <td className="p-4">
+                            <Badge
+                              variant="default"
+                              className="bg-green-500/10 text-green-700 hover:bg-green-500/20"
+                            >
+                              {transaction.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {transactions.map((transaction) => (
+                <Card key={transaction.id} className="border-none shadow-md">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg mb-1">
+                          {transaction.course}
+                        </CardTitle>
+                        <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                          {transaction.id}
+                        </code>
+                      </div>
+                      <Badge
+                        variant="default"
+                        className="bg-green-500/10 text-green-700"
+                      >
+                        {transaction.status}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        Amount
+                      </span>
+                      <span className="font-semibold text-lg text-primary">
+                        {transaction.amount}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        Date
+                      </span>
+                      <span className="text-sm">{transaction.date}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        Payment Method
+                      </span>
+                      <span className="text-sm">{transaction.method}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      <Footer />
     </div>
   );
-}
+};
+
+export default Profile;
