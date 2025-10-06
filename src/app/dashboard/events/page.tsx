@@ -640,16 +640,16 @@ const CreateEventModal = ({
               id="file-upload"
               type="file"
               name="file"
-              onChange={(e) => {
-                const selectedFile = e.target.files[0];
-                if (!selectedFile) return;
-                setFile(selectedFile);
-                console.log("Selected file:", selectedFile.name);
-                // Optional: Add validation or other logic
-                if (selectedFile && !selectedFile.type.startsWith("image/")) {
-                  alert("Please select an image file.");
-                }
-              }}
+              // onChange={(e) => {
+              //   const selectedFile = e.target.files[0];
+              //   if (!selectedFile) return;
+              //   setFile(selectedFile);
+              //   console.log("Selected file:", selectedFile.name);
+              //   // Optional: Add validation or other logic
+              //   if (selectedFile && !selectedFile.type.startsWith("image/")) {
+              //     alert("Please select an image file.");
+              //   }
+              // }}
               className="hidden"
               accept="image/*"
             />
