@@ -13,6 +13,7 @@ interface YoutubeEmbedProps {
 
 declare global {
   interface Window {
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     YT: any;
     onYouTubeIframeAPIReady: () => void;
   }
@@ -24,6 +25,7 @@ const YoutubeEmbed = ({
   courseId,
   lessonId,
 }: YoutubeEmbedProps) => {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
   const [hasClicked, setHasClicked] = useState(false);
   const dispatch = useDispatch();

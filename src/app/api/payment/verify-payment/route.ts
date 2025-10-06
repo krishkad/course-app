@@ -9,7 +9,12 @@ const razorpay = new Razorpay({
 
 export async function POST(req: NextRequest) {
   try {
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, paymentId } = await req.json();
+    const {
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+      paymentId,
+    } = await req.json();
     const crypto = await import("crypto");
 
     // Verify signature
@@ -19,19 +24,28 @@ export async function POST(req: NextRequest) {
       .digest("hex");
 
     if (generatedSignature !== razorpay_signature) {
-      return NextResponse.json({ success: false, message: "Invalid signature" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Invalid signature" },
+        { status: 400 }
+      );
     }
 
     // Fetch payment details from Razorpay
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
     if (payment.order_id !== razorpay_order_id) {
-      return NextResponse.json({ success: false, message: "Order ID mismatch" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Order ID mismatch" },
+        { status: 400 }
+      );
     }
 
     // Verify amount
     const order = await razorpay.orders.fetch(razorpay_order_id);
     if (payment.amount !== order.amount) {
-      return NextResponse.json({ success: false, message: "Amount mismatch" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Amount mismatch" },
+        { status: 400 }
+      );
     }
 
     // Update payment status in database
@@ -40,13 +54,19 @@ export async function POST(req: NextRequest) {
       data: { status: "SUCCESS" },
     });
 
-    return NextResponse.json({ success: true, message: "Payment verified" }, { status: 200 });
-  } catch (error: any) {
+    return NextResponse.json(
+      { success: true, message: "Payment verified" },
+      { status: 200 }
+    );
+  } catch (error) {
     console.error("PAYMENT VERIFICATION ERROR:", error);
-    return NextResponse.json({
-      success: false,
-      message: "Payment verification failed",
-      error: error.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Payment verification failed",
+        error: error,
+      },
+      { status: 500 }
+    );
   }
 }
