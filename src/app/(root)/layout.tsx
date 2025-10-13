@@ -4,10 +4,16 @@ import { cookies } from "next/headers";
 import React, { ReactNode } from "react";
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
-  const { courses, events, users } = await getData();
+  const { courses, events, users, display, lessonProgress } = await getData();
   return (
     <div className="w-full">
-      <ReduxProviderInitializer courses={courses} events={events} user={users}>
+      <ReduxProviderInitializer
+        courses={courses}
+        events={events}
+        user={users}
+        display={display}
+        lessonProgress={lessonProgress}
+      >
         <main className="w-full">{children}</main>
       </ReduxProviderInitializer>
     </div>
@@ -26,6 +32,8 @@ const getData = async () => {
     const coursesUrl = `${baseUrl}/api/course/get-all`;
     const eventsUrl = `${baseUrl}/api/event/get-all`;
     const userUrl = `${baseUrl}/api/user/get-user`;
+    const displayUrl = `${baseUrl}/api/display/get`;
+    const lessonProgressUrl = `${baseUrl}/api/lesson-progress/get-all`;
 
     // Define fetch options
     const fetchOptions: RequestInit = {
@@ -37,28 +45,49 @@ const getData = async () => {
     };
 
     // Fetch both APIs in parallel
-    const [CoursesRes, eventsRes, userRes] = await Promise.all([
-      fetch(coursesUrl, fetchOptions),
-      fetch(eventsUrl, fetchOptions),
-      fetch(userUrl, fetchOptions),
-    ]);
+    const [CoursesRes, eventsRes, userRes, displayRes, lessonProgressRes] =
+      await Promise.all([
+        fetch(coursesUrl, fetchOptions),
+        fetch(eventsUrl, fetchOptions),
+        fetch(userUrl, fetchOptions),
+        fetch(displayUrl, fetchOptions),
+        fetch(lessonProgressUrl, fetchOptions),
+      ]);
 
-    const [CoursesJson, eventsJson, userJson] = await Promise.all([
-      CoursesRes.json(),
-      eventsRes.json(),
-      userRes.json(),
-    ]);
+    const [CoursesJson, eventsJson, userJson, displayJson, lessonProgressJson] =
+      await Promise.all([
+        CoursesRes.json(),
+        eventsRes.json(),
+        userRes.json(),
+        displayRes.json(),
+        lessonProgressRes.json(),
+      ]);
 
-    console.log({ userJson });
     // Check success status of both
-    const coursesData = CoursesJson.success ? CoursesJson.data : [];
-    const eventsData = eventsJson.success ? eventsJson.data : [];
-    const userData = userJson.success ? userJson.data : [];
+    const displayData = displayJson.success ? displayJson.data : {};
+    const coursesData = displayData.view_courses
+      ? CoursesJson.success
+        ? CoursesJson.data
+        : []
+      : [];
+    const lessonProgressData = displayData.view_courses
+      ? lessonProgressJson.success
+        ? lessonProgressJson.data
+        : []
+      : [];
+    const eventsData = displayData.view_events
+      ? eventsJson.success
+        ? eventsJson.data
+        : []
+      : [];
+    const userData = userJson.success ? userJson.data : {};
 
     return {
       courses: coursesData,
       events: eventsData,
       users: userData,
+      display: displayData,
+      lessonProgress: lessonProgressData,
     };
   } catch (error) {
     console.error("Error while fetching data:", error);
@@ -66,6 +95,8 @@ const getData = async () => {
       courses: [],
       events: [],
       user: {} as User,
+      display: {},
+      lessonProgress: [],
     };
   }
 };

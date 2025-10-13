@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { CustomJWTPayload } from "@/types/types";
-import { Lesson } from "@prisma/client";
+import { CourseTag, Lesson } from "@prisma/client";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -11,6 +11,7 @@ export async function PUT(req: NextRequest) {
       description,
       price,
       duration,
+      tag,
       published,
       courseId,
       lessons,
@@ -19,6 +20,7 @@ export async function PUT(req: NextRequest) {
       description: string;
       price: number;
       duration: string;
+      tag: CourseTag;
       published: boolean;
       courseId: string;
       lessons: Lesson[];
@@ -34,6 +36,7 @@ export async function PUT(req: NextRequest) {
       !description ||
       !price ||
       !duration ||
+      !tag ||
       typeof published !== "boolean" ||
       !courseId ||
       !lessons ||
@@ -64,7 +67,7 @@ export async function PUT(req: NextRequest) {
 
     const updated_course = await prisma.course.update({
       where: { id: courseId },
-      data: { title, description, price, duration, published },
+      data: { title, description, price, duration, published, tag },
     });
 
     if (!updated_course) {

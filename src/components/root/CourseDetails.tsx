@@ -9,6 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { cn, sortByIdAscending } from "@/lib/utils";
+import { ICourse } from "@/redux/slices/courses";
+import { initializeLessonProgress } from "@/redux/slices/lessons-progress";
+import { RootState } from "@/redux/store";
+import { Lesson } from "@prisma/client";
 import {
   ArrowLeft,
   CheckCircle,
@@ -18,20 +23,16 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Skeleton } from "../ui/skeleton";
 import Footer from "./Footer";
 import Navigation from "./Navigation";
-import YouTubeEmbed from "./YoutubeEmbed";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { useEffect, useState } from "react";
-import { ICourse } from "@/redux/slices/courses";
-import { Lesson } from "@prisma/client";
-import { cn, sortByIdAscending } from "@/lib/utils";
 import RazorpayButton from "./RazorpayButton";
-import { initializeLessonProgress } from "@/redux/slices/lessons-progress";
-import { Skeleton } from "../ui/skeleton";
+import YouTubeEmbed from "./YoutubeEmbed";
+import AuthComponent from "../auth/AuthComponent";
+import Link from "next/link";
 
 const CourseDetail = ({
   courseId,
@@ -41,6 +42,7 @@ const CourseDetail = ({
   userId: string | undefined;
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const courses = useSelector((state: RootState) => state.courses.courses);
   const [activeLesson, setActiveLesson] = useState<Lesson>({} as Lesson);
   const [current_course, setCurrent_course] = useState<ICourse>();
@@ -331,26 +333,50 @@ const CourseDetail = ({
                   /> */}
 
                   {/* Badge */}
-                  <div className="mb-4">
-                    <Badge variant="default" className="shadow-sm">
-                      {current_course.tag}
-                    </Badge>
-                  </div>
-
+                  {isFetching ? (
+                    <Skeleton className="mb-4 w-32 h-6" />
+                  ) : (
+                    <div className="mb-4">
+                      <Badge variant="default" className="shadow-sm">
+                        {static_course.badge}
+                      </Badge>
+                    </div>
+                  )}
                   {/* Title and Description */}
-                  <h1 className="text-2xl font-bold mb-4 text-card-foreground">
-                    {current_course?.title}
-                  </h1>
+                  {isFetching ? (
+                    <Skeleton className="h-12 w-full mb-4" />
+                  ) : (
+                    <h1 className="text-2xl font-bold mb-4 text-card-foreground">
+                      {current_course?.title}
+                    </h1>
+                  )}
 
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {current_course?.description}
-                  </p>
-
+                  {isFetching ? (
+                    <div className="space-y-1 mb-6">
+                      <span className="pb-2">
+                        <Skeleton className="w-full h-4" />
+                      </span>
+                      <span className="pb-2">
+                        <Skeleton className="w-[80%] h-4 my-2" />
+                      </span>
+                      <span className="pb-2">
+                        <Skeleton className="w-[50%] h-4" />
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground mb-6 leading-relaxed">
+                      {current_course?.description}
+                    </p>
+                  )}
                   {/* Price */}
                   <div className="mb-6">
                     <div className="flex items-center space-x-3 mb-2">
                       <span className="text-3xl font-bold text-primary">
-                        {current_course?.price}
+                        {isFetching ? (
+                          <Skeleton className="h-12 aspect-square" />
+                        ) : (
+                          <>{current_course?.price}</>
+                        )}
                       </span>
                       <span className="text-lg text-muted-foreground line-through">
                         {static_course.originalPrice}
@@ -360,11 +386,13 @@ const CourseDetail = ({
                       Limited time offer
                     </p>
                   </div>
-
-                  {/* CTA Button */}
-                  <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
-                    Enroll Now
-                  </Button>
+                  <>
+                    <RazorpayButton
+                      userId={userId || ""}
+                      courseId={current_course.id}
+                      price={current_course?.price}
+                    />
+                  </>
 
                   {/* Course Stats */}
                   <div className="space-y-4 text-sm">
@@ -645,18 +673,26 @@ const CourseDetail = ({
                       Limited time offer
                     </p>
                   </div>
-                  <>
-                    <RazorpayButton
-                      userId={userId || ""}
-                      courseId={current_course.id}
-                      price={current_course?.price}
-                    />
-
-                    {/* CTA Button */}
-                    {/* <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
-                      Enroll Now
-                    </Button> */}
-                  </>
+                  <AuthComponent
+                    signOut={
+                      <>
+                        <RazorpayButton
+                          userId={userId || ""}
+                          courseId={current_course.id}
+                          price={current_course?.price}
+                        />
+                      </>
+                    }
+                    signIn={
+                      <>
+                        <Link href={`/sign-in?redirect=${pathname}`}>
+                          <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
+                            Enroll Now
+                          </Button>
+                        </Link>
+                      </>
+                    }
+                  />
 
                   {/* Course Stats */}
                   <div className="space-y-4 text-sm">

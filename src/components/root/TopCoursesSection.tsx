@@ -12,6 +12,7 @@ import { ICourse } from "@/redux/slices/courses";
 const TopCoursesSection = () => {
   const [topCourses, setTopCourses] = useState<ICourse[]>([]);
   const courses = useSelector((state: RootState) => state.courses.courses);
+  const display = useSelector((state: RootState) => state.display.display);
   // const courses = [
   //   {
   //     id: "digital-marketing-mastery",
@@ -124,6 +125,7 @@ const TopCoursesSection = () => {
     }
   }, [courses]);
 
+  if (!display.view_courses) return null;
   return (
     <section className="py-24 bg-gradient-secondary">
       <div className="container mx-auto px-4">

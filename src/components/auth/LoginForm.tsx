@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { ChangeEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { initializeUser } from "@/redux/slices/user";
 
@@ -18,6 +18,8 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect");
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
@@ -41,8 +43,11 @@ export function LoginForm({
         console.log(res.message);
         return;
       }
-
-      router.refresh();
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else {
+        router.refresh();
+      }
       console.log({ user: res.data });
       dispatch(initializeUser(res.data));
     } catch (error) {
@@ -100,19 +105,6 @@ export function LoginForm({
         >
           Login
         </Button>
-        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-          <span className="bg-background text-muted-foreground relative z-10 px-2">
-            Or continue with
-          </span>
-        </div>
-        {/* <Button variant="outline" className="w-full">
-          <img
-            src={"/google-icon-logo.svg"}
-            className="size-5 shrink-0"
-            alt="google icon"
-          />
-          Login with Google
-        </Button> */}
       </div>
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}

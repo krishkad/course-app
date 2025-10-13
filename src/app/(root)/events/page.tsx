@@ -27,6 +27,7 @@ import Footer from "@/components/root/Footer";
 import { Input } from "@/components/ui/input";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { format } from "date-fns";
 
 const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -111,14 +112,14 @@ const AllCourses = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Open":
+      case "upcomming":
         return "default";
-      case "Limited":
+      case "k":
         return "secondary";
-      case "Filling Fast":
+      case "today":
         return "destructive";
       default:
-        return "outline";
+        return "secondary";
     }
   };
 
@@ -221,23 +222,13 @@ const AllCourses = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-              {events.map((event, index) => (
-                <Link
-                  key={index}
-                  href={`/events/${
-                    redux_events[index + 1]?.slug ?? event.title
-                  }`}
-                >
-                  <div
-                    key={index}
-                    className="group bg-background rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20"
-                  >
+              {redux_events.map((event, index) => (
+                <Link href={`/events/${event.slug}`} key={index}>
+                  <div className="group bg-background rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
                     {/* Event Image */}
                     <div className="relative overflow-hidden h-48">
                       <img
-                        src={
-                          redux_events[index + 1]?.thumbnailUrl ?? event.image
-                        }
+                        src={event?.thumbnailUrl as string}
                         alt={event.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
@@ -249,16 +240,19 @@ const AllCourses = () => {
                           variant="outline"
                           className="bg-white/90 backdrop-blur-sm text-primary border-none shadow-sm"
                         >
-                          {event.type}
+                          {event?.type ?? event.type}
                         </Badge>
                       </div>
                       <div className="absolute top-4 right-4">
                         <Badge
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          variant={getStatusColor(event.status) as any}
+                          variant={
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            getStatusColor(event?.status ?? event.status) as any
+                          }
                           className="shadow-sm"
                         >
-                          {event.status}
+                          {event?.status ?? event.status}
                         </Badge>
                       </div>
 
@@ -273,11 +267,11 @@ const AllCourses = () => {
                     {/* Event Content */}
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
-                        {redux_events[index + 1]?.title ?? event.title}
+                        {event?.title ?? event.title}
                       </h3>
 
                       <p className="text-muted-foreground mb-6 text-sm leading-relaxed line-clamp-2">
-                        {event.description}
+                        {event?.description ?? event.description}
                       </p>
 
                       {/* Event Details */}
@@ -287,7 +281,7 @@ const AllCourses = () => {
                             <Calendar className="h-4 w-4 text-primary" />
                           </div>
                           <span className="text-foreground font-medium">
-                            {event.date}
+                            {format(event.date, "MMMM dd yyyy")}
                           </span>
                         </div>
 
@@ -296,7 +290,7 @@ const AllCourses = () => {
                             <Clock className="h-4 w-4 text-primary" />
                           </div>
                           <span className="text-muted-foreground">
-                            {event.time}
+                            {format(event.date, "h:mm a")}
                           </span>
                         </div>
 
@@ -305,8 +299,7 @@ const AllCourses = () => {
                             <User className="h-4 w-4 text-primary" />
                           </div>
                           <span className="text-muted-foreground">
-                            {redux_events[index + 1]?.organizer_name ??
-                              event.speaker}
+                            {event?.organizer_name}
                           </span>
                         </div>
 
@@ -315,7 +308,7 @@ const AllCourses = () => {
                             <Users className="h-4 w-4 text-primary" />
                           </div>
                           <span className="text-muted-foreground">
-                            {event.attendees} registered
+                            {event?.registered} registered
                           </span>
                         </div>
                       </div>

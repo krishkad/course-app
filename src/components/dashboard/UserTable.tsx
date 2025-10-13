@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -18,8 +20,38 @@ import { Button } from "../ui/button";
 import { ArrowUpRight, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Progress } from "../ui/progress";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useEffect, useState } from "react";
+import { displayRazorpayAmount, getTopPerformingCourse } from "@/lib/utils";
+import Link from "next/link";
 
 export function UserTable() {
+  const payments = useSelector((state: RootState) => state.payments.payments);
+  const courses = useSelector(
+    (state: RootState) => state.all_courses.all_courses
+  );
+  const lessons = useSelector((state: RootState) => state.all_lessons.lessons);
+  const lessonsProgress = useSelector(
+    (state: RootState) => state.all_lessonProgress.lessonProgress
+  );
+  const [topCourses, setTopCourses] = useState<
+    {
+      id: string;
+      title: string;
+      students: number;
+      revenue: number;
+      completion: number;
+    }[]
+  >(
+    [] as {
+      id: string;
+      title: string;
+      students: number;
+      revenue: number;
+      completion: number;
+    }[]
+  );
   const users = [
     {
       fname: "John",
@@ -90,36 +122,48 @@ export function UserTable() {
     },
   ];
 
-  const topCourses = [
-    {
-      id: 1,
-      title: "Advanced React Development",
-      students: 245,
-      revenue: "$12,350",
-      completion: 78,
-    },
-    {
-      id: 2,
-      title: "Full-Stack JavaScript",
-      students: 189,
-      revenue: "$9,450",
-      completion: 65,
-    },
-    {
-      id: 3,
-      title: "UI/UX Design Fundamentals",
-      students: 156,
-      revenue: "$7,800",
-      completion: 82,
-    },
-    {
-      id: 4,
-      title: "Data Science Basics",
-      students: 134,
-      revenue: "$6,700",
-      completion: 71,
-    },
-  ];
+  // const topCourses = [
+  //   {
+  //     id: 1,
+  //     title: "Advanced React Development",
+  //     students: 245,
+  //     revenue: "$12,350",
+  //     completion: 78,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Full-Stack JavaScript",
+  //     students: 189,
+  //     revenue: "$9,450",
+  //     completion: 65,
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "UI/UX Design Fundamentals",
+  //     students: 156,
+  //     revenue: "$7,800",
+  //     completion: 82,
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Data Science Basics",
+  //     students: 134,
+  //     revenue: "$6,700",
+  //     completion: 71,
+  //   },
+  // ];
+
+  useEffect(() => {
+    if (payments || courses || lessons || lessonsProgress) {
+      const topCourses = getTopPerformingCourse({
+        courses,
+        lessons,
+        lessonsProgress,
+        payments,
+      });
+      setTopCourses(topCourses);
+    }
+  }, [payments, courses, lessons, lessonsProgress]);
 
   return (
     <>
@@ -213,29 +257,37 @@ export function UserTable() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Top Performing Courses
-              <Button variant="ghost" size="sm">
-                <ArrowUpRight className="w-4 h-4 mr-2" />
-                View All
-              </Button>
+              <Link href={"/dashboard/courses"}>
+                <Button variant="ghost" size="sm">
+                  <ArrowUpRight className="w-4 h-4 mr-2" />
+                  View All
+                </Button>
+              </Link>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {topCourses.map((course) => (
-                <div key={course.id} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-foreground">
-                      {course.title}
-                    </h4>
-                    <Badge variant="outline">{course.students} students</Badge>
+              {topCourses
+                .filter((topCourse) => topCourse.revenue > 0)
+                .map((course) => (
+                  <div key={course.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium text-foreground">
+                        {course.title}
+                      </h4>
+                      <Badge variant="outline">
+                        {course.students} students
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        Revenue: ${displayRazorpayAmount(course.revenue)}
+                      </span>
+                      <span>Completion: {course.completion}%</span>
+                    </div>
+                    <Progress value={course.completion} className="h-2" />
                   </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Revenue: {course.revenue}</span>
-                    <span>Completion: {course.completion}%</span>
-                  </div>
-                  <Progress value={course.completion} className="h-2" />
-                </div>
-              ))}
+                ))}
             </div>
           </CardContent>
         </Card>

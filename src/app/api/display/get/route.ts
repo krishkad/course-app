@@ -13,7 +13,7 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ success: true, message: "ok", display });
+    return NextResponse.json({ success: true, message: "ok", data: display });
   } catch (error) {
     console.log("ERROR WHILE GETTING DISPLAY: ", error);
     return NextResponse.json({

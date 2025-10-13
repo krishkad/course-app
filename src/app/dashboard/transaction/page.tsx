@@ -133,14 +133,16 @@ export default function AdminTransactions() {
   const stats = [
     {
       title: "Total Revenue",
-      value: `$45,820`,
+      value: `$${displayRazorpayAmount(
+        all_transactions.reduce((total, item) => total + item.amount, 0)
+      )}`,
       change: "+12.5%",
       trend: "up",
       icon: DollarSign,
     },
     {
       title: "Transactions (Today)",
-      value: "128",
+      value: `${all_transactions.length}`,
       change: "+8.2%",
       trend: "up",
       icon: ArrowUpRight,
@@ -326,7 +328,9 @@ export default function AdminTransactions() {
                       return (
                         <TableRow key={transaction.id}>
                           <TableCell className="font-mono text-sm">
-                            {transaction.id.slice(0, 5)}
+                            <span className="bg-secondary p-1 rounded-xs">
+                              TX-{transaction.id.slice(0, 6)}
+                            </span>
                           </TableCell>
                           <TableCell>
                             <div>

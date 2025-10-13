@@ -1,12 +1,25 @@
 "use client";
 
-import { ChangeEvent, useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -15,15 +28,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Table,
   TableBody,
   TableCell,
@@ -31,31 +35,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  add_event,
+  remove_events,
+  update_event,
+} from "@/redux/admin/slice/all-events";
+import { IEvent } from "@/redux/slices/events";
+import { RootState } from "@/redux/store";
+import { EventStatus, EventType } from "@prisma/client";
+import { format } from "date-fns";
 import {
-  Search,
-  Plus,
   Calendar,
   Clock,
-  Users,
-  MoreHorizontal,
-  Edit,
   Copy,
-  Trash2,
-  Video,
-  MapPin,
   Download,
+  Edit,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Trash2,
+  TrashIcon,
   UploadCloud,
+  Users,
+  XIcon,
 } from "lucide-react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { format } from "date-fns";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ChangeEvent, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 // Mock data
 // const events = [
@@ -117,7 +123,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 //   },
 // ];
 
-const eventTypes = ["webinar", "workshop", "live", "conference"];
+const eventTypes = ["webinar", "workshop", "live", "conference", "upcoming"];
 const courses = [
   "Business Strategy",
   "Career Development",
@@ -125,28 +131,63 @@ const courses = [
   "Web Development",
 ];
 
+const initialEventState: IEvent = {
+  id: "",
+  slug: "",
+  title: "",
+  description: "",
+  location: "",
+  date: new Date(), // You'll convert this to a Date when submitting
+  time: "",
+  duration: "",
+  isPaid: false,
+  price: 0,
+  capacity: 0,
+  thumbnailUrl: "",
+  type: "upcoming", // Should match one of your EventType values
+  status: "upcoming", // Default from schema
+  createdAt: new Date(), // You may not need this in the form
+  updatedAt: new Date(), // Same as above
+  organizerId: "",
+  keywords: [],
+  registered: 0,
+  organizer_name: "",
+};
+
+interface EventProps {
+  title: string;
+  type: string;
+  description: string;
+  date: string;
+  time: string;
+  duration: string;
+  capacity: string;
+  course: string;
+  instructor: string;
+  image: File | null;
+  status: EventStatus;
+  location: "online" | string;
+  price: string;
+  isPaid: boolean;
+  keywords: string[];
+}
+
 export default function AdminEvents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [deleteEventOpen, setDeleteEventOpen] = useState(false);
+  const [deleteEvent, setdeleteEvent] = useState<IEvent>({} as IEvent);
+  const [updateEvent, setUpdateEvent] = useState<IEvent>({} as IEvent);
+  const [updateEventOpen, setUpdateEventOpen] = useState<boolean>(false);
+  const [updateEventFile, setUpdateEventFile] = useState<File | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const all_events = useSelector(
     (state: RootState) => state.all_events.all_events
   );
   const [file, setFile] = useState<File | null>(null);
-  const [formData, setFormData] = useState<{
-    title: string;
-    type: string;
-    description: string;
-    date: string;
-    time: string;
-    duration: string;
-    capacity: string;
-    course: string;
-    instructor: string;
-    image: File | null;
-    status: "draft" | "published";
-  }>({
+  const [formData, setFormData] = useState<EventProps>({
     title: "",
     type: "",
     description: "",
@@ -158,7 +199,13 @@ export default function AdminEvents() {
     instructor: "",
     image: null,
     status: "draft",
+    location: "online",
+    price: "",
+    isPaid: true,
+    keywords: [],
   });
+
+  const dispatch = useDispatch();
 
   const filteredEvents = all_events.filter((event) => {
     const matchesSearch = event.title
@@ -171,7 +218,7 @@ export default function AdminEvents() {
   });
 
   const upcomingEvents = filteredEvents.filter(
-    (event) => event.status === "upcomming"
+    (event) => event.type === "upcoming"
   );
   const pastEvents = filteredEvents.filter(
     (event) => event.status === "completed"
@@ -207,11 +254,99 @@ export default function AdminEvents() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleOnEventChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setUpdateEvent({ ...updateEvent, [e.target.name]: e.target.value });
+  };
+
   useEffect(() => {
     if (all_events) {
       console.log({ all_events });
     }
   }, [all_events]);
+
+  const handle_create_event = async () => {
+    try {
+      if (!file) return;
+      const create_event_formData = new FormData();
+      create_event_formData.append("file", file);
+      create_event_formData.append("eventData", JSON.stringify(formData));
+      const response = await fetch("/api/event/create-event", {
+        method: "POST",
+        body: create_event_formData,
+        credentials: "include",
+      });
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        return;
+      }
+
+      console.log({ create_event: res.data });
+      dispatch(add_event(res.data));
+    } catch (error) {
+      console.log("error creating event: ", error);
+    }
+  };
+
+  const handle_delete_event = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await fetch(
+        `/api/event/delete?eventId=${deleteEvent.id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        return;
+      }
+
+      console.log({ response: res.data });
+      dispatch(remove_events(deleteEvent.id));
+    } catch (error) {
+      console.log("error deleting event: ", error);
+    } finally {
+      setDeleteEventOpen(false);
+      setdeleteEvent({} as IEvent);
+      setIsDeleting(false);
+    }
+  };
+
+  const handle_update_event = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("updateEventDetail", JSON.stringify(updateEvent));
+      if (file) {
+        formData.append("file", file);
+      }
+      const response = await fetch("/api/event/edit", {
+        method: "PUT",
+        credentials: "include",
+        body: formData,
+      });
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        return;
+      }
+
+      console.log({ updated_event: res.data });
+      dispatch(update_event(res.data));
+    } catch (error) {
+      console.log("error updating event: ", error);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -353,84 +488,90 @@ export default function AdminEvents() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {all_events.map((event) => (
-                    <TableRow key={event.id} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-foreground">
-                            {event.title}
+                  {all_events
+                    .slice()
+                    .reverse()
+                    .map((event) => (
+                      <TableRow key={event.id} className="hover:bg-muted/50">
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-foreground">
+                              {event.title}
+                            </div>
+                            <div className="text-sm text-muted-foreground line-clamp-1 truncate">
+                              {event.description}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {event.organizer_name}
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground line-clamp-1 truncate">
-                            {event.description}
+                        </TableCell>
+                        <TableCell>{getTypeBadge(event.type)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-1 text-sm">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                            <span>
+                              {/* {new Date(event.date).toLocaleDateString()} */}
+                              {format(new Date(event.date), "MMM dd yyyy")}
+                            </span>
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {event.organizer_name}
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Clock className="w-4 h-4" />
+                            <span>{event.time}</span>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getTypeBadge(event.type)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1 text-sm">
-                          <Calendar className="w-4 h-4 text-muted-foreground" />
-                          <span>
-                            {/* {new Date(event.date).toLocaleDateString()} */}
-                            {format(new Date(event.date), "MMM dd yyyy")}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                          <Clock className="w-4 h-4" />
-                          <span>{format(event.date, "h:mm a")}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Users className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">
-                            {event.registered}/{event.capacity}
-                          </span>
-                        </div>
-                        <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden mt-1">
-                          <div
-                            className="h-full bg-primary"
-                            style={{
-                              width: `${
-                                (event.registered! / event.capacity!) * 100
-                              }%`,
-                            }}
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(event.status)}</TableCell>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">
+                              {event.registered}/{event.capacity}
+                            </span>
+                          </div>
+                          <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden mt-1">
+                            <div
+                              className="h-full bg-primary"
+                              style={{
+                                width: `${
+                                  (event.registered! / event.capacity!) * 100
+                                }%`,
+                              }}
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(event.status)}</TableCell>
 
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit Event
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Copy className="w-4 h-4 mr-2" />
-                              Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Download className="w-4 h-4 mr-2" />
-                              Export Attendees
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Cancel Event
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setUpdateEventOpen(true);
+                                  setUpdateEvent(event);
+                                }}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit Event
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setdeleteEvent(event);
+                                  setDeleteEventOpen(true);
+                                }}
+                                className="text-destructive hover:!bg-destructive/10 hover:!text-destructive"
+                              >
+                                <TrashIcon className="w-4 h-4 mr-2" />
+                                Delete Event
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </div>
@@ -445,6 +586,25 @@ export default function AdminEvents() {
           setFormData={setFormData}
           file={file}
           setFile={setFile}
+          onCreate={handle_create_event}
+        />
+
+        <DeleteEventDialog
+          deleteEventOpen={deleteEventOpen}
+          setDeleteEventOpen={setDeleteEventOpen}
+          onDelete={handle_delete_event}
+          isDeleting={isDeleting}
+        />
+
+        <UpdateEventModal
+          updateEventModalOpen={updateEventOpen}
+          setUpdateEventModalOpen={setUpdateEventOpen}
+          updateEvent={updateEvent}
+          setUpdateEvent={setUpdateEvent}
+          onUpdate={handle_update_event}
+          file={updateEventFile}
+          setFile={setUpdateEventFile}
+          handleOnChange={handleOnEventChange}
         />
       </div>
     </div>
@@ -459,43 +619,44 @@ const CreateEventModal = ({
   setFormData,
   file,
   setFile,
+  onCreate,
 }: {
   createModalOpen: boolean;
   setCreateModalOpen: (value: boolean) => void;
   handleOnChange: (
     value: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-  formData: {
-    title: string;
-    type: string;
-    description: string;
-    date: string;
-    time: string;
-    duration: string;
-    capacity: string;
-    course: string;
-    instructor: string;
-    image: File | null;
-    status: "draft" | "published";
-  };
-  setFormData: (value: {
-    title: string;
-    type: string;
-    description: string;
-    date: string;
-    time: string;
-    duration: string;
-    capacity: string;
-    course: string;
-    instructor: string;
-    image: File | null;
-    status: "draft" | "published";
-  }) => void;
+  formData: EventProps;
+  setFormData: (value: EventProps) => void;
   file: File | null;
-  setFile: (value: File) => void;
+  setFile: (value: File | null) => void;
+  onCreate: () => void;
 }) => {
   return (
-    <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+    <Dialog
+      open={createModalOpen}
+      onOpenChange={(value) => {
+        setFormData({
+          title: "",
+          type: "",
+          description: "",
+          date: "",
+          time: "",
+          duration: "",
+          capacity: "",
+          course: "",
+          instructor: "",
+          image: null as File | null,
+          status: "draft" as EventStatus,
+          location: "online",
+          isPaid: true,
+          price: "",
+          keywords: [],
+        });
+        setFile(null);
+        setCreateModalOpen(value);
+      }}
+    >
       <DialogContent className="w-[90%] max-w-2xl h-[90vh] overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>Create New Event</DialogTitle>
@@ -567,7 +728,8 @@ const CreateEventModal = ({
                 name="time"
                 value={formData.time}
                 onChange={handleOnChange}
-                type="time"
+                placeholder="10: 30 AM"
+                type="text"
               />
             </div>
             <div className="space-y-1">
@@ -579,6 +741,59 @@ const CreateEventModal = ({
                 onChange={handleOnChange}
                 placeholder="2 hours"
               />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="date">Location</Label>
+              <Select
+                onValueChange={(value) =>
+                  setFormData({ ...formData, location: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["online", "offline"].map((loca) => (
+                    <SelectItem key={loca} value={loca}>
+                      {loca}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="time">Price</Label>
+              <Input
+                id="price"
+                name="price"
+                value={formData.price}
+                onChange={handleOnChange}
+                type="number"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="duration">Paid?</Label>
+              <Select
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    isPaid: value === "paid" ? true : false,
+                  })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["paid", "free"].map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -616,67 +831,101 @@ const CreateEventModal = ({
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="capacity">Keywords</Label>
+              <Input
+                id="keywords"
+                name="keywords"
+                value={formData.keywords?.join(", ") ?? ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    keywords: e.target.value.split(",").map((k) => k.trim()),
+                  })
+                }
+                placeholder="react, nextjs, frontend"
+              />
+            </div>
           </div>
-
-          {/* <div className="space-y-1">
-          <Label htmlFor="instructor">Instructor</Label>
-          <Input id="instructor" placeholder="Enter instructor name" />
-        </div> */}
         </div>
-        {/* Upload Section */}
-        <div className="space-y-2 border border-dashed border-gray-300 p-4 rounded-md text-center">
-          <Label
-            htmlFor="file-upload"
-            className="flex flex-col items-center gap-2 cursor-pointer"
-          >
-            <UploadCloud className="w-8 h-8 text-gray-500" />
-            <span className="text-sm text-gray-600">
-              Click to upload event image
-            </span>
-            <span className="text-xs text-muted-foreground">
-              PNG, JPG or GIF up to 10MB
-            </span>
-            <Input
-              id="file-upload"
-              type="file"
-              name="file"
-              // onChange={(e) => {
-              //   const selectedFile = e.target.files[0];
-              //   if (!selectedFile) return;
-              //   setFile(selectedFile);
-              //   console.log("Selected file:", selectedFile.name);
-              //   // Optional: Add validation or other logic
-              //   if (selectedFile && !selectedFile.type.startsWith("image/")) {
-              //     alert("Please select an image file.");
-              //   }
-              // }}
-              className="hidden"
-              accept="image/*"
-            />
-          </Label>
-        </div>
+        {!file?.name ? (
+          <div className="space-y-2 border border-dashed border-gray-300 p-4 rounded-md text-center">
+            <Label
+              htmlFor="file-upload"
+              className="flex flex-col items-center gap-2 cursor-pointer"
+            >
+              <UploadCloud className="w-8 h-8 text-gray-500" />
+              <span className="text-sm text-gray-600">
+                Click to upload event image
+              </span>
+              <span className="text-xs text-muted-foreground">
+                PNG, JPG or GIF up to 10MB
+              </span>
+              <Input
+                id="file-upload"
+                type="file"
+                name="file"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const selectedFile = e.target.files?.[0];
+                  if (!selectedFile) return;
 
-        {/* Status Radio Group */}
+                  if (!selectedFile.type.startsWith("image/")) {
+                    alert("Please select an image file.");
+                    return;
+                  }
+
+                  setFile(selectedFile);
+                  console.log("Selected file:", selectedFile.name);
+                }}
+                className="hidden"
+                accept="image/*"
+              />
+            </Label>
+          </div>
+        ) : (
+          <div className="relative space-y-2 border border-dashed border-gray-300 p-4 rounded-md text-center">
+            {file.name && (
+              <>
+                <img
+                  src={URL.createObjectURL(file)}
+                  className="w-full aspect-video object-cover"
+                  alt={file.name}
+                />
+                <Button
+                  size={"icon"}
+                  variant={"outline"}
+                  className="absolute top-2 right-2 rounded-full border-0 p-1"
+                  onClick={() => setFile(null)}
+                >
+                  <XIcon className="w-3 h-3 shrink-0" />
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label className="text-sm font-medium">Event Status</Label>
           <RadioGroup
-            defaultValue="draft"
-            className="flex gap-4"
+            value={formData.status}
+            className="flex flex-wrap gap-4"
             onValueChange={(value) =>
               setFormData({
                 ...formData,
-                status: value as "draft" | "published",
+                status: value as EventStatus,
               })
             }
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="draft" id="draft" />
-              <Label htmlFor="draft">Draft</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="published" id="published" />
-              <Label htmlFor="published">Publish</Label>
-            </div>
+            {["upcoming", "today", "draft", "completed", "published"].map(
+              (status) => (
+                <div key={status} className="flex items-center space-x-2">
+                  <RadioGroupItem value={status} id={status} />
+                  <Label htmlFor={status} className="capitalize">
+                    {status}
+                  </Label>
+                </div>
+              )
+            )}
           </RadioGroup>
         </div>
 
@@ -686,11 +935,400 @@ const CreateEventModal = ({
           </Button>
           <Button
             onClick={() => {
-              setCreateModalOpen(false);
               console.log({ formData });
+              setCreateModalOpen(false);
+              onCreate();
+              setFormData({
+                title: "",
+                type: "",
+                description: "",
+                date: "",
+                time: "",
+                duration: "",
+                capacity: "",
+                course: "",
+                instructor: "",
+                image: null as File | null,
+                status: "draft" as "draft" | "published",
+                location: "online",
+                isPaid: true,
+                price: "",
+                keywords: [],
+              });
             }}
           >
             Create Event
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+function DeleteEventDialog({
+  deleteEventOpen,
+  setDeleteEventOpen,
+  onDelete,
+  isDeleting,
+}: {
+  onDelete: () => void;
+  deleteEventOpen: boolean;
+  setDeleteEventOpen: (value: boolean) => void;
+  isDeleting: boolean;
+}) {
+  return (
+    <Dialog open={deleteEventOpen} onOpenChange={setDeleteEventOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Delete Event</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this event? This action cannot be
+            undone.
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter>
+          <Button
+            variant="destructive"
+            disabled={isDeleting}
+            onClick={() => onDelete()}
+          >
+            Confirm Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const UpdateEventModal = ({
+  updateEventModalOpen,
+  setUpdateEventModalOpen,
+  handleOnChange,
+  updateEvent,
+  setUpdateEvent,
+  file,
+  setFile,
+  onUpdate,
+}: {
+  updateEventModalOpen: boolean;
+  setUpdateEventModalOpen: (value: boolean) => void;
+  handleOnChange: (
+    value: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  updateEvent: IEvent;
+  setUpdateEvent: (value: IEvent) => void;
+  file: File | null;
+  setFile: (value: File | null) => void;
+  onUpdate: () => void;
+}) => {
+  return (
+    <Dialog
+      open={updateEventModalOpen}
+      onOpenChange={(value) => {
+        setUpdateEvent(initialEventState);
+        setFile(null);
+        setUpdateEventModalOpen(value);
+      }}
+    >
+      <DialogContent className="w-[90%] max-w-2xl h-[90vh] overflow-y-scroll">
+        <DialogHeader>
+          <DialogTitle>Update Event</DialogTitle>
+          <DialogDescription>
+            Add a new event to your calendar
+          </DialogDescription>
+        </DialogHeader>
+        <div className="relative space-y-2 border border-dashed border-gray-300 p-4 rounded-md text-center">
+          {updateEvent.thumbnailUrl && (
+            <>
+              <img
+                src={updateEvent.thumbnailUrl}
+                className="w-full aspect-video object-cover"
+                alt={updateEvent.title}
+              />
+            </>
+          )}
+        </div>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="title">Event Title</Label>
+              <Input
+                id="title"
+                name="title"
+                value={updateEvent.title}
+                onChange={handleOnChange}
+                placeholder="Enter event title"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="type">Event Type</Label>
+              <Select
+                onValueChange={(value) =>
+                  setUpdateEvent({ ...updateEvent, type: value as EventType })
+                }
+                value={updateEvent.type}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eventTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={updateEvent.description}
+              onChange={handleOnChange}
+              placeholder="Enter event description"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                name="date"
+                value={new Date(updateEvent.date).toLocaleString()}
+                onChange={handleOnChange}
+                type="date"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="time">Time</Label>
+              <Input
+                id="time"
+                name="time"
+                value={updateEvent.time}
+                onChange={handleOnChange}
+                placeholder="10: 30 AM"
+                type="text"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="duration">Duration</Label>
+              <Input
+                id="duration"
+                name="duration"
+                value={updateEvent.duration}
+                onChange={handleOnChange}
+                placeholder="2 hours"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="date">Location</Label>
+              <Select
+                onValueChange={(value) =>
+                  setUpdateEvent({ ...updateEvent, location: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["online", "offline"].map((loca) => (
+                    <SelectItem key={loca} value={loca}>
+                      {loca}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="time">Price</Label>
+              <Input
+                id="price"
+                name="price"
+                value={updateEvent.price as number}
+                onChange={handleOnChange}
+                type="number"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="duration">Paid?</Label>
+              <Select
+                onValueChange={(value) =>
+                  setUpdateEvent({
+                    ...updateEvent,
+                    isPaid: value === "paid" ? true : false,
+                  })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["paid", "free"].map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="capacity">Max Capacity</Label>
+              <Input
+                id="capacity"
+                name="capacity"
+                value={updateEvent.capacity as number}
+                onChange={handleOnChange}
+                type="number"
+                placeholder="100"
+              />
+            </div>
+            {/* <div className="space-y-1">
+              <Label htmlFor="course">
+                Associated Course{" "}
+                <span className="max-sm:hidden">(Optional)</span>
+              </Label>
+              <Select
+                onValueChange={(value) =>
+                  setUpdateEvent({ ...updateEvent, course: value as  })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map((course) => (
+                    <SelectItem key={course} value={course}>
+                      {course}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div> */}
+            <div className="space-y-1">
+              <Label htmlFor="capacity">Keywords</Label>
+              <Input
+                id="keywords"
+                name="keywords"
+                value={updateEvent.keywords?.join(", ") ?? ""}
+                onChange={(e) =>
+                  setUpdateEvent({
+                    ...updateEvent,
+                    keywords: e.target.value.split(",").map((k) => k.trim()),
+                  })
+                }
+                placeholder="react, nextjs, frontend"
+              />
+            </div>
+          </div>
+        </div>
+        {!file?.name ? (
+          <div className="space-y-2 border border-dashed border-gray-300 p-4 rounded-md text-center">
+            <Label
+              htmlFor="file-upload"
+              className="flex flex-col items-center gap-2 cursor-pointer"
+            >
+              <UploadCloud className="w-8 h-8 text-gray-500" />
+              <span className="text-sm text-gray-600">
+                Click to upload event image
+              </span>
+              <span className="text-xs text-muted-foreground">
+                PNG, JPG or GIF up to 10MB
+              </span>
+              <Input
+                id="file-upload"
+                type="file"
+                name="file"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const selectedFile = e.target.files?.[0];
+                  if (!selectedFile) return;
+
+                  if (!selectedFile.type.startsWith("image/")) {
+                    alert("Please select an image file.");
+                    return;
+                  }
+
+                  setFile(selectedFile);
+                  console.log("Selected file:", selectedFile.name);
+                }}
+                className="hidden"
+                accept="image/*"
+              />
+            </Label>
+          </div>
+        ) : (
+          <div className="relative space-y-2 border border-dashed border-gray-300 p-4 rounded-md text-center">
+            {file?.name && (
+              <>
+                <img
+                  src={URL.createObjectURL(file)}
+                  className="w-full aspect-video object-cover"
+                  alt={updateEvent.title}
+                />
+                <Button
+                  size={"icon"}
+                  variant={"outline"}
+                  className="absolute top-2 right-2 rounded-full border-0 p-1"
+                  onClick={() => setFile(null)}
+                >
+                  <XIcon className="w-3 h-3 shrink-0" />
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Event Status</Label>
+          <RadioGroup
+            value={updateEvent.status}
+            className="flex flex-wrap gap-4"
+            onValueChange={(value) =>
+              setUpdateEvent({
+                ...updateEvent,
+                status: value as EventStatus,
+              })
+            }
+          >
+            {["upcoming", "today", "draft", "completed", "published"].map(
+              (status) => (
+                <div key={status} className="flex items-center space-x-2">
+                  <RadioGroupItem value={status} id={status} />
+                  <Label htmlFor={status} className="capitalize">
+                    {status}
+                  </Label>
+                </div>
+              )
+            )}
+          </RadioGroup>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setUpdateEventModalOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              console.log({ updateEvent });
+              setUpdateEventModalOpen(false);
+              onUpdate();
+              setUpdateEvent(initialEventState);
+            }}
+          >
+            Update Event
           </Button>
         </DialogFooter>
       </DialogContent>

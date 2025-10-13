@@ -10,10 +10,16 @@ import Footer from "@/components/root/Footer";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { IEvent } from "@/redux/slices/events";
+import RegisterModal from "./RegisterModal";
+import AuthComponent from "../auth/AuthComponent";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const EventDetail = ({ event_slug }: { event_slug: string }) => {
   const [event, setEvent] = useState<IEvent>({} as IEvent);
   const events = useSelector((state: RootState) => state.events.events);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const pathname = usePathname();
 
   const eventData = {
     id: "live-ai-business-transformation",
@@ -47,6 +53,7 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
         console.log({ error: res.message });
         return;
       }
+      console.log({ event: res.event });
 
       setEvent(res.event);
       console.log({ current_event: res.event });
@@ -57,10 +64,10 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
 
   useEffect(() => {
     fetch_course();
-  }, [event_slug]);
+  }, [event_slug, events]);
 
-  if(!event) {
-    return <>Loading...</>
+  if (!event) {
+    return <>Loading...</>;
   }
 
   return (
@@ -161,19 +168,36 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                           }}
                         ></div>
                       </div>
-                      <Button
+                      <AuthComponent
+                        signOut={
+                          <>
+                            <Button
+                              className="w-full bg-gradient-primary hover:opacity-90 shadow-glow"
+                              onClick={() => setRegisterModalOpen(true)}
+                            >
+                              <ExternalLink className="w-4 h-4 mr-2" />
+                              {eventData.ctaText}
+                            </Button>
+                          </>
+                        }
+                        signIn={
+                          <>
+                            <Link href={`/sign-in?redirect=${pathname}`}>
+                              <Button className="w-full bg-gradient-primary hover:opacity-90 shadow-glow">
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                {eventData.ctaText}
+                              </Button>
+                            </Link>
+                          </>
+                        }
+                      />
+                      {/* <Button
                         className="w-full bg-gradient-primary hover:opacity-90 shadow-glow"
-                        asChild
+                        onClick={() => setRegisterModalOpen(true)}
                       >
-                        <a
-                          href={eventData.ctaUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          {eventData.ctaText}
-                        </a>
-                      </Button>
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        {eventData.ctaText}
+                      </Button> */}
                     </div>
                   </div>
 
@@ -237,7 +261,11 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
           </div>
         </section>
       </main>
-
+      <RegisterModal
+        eventId={event.id}
+        registerModalOpen={registerModalOpen}
+        setRegisterModalOpen={setRegisterModalOpen}
+      />
       <Footer />
     </div>
   );

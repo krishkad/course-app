@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
         slug,
         instructorId: token_data.id,
         thumbnailUrl,
+        tag: courseDetail.tag,
         category: courseDetail.category,
         keywords: courseDetail.keywords,
         students: courseDetail.students ? courseDetail.students : null,

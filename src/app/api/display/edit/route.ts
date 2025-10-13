@@ -5,10 +5,14 @@ import prisma from "@/lib/prisma";
 
 export async function PUT(req: NextRequest) {
   try {
-    const { view_courses, view_events, display_id } = await req.json();
+    const body = await req.json();
     const token = req.cookies.get("course-app-authentication")?.value;
-
-    if (!view_courses || !view_events || !display_id) {
+    console.log({ body });
+    if (
+      typeof body.view_courses !== "boolean" ||
+      typeof body.view_events !== "boolean" ||
+      !body.id
+    ) {
       return NextResponse.json({
         success: false,
         message: "missing required fields",
@@ -24,7 +28,7 @@ export async function PUT(req: NextRequest) {
       process.env.NEXTAUTH_SECRET as string
     ) as CustomJWTPayload;
 
-    if (!token_data.id || token_data.role === "ADMIN") {
+    if (!token_data.id || token_data.role !== "ADMIN") {
       return NextResponse.json({
         success: false,
         message: "not authenticated",
@@ -40,8 +44,8 @@ export async function PUT(req: NextRequest) {
     }
 
     const updated_display = await prisma.display.update({
-      where: { id: admin_exist.id },
-      data: { view_courses, view_events },
+      where: { id: body.id },
+      data: { view_courses: body.view_courses, view_events: body.view_events },
     });
 
     if (!updated_display) {
@@ -54,7 +58,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "ok",
-      display: updated_display,
+      data: updated_display,
     });
   } catch (error) {
     console.log("ERROR WHILE EDITTING DISPLAY: ", error);

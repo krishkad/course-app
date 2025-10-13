@@ -1,5 +1,7 @@
-import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react"
-import { Badge } from "@/components/ui/badge"
+"use client";
+
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -7,16 +9,28 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { displayRazorpayAmount } from "@/lib/utils";
 
 export function SectionCards() {
+  const all_transactions = useSelector(
+    (state: RootState) => state.payments.payments
+  );
+  const all_students = useSelector(
+    (state: RootState) => state.students.students
+  );
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <Card className="@container/card w-full gap-2">
         <CardHeader>
           <CardDescription>Total Revenue</CardDescription>
           <CardTitle className="text-xl font-semibold tabular-nums @md/card:text-2xl @lg/card:text-3xl">
-            $1,250.00
+            $
+            {displayRazorpayAmount(
+              all_transactions.reduce((total, item) => total + item.amount, 0)
+            )}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -38,7 +52,7 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>New Customers</CardDescription>
           <CardTitle className="text-xl font-semibold tabular-nums @md/card:text-2xl @lg/card:text-3xl">
-            1,234
+            {all_students.filter((student) => student.role === "STUDENT").length}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -97,5 +111,5 @@ export function SectionCards() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { displayRazorpayAmount } from "@/lib/utils";
 import { ICourse, remove_course } from "@/redux/admin/slice/all-courses";
 import { RootState } from "@/redux/store";
 import {
@@ -26,12 +27,14 @@ import {
   DollarSign,
   Edit,
   Eye,
+  HandCoinsIcon,
   MoreHorizontal,
   Plus,
   Search,
   Star,
   Trash2,
   Users,
+  WalletIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -107,9 +110,11 @@ export default function CoursesPage() {
   const CourseCard = ({
     course,
     enrolled,
+    revenue,
   }: {
     course: ICourse;
     enrolled: number;
+    revenue: number;
   }) => (
     <Card className="group hover:shadow-card-hover transition-all duration-200 py-0">
       <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
@@ -185,6 +190,10 @@ export default function CoursesPage() {
               <span className="text-sm">{course.rating}</span>
             </div>
           )}
+          <div className="flex items-center">
+            <WalletIcon className="w-4 h-4 text-green-600 mr-1" />
+            <span className="text-sm">{displayRazorpayAmount(revenue)}</span>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -302,18 +311,29 @@ export default function CoursesPage() {
           </div>
           <TabsContent value="published" className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {publishedCourses.map((course, i) => {
+              {publishedCourses.slice().reverse().map((course, i) => {
                 const enrolled = payments.reduce((total, pay) => {
                   const matches = pay.purchases.filter(
                     (purchase) => purchase.courseId === course.id
                   ).length;
                   return total + matches;
                 }, 0);
+                const revenue = payments.reduce((total, payment, index) => {
+                  const courseRevenue = payment.purchases
+                    .filter((purchase) => purchase.courseId === course.id)
+                    .reduce((sum, purchase) => sum + payments[index].amount, 0);
+
+                  return total + courseRevenue;
+                }, 0);
+
+                console.log({ revenue });
+
                 return (
                   <CourseCard
                     key={course.id}
                     course={course}
                     enrolled={enrolled}
+                    revenue={revenue}
                   />
                 );
               })}
@@ -329,11 +349,20 @@ export default function CoursesPage() {
                   ).length;
                   return total + matches;
                 }, 0);
+
+                const revenue = payments.reduce((total, payment, index) => {
+                  const courseRevenue = payment.purchases
+                    .filter((purchase) => purchase.courseId === course.id)
+                    .reduce((sum, purchase) => sum + payments[index].amount, 0);
+
+                  return total + courseRevenue;
+                }, 0);
                 return (
                   <CourseCard
                     key={course.id}
                     enrolled={enrolled}
                     course={course}
+                    revenue={revenue}
                   />
                 );
               })}

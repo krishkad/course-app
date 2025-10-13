@@ -43,6 +43,7 @@ import { format } from "date-fns";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { User } from "@prisma/client";
+import { getPaidStudentsCount } from "@/lib/utils";
 
 // Mock data
 const students = [
@@ -108,8 +109,6 @@ const students = [
   },
 ];
 
-
-
 export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
@@ -138,13 +137,16 @@ export default function StudentsPage() {
     }
   }, [all_students]);
 
-
   const stats = [
-  { label: "Total Students", value: all_students.length, change: "+12.5%" },
-  { label: "Active This Week", value: "1,234", change: "+5.2%" },
-  { label: "Premium Members", value: "892", change: "+8.1%" },
-  { label: "Course Completions", value: "1,567", change: "+15.3%" },
-];
+    {
+      label: "Total Students",
+      value: all_students.filter((student) => student.role !== "ADMIN").length,
+      change: "+12.5%",
+    },
+    { label: "Active This Week", value: "1,234", change: "+5.2%" },
+    { label: "Premium Members", value: `${getPaidStudentsCount(all_students, payments)}`, change: "+8.1%" },
+    { label: "Course Completions", value: "1,567", change: "+15.3%" },
+  ];
 
   return (
     <div className="w-full">
@@ -241,52 +243,61 @@ export default function StudentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {display_students.map((student) => {
-                    if (student.role === "ADMIN") return;
-                    // const student_course = all_courses.find((course) => student )
-                    const payment_count = payments.filter(
-                      (payment) => student.id === payment.userId
-                    ).length;
-                    return (
-                      <TableRow key={student.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage
-                                src={student.fname}
-                                alt={student.fname}
-                              />
-                              <AvatarFallback>
-                                {student.fname.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium text-foreground">
-                                {student.fname} {student.lname}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {student.email}
+                  {display_students
+                    .slice()
+                    .reverse()
+                    .map((student) => {
+                      if (student.role === "ADMIN") return;
+                      // const student_course = all_courses.find((course) => student )
+                      const payment_count = payments.filter(
+                        (payment) => student.id === payment.userId
+                      ).length;
+                      return (
+                        <TableRow
+                          key={student.id}
+                          className="hover:bg-muted/50"
+                        >
+                          <TableCell>
+                            <div className="flex items-center space-x-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage
+                                  src={student.fname}
+                                  alt={student.fname}
+                                />
+                                <AvatarFallback>
+                                  {student.fname.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-medium text-foreground">
+                                  {student.fname} {student.lname}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {student.email}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              payment_count <= 0 ? "secondary" : "default"
-                            }
-                          >
-                            {/* {student.type} */}
-                            {payment_count <= 0 ? "Free" : "Premium"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{student.profession}</TableCell>
-                        <TableCell>{payment_count ?? 0}</TableCell>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                payment_count <= 0 ? "secondary" : "default"
+                              }
+                            >
+                              {/* {student.type} */}
+                              {payment_count <= 0 ? "Free" : "Premium"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{student.profession}</TableCell>
+                          <TableCell>{payment_count ?? 0}</TableCell>
 
-                        <TableCell className="text-muted-foreground">
-                          {format(new Date(student.createdAt), "MMM dd yyyy - h:mm a")}
-                        </TableCell>
-                        {/* <TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {format(
+                              new Date(student.createdAt),
+                              "MMM dd yyyy - h:mm a"
+                            )}
+                          </TableCell>
+                          {/* <TableCell>
                         <Badge
                           variant={
                             student.status === "active"
@@ -297,28 +308,28 @@ export default function StudentsPage() {
                           {student.status}
                         </Badge>
                       </TableCell> */}
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Profile
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <UserMinus className="w-4 h-4 mr-2" />
-                                Remove Student
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  View Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive">
+                                  <UserMinus className="w-4 h-4 mr-2" />
+                                  Remove Student
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </div>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -25,13 +25,23 @@ import {
   Edit,
   LogOutIcon,
   UserIcon,
+  LoaderIcon,
 } from "lucide-react";
 import Navigation from "@/components/root/Navigation";
 import Footer from "@/components/root/Footer";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { Payment } from "@prisma/client";
+import { Course, Lesson, Payment } from "@prisma/client";
+import { ICourse } from "@/redux/slices/courses";
+import { toast } from "sonner";
+import { displayRazorpayAmount } from "@/lib/utils";
+import { format } from "date-fns";
+import Link from "next/link";
+
+interface PaymentCourseId extends Payment {
+  courseId: string;
+}
 
 const Profile = () => {
   // Mock user data - replace with actual data from backend
@@ -45,9 +55,14 @@ const Profile = () => {
     bio: "Passionate learner focused on technology and personal development",
   });
   const user = useSelector((state: RootState) => state.user.user);
-  const [payments, setPayments] = useState<Payment[]>([]);
   const courses = useSelector((state: RootState) => state.courses.courses);
-  const lessons = useSelector((state: RootState) => state.lessons.lessons);
+  const lessonsProgress = useSelector(
+    (state: RootState) => state.lessonsProgress.lessonProgress
+  );
+  const [payments, setPayments] = useState<PaymentCourseId[]>([]);
+  const [purchased_courses, setPurchased_courses] = useState<ICourse[]>([]);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const router = useRouter();
 
   const [purchasedCourses] = useState([
@@ -114,29 +129,76 @@ const Profile = () => {
   ]);
 
   useEffect(() => {
-    const fetch_lessons = async () => {
-      console.log({userId: user?.id})
-      const response = await fetch(
-        `/api/payment/get-user-payments?userId=${user?.id}`,
-        {
-          method: "GET",
-          credentials: "include",
+    const fetch_profile_data = async () => {
+      if (!user) return;
+
+      try {
+        const response = await fetch(
+          `/api/payment/get-user-payments?userId=${user.id}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        const res = await response.json();
+
+        if (!res.success) {
+          console.log(res.message);
+          toast.warning(res.message);
+          return;
         }
-      );
 
-      const res = await response.json();
+        setPayments(res.data);
 
-      if (!res.success) {
-        console.log(res.message);
-        return;
+        const payment_set = new Set(
+          res.data.map((pay: PaymentCourseId) => pay.courseId)
+        );
+
+        const published_courses = courses.filter((course) =>
+          payment_set.has(course.id)
+        );
+        console.log({ published_courses });
+        setPurchased_courses(published_courses);
+
+        const courses_lessons = (
+          await Promise.all(
+            res.data.map(async (pay: PaymentCourseId) => {
+              try {
+                const response = await fetch(
+                  `/api/course/get-course?courseId=${pay.courseId}&userId=${user.id}`,
+                  {
+                    method: "GET",
+                    credentials: "include",
+                  }
+                );
+
+                const courseRes = await response.json();
+
+                if (!courseRes.success) {
+                  console.log(courseRes.message);
+                  toast.warning(courseRes.message);
+                  return [];
+                }
+
+                return courseRes.lessons || [];
+              } catch (error) {
+                console.error("Error fetching course:", error);
+                return [];
+              }
+            })
+          )
+        ).flat();
+
+        setLessons(courses_lessons);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+        toast.error("Failed to fetch profile data.");
       }
-
-      setPayments(res.data);
-      console.log({ user_payments: res.data });
     };
 
-    fetch_lessons();
-  }, [user]);
+    fetch_profile_data();
+  }, [user, courses]);
 
   const getStatusColor = (status: string) => {
     return status === "Completed" ? "default" : "secondary";
@@ -151,6 +213,7 @@ const Profile = () => {
   };
 
   const handleLogOut = async () => {
+    setIsLoggingOut(true);
     try {
       const response = await fetch("/api/auth/sign-out", {
         method: "GET",
@@ -168,8 +231,16 @@ const Profile = () => {
       router.refresh();
     } catch (error) {
       console.log("error while log out: ", error);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
+
+  useEffect(() => {
+    if (purchased_courses || lessons || lessonsProgress) {
+      console.log({ purchased_courses, lessons, lessonsProgress });
+    }
+  }, [purchased_courses, lessons, lessonsProgress]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -224,9 +295,19 @@ const Profile = () => {
                   variant="outline"
                   className="gap-2 mt-4 md:mt-0"
                   onClick={handleLogOut}
+                  disabled={isLoggingOut}
                 >
-                  <LogOutIcon className="h-4 w-4" />
-                  Log Out
+                  {isLoggingOut ? (
+                    <>
+                      <LoaderIcon className="w-4 h-4 shrink-0 animate-spin" />
+                      Logging out
+                    </>
+                  ) : (
+                    <>
+                      <LogOutIcon className="h-4 w-4" />
+                      Log Out
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
@@ -302,7 +383,12 @@ const Profile = () => {
                   <p className="text-sm text-muted-foreground mb-1">
                     Total Spent
                   </p>
-                  <p className="text-3xl font-bold text-foreground">$527</p>
+                  <p className="text-3xl font-bold text-foreground">
+                    $
+                    {displayRazorpayAmount(
+                      payments.reduce((total, item) => total + item.amount, 0)
+                    )}
+                  </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
                   <CreditCard className="h-6 w-6 text-purple-600" />
@@ -328,59 +414,71 @@ const Profile = () => {
           </TabsList>
 
           <TabsContent value="courses" className="space-y-4 md:space-y-6">
-            {purchasedCourses.map((course) => (
-              <Card
-                key={course.id}
-                className="border-none shadow-md hover:shadow-xl transition-all overflow-hidden"
-              >
-                <div className="flex flex-col md:flex-row">
-                  <div className="w-full md:w-48 lg:w-64 h-48 md:h-auto bg-muted flex-shrink-0">
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+            {purchased_courses.map((course) => {
+              const less = lessons.filter(
+                (lesson: Lesson) => lesson?.courseId === course.id
+              );
+              const progress = lessonsProgress.filter(
+                (prog) => prog.courseId === course.id
+              );
+              return (
+                <Card
+                  key={course.id}
+                  className="border-none shadow-md hover:shadow-xl transition-all overflow-hidden"
+                >
+                  <div className="flex flex-col md:flex-row">
+                    <div className="w-full md:w-48 lg:w-64 h-48 md:h-auto bg-muted flex-shrink-0">
+                      <img
+                        src={course?.thumbnailUrl}
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                  <div className="flex-1 p-6 md:p-8">
-                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <Badge variant={getStatusColor(course.status)}>
-                            {course.status}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            Enrolled {course.enrolled}
+                    <div className="flex-1 p-6 md:p-8">
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-4">
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <Badge variant={getStatusColor("completed")}>
+                              completed
+                            </Badge>
+                            <span className="text-sm text-muted-foreground"></span>
+                          </div>
+                          <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+                            {course.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            Instructor: {course.instructor}
+                          </p>
+                        </div>
+                        <Link href={`/courses/${course.slug}`}>
+                          <Button className="w-full lg:w-auto cursor-pointer">
+                            Continue Learning
+                          </Button>
+                        </Link>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Progress: {progress.length} of {less.length} lessons
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {Math.round((progress.length / less.length) * 100)}%
                           </span>
                         </div>
-                        <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
-                          {course.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Instructor: {course.instructor}
-                        </p>
+                        <Progress
+                          value={Math.round(
+                            (progress.length / less.length) * 100
+                          )}
+                          className="h-2"
+                        />
                       </div>
-                      <Button className="w-full lg:w-auto">
-                        Continue Learning
-                      </Button>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Progress: {course.lessonsCompleted} of{" "}
-                          {course.totalLessons} lessons
-                        </span>
-                        <span className="font-semibold text-foreground">
-                          {course.progress}%
-                        </span>
-                      </div>
-                      <Progress value={course.progress} className="h-2" />
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </TabsContent>
 
           <TabsContent value="transactions" className="space-y-4">
@@ -412,47 +510,53 @@ const Profile = () => {
                         <th className="text-left p-4 font-semibold text-sm">
                           Date
                         </th>
-                        <th className="text-left p-4 font-semibold text-sm">
-                          Method
-                        </th>
+
                         <th className="text-left p-4 font-semibold text-sm">
                           Status
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {transactions.map((transaction) => (
-                        <tr
-                          key={transaction.id}
-                          className="border-b hover:bg-muted/30 transition-colors"
-                        >
-                          <td className="p-4">
-                            <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
-                              {transaction.id}
-                            </code>
-                          </td>
-                          <td className="p-4 font-medium">
-                            {transaction.course}
-                          </td>
-                          <td className="p-4 font-semibold text-primary">
-                            {transaction.amount}
-                          </td>
-                          <td className="p-4 text-muted-foreground">
-                            {transaction.date}
-                          </td>
-                          <td className="p-4 text-muted-foreground">
-                            {transaction.method}
-                          </td>
-                          <td className="p-4">
-                            <Badge
-                              variant="default"
-                              className="bg-green-500/10 text-green-700 hover:bg-green-500/20"
-                            >
-                              {transaction.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
+                      {payments.map((transaction, i) => {
+                        const pay = payments[i];
+                        const trans_course = purchased_courses.filter(
+                          (cour) => cour.id === pay?.courseId
+                        );
+                        return (
+                          <tr
+                            key={transaction.id}
+                            className="border-b hover:bg-muted/30 transition-colors"
+                          >
+                            <td className="p-4">
+                              <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                                TX-{transaction.id.slice(0, 6)}
+                              </code>
+                            </td>
+                            <td className="p-4 font-medium">
+                              {trans_course[0]?.title}
+                            </td>
+                            <td className="p-4 font-semibold text-primary">
+                              {payments[i]?.amount
+                                ? `$${displayRazorpayAmount(
+                                    payments[i].amount
+                                  )}`
+                                : transaction.amount}
+                            </td>
+                            <td className="p-4 text-muted-foreground">
+                              {format(transaction?.createdAt, "MMM, dd yyyy")}
+                            </td>
+
+                            <td className="p-4">
+                              <Badge
+                                variant="default"
+                                className="bg-green-500/10 text-green-700 hover:bg-green-500/20"
+                              >
+                                {transaction.status}
+                              </Badge>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -461,50 +565,54 @@ const Profile = () => {
 
             {/* Mobile Card View */}
             <div className="md:hidden space-y-4">
-              {transactions.map((transaction) => (
-                <Card key={transaction.id} className="border-none shadow-md">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg mb-1">
-                          {transaction.course}
-                        </CardTitle>
-                        <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                          {transaction.id}
-                        </code>
+              {payments.map((transaction, i) => {
+                const pay = payments[i];
+                const trans_course = purchased_courses.filter(
+                  (cour) => cour.id === pay?.courseId
+                );
+                return (
+                  <Card key={transaction.id} className="border-none shadow-md">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg mb-1">
+                            {trans_course[0]?.title}
+                          </CardTitle>
+                          <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                            {transaction.id}
+                          </code>
+                        </div>
+                        <Badge
+                          variant="default"
+                          className="bg-green-500/10 text-green-700"
+                        >
+                          {transaction.status}
+                        </Badge>
                       </div>
-                      <Badge
-                        variant="default"
-                        className="bg-green-500/10 text-green-700"
-                      >
-                        {transaction.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">
-                        Amount
-                      </span>
-                      <span className="font-semibold text-lg text-primary">
-                        {transaction.amount}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">
-                        Date
-                      </span>
-                      <span className="text-sm">{transaction.date}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">
-                        Payment Method
-                      </span>
-                      <span className="text-sm">{transaction.method}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">
+                          Amount
+                        </span>
+                        <span className="font-semibold text-lg text-primary">
+                          {payments[i]?.amount
+                            ? `$${displayRazorpayAmount(payments[i].amount)}`
+                            : transaction.amount}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">
+                          Date
+                        </span>
+                        <span className="text-sm">
+                          {format(transaction.createdAt, "MMM, dd yyyy")}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
         </Tabs>

@@ -21,12 +21,12 @@ export async function DELETE(req: NextRequest) {
       process.env.NEXTAUTH_SECRET as string
     ) as CustomJWTPayload;
 
-    if (!token_data.id || token_data.role === "ADMIN") {
+    if (!token_data.id || token_data.role !== "ADMIN") {
       return NextResponse.json({ success: false, message: "not authorized" });
     }
 
     const user = await prisma.event.findFirst({
-      where: { id: eventId, organizerId: token_data.id },
+      where: { id: eventId},
     });
 
     if (!user) {
@@ -34,7 +34,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     const delete_event = await prisma.event.delete({
-      where: { id: eventId, organizerId: user.id },
+      where: { id: eventId},
     });
 
     if (!delete_event) {

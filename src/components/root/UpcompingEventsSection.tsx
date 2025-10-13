@@ -11,7 +11,7 @@ import { format } from "date-fns";
 
 const UpcomingEventsSection = () => {
   const events = useSelector((state: RootState) => state.events.events);
-
+  const display = useSelector((state: RootState) => state.display.display);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -27,9 +27,10 @@ const UpcomingEventsSection = () => {
   };
 
   useEffect(() => {
-    console.log({ events });
-  }, [events]);
+    console.log({ events, display });
+  }, [events, display]);
 
+  if (!display.view_events) return null;
   return (
     <section className="py-24 bg-gradient-secondary">
       <div className="container mx-auto px-4">
@@ -51,9 +52,7 @@ const UpcomingEventsSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           {events.map((event, index) => (
             <Link href={`/events/${event.slug}`} key={index}>
-              <div
-                className="group bg-background rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20"
-              >
+              <div className="group bg-background rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
                 {/* Event Image */}
                 <div className="relative overflow-hidden h-48">
                   <img

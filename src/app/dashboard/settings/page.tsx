@@ -1,39 +1,4 @@
 "use client";
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,22 +10,54 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Settings,
-  Upload,
-  Save,
-  Plus,
-  Trash2,
-  Shield,
-  Bell,
-  Palette,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { initializeDisplay } from "@/redux/slices/display";
+import { RootState } from "@/redux/store";
+import { Display } from "@prisma/client";
+import {
   CreditCard,
   Globe,
-  Users,
   Mail,
-  Key,
-  Youtube,
+  Palette,
+  Plus,
+  Save,
+  Trash2,
+  Users,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 // Mock data
 const admins = [
@@ -118,7 +115,49 @@ const emailTemplates = [
 
 export default function SettingsPage() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const students = useSelector((state: RootState) => state.students.students);
+  const display = useSelector(
+    (state: RootState) => state.display_state.display
+  );
+  const [display_show, setDisplay_show] = useState<Display>({} as Display);
+  const [isDisplaySaving, setIsDisplaySaving] = useState(false);
 
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (display) {
+      setDisplay_show(display);
+      console.log({ display });
+    }
+  }, [display]);
+
+  const handleDisplaySave = async () => {
+    try {
+      setIsDisplaySaving(true);
+      const response = await fetch("/api/display/edit", {
+        method: "PUT",
+        credentials: "include",
+        body: JSON.stringify({
+          view_courses: display_show.view_courses,
+          id: display_show.id,
+          view_events: display_show.view_events,
+        }),
+      });
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        return;
+      }
+
+      dispatch(initializeDisplay(res.data));
+      toast.success("updated successfully");
+    } catch (error) {
+      console.log("error saving display changes: ", error);
+    } finally {
+      setIsDisplaySaving(false);
+    }
+  };
   return (
     <div className="w-full">
       <div className="max-w-7xl mx-auto px-4 space-y-6 pt-8">
@@ -257,7 +296,17 @@ export default function SettingsPage() {
                         Enable/disable the courses page visibility
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      defaultChecked
+                      name="view_courses"
+                      checked={display_show?.view_courses}
+                      onCheckedChange={(value) =>
+                        setDisplay_show({
+                          ...display_show,
+                          view_courses: value,
+                        })
+                      }
+                    />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
                     <div>
@@ -266,7 +315,14 @@ export default function SettingsPage() {
                         Enable/disable the events page visibility
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      defaultChecked
+                      name="view_events"
+                      checked={display_show?.view_events}
+                      onCheckedChange={(value) =>
+                        setDisplay_show({ ...display_show, view_events: value })
+                      }
+                    />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
                     <div>
@@ -280,9 +336,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button className="w-full sm:w-auto">
+                  <Button
+                    className="w-full sm:w-auto"
+                    onClick={handleDisplaySave}
+                    disabled={isDisplaySaving}
+                  >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Display Settings
+                    {isDisplaySaving ? "Saving..." : "Save Display Settings"}
                   </Button>
                 </div>
               </CardContent>
@@ -410,83 +470,87 @@ export default function SettingsPage() {
                         <TableHead className="min-w-[200px]">Admin</TableHead>
                         <TableHead className="min-w-[100px]">Role</TableHead>
                         <TableHead className="min-w-[120px]">
-                          Last Active
+                          Created At
                         </TableHead>
-                        <TableHead className="min-w-[80px]">Status</TableHead>
+                        {/* <TableHead className="min-w-[80px]">Status</TableHead> */}
                         <TableHead className="w-10"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {admins.map((admin) => (
-                        <TableRow key={admin.id}>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage
-                                  src={admin.avatar}
-                                  alt={admin.name}
-                                />
-                                <AvatarFallback>
-                                  {admin.name.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="font-medium">{admin.name}</div>
-                                <div className="text-sm text-muted-foreground">
-                                  {admin.email}
+                      {students
+                        .filter((student) => student.role === "ADMIN")
+                        .map((admin) => (
+                          <TableRow key={admin.id}>
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <Avatar className="w-8 h-8">
+                                 
+                                  <AvatarFallback>
+                                    {admin.fname.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium">
+                                    {`${admin.fname} ${admin.lname}`}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {admin.email}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{admin.role}</Badge>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {new Date(admin.lastActive).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                admin.status === "active"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                            >
-                              {admin.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Remove Admin
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to remove {admin.name}{" "}
-                                    as an admin? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction className="bg-destructive text-destructive-foreground">
-                                    Remove
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{admin.role}</Badge>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {new Date(admin.createdAt).toLocaleDateString()}
+                            </TableCell>
+                            {/* <TableCell>
+                              <Badge
+                                variant={
+                                  admin.status === "active"
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {admin.status}
+                              </Badge>
+                            </TableCell> */}
+                            <TableCell>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Remove Admin
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to remove{" "}
+                                      {admin.lname} as an admin? This action
+                                      cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction className="bg-destructive text-destructive-foreground">
+                                      Remove
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 </div>

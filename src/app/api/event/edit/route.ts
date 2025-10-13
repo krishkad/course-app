@@ -2,11 +2,18 @@ import { CustomJWTPayload } from "@/types/types";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "@/lib/prisma";
+import { IEvent } from "@/redux/slices/events";
+import path from "path";
+import { writeFileSync } from "fs";
+import { createSlug } from "@/lib/utils";
 
 export async function PUT(req: NextRequest) {
   try {
     const token = req.cookies.get("course-app-authentication")?.value;
+    const fromData = await req.formData();
+    const update_data = fromData.get("updateEventDetail");
     const {
+      id,
       title,
       description,
       location,
@@ -14,9 +21,13 @@ export async function PUT(req: NextRequest) {
       date,
       isPaid,
       capacity,
-      eventId,
-    } = await req.json();
-    const fromData = await req.formData();
+      type,
+      time,
+      duration,
+      keywords,
+      status,
+      organizer_name,
+    }: IEvent = update_data ? JSON.parse(update_data.toString()) : {};
     const file = fromData.get("file") as File;
 
     if (!token) {
@@ -30,7 +41,14 @@ export async function PUT(req: NextRequest) {
       !price ||
       !date ||
       !isPaid ||
-      !capacity
+      !capacity ||
+      !id ||
+      !type ||
+      !time ||
+      !duration ||
+      !keywords ||
+      !status ||
+      !organizer_name
     ) {
       return NextResponse.json({
         success: false,
@@ -43,7 +61,7 @@ export async function PUT(req: NextRequest) {
       process.env.NEXTAUTH_SECRET as string
     ) as CustomJWTPayload;
 
-    if (token_data.id || token_data.role === "ADMIN") {
+    if (!token_data.id || token_data.role !== "ADMIN") {
       return NextResponse.json({ success: false, message: "not authorized" });
     }
 
@@ -54,7 +72,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const existing_event = await prisma.event.findFirst({
-      where: { id: eventId, organizerId: token_data.id },
+      where: { id: id },
     });
 
     if (!existing_event || !existing_event.thumbnailUrl) {
@@ -64,10 +82,27 @@ export async function PUT(req: NextRequest) {
       });
     }
 
-    const thumbnailUrl = "";
+    let thumbnailUrl;
+    let new_slug;
+    if (file && file.name) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      const filePath = path.join(uploadDir, file.name);
+
+      writeFileSync(filePath, buffer);
+
+      const image_path = `/uploads/${file.name}`;
+
+      const slug = createSlug(title);
+      new_slug = slug;
+      thumbnailUrl = image_path;
+    }
     const updated_event = await prisma.event.update({
-      where: { id: eventId, organizerId: token_data.id },
+      where: { id },
       data: {
+        slug: title !== existing_event.title ? new_slug : existing_event.slug,
         title,
         description,
         location,
@@ -75,7 +110,13 @@ export async function PUT(req: NextRequest) {
         isPaid,
         date,
         capacity,
-        thumbnailUrl: file ? thumbnailUrl : existing_event.thumbnailUrl,
+        thumbnailUrl:
+          file && file.name ? thumbnailUrl : existing_event.thumbnailUrl,
+        duration,
+        type,
+        time,
+        keywords,
+        status,
       },
     });
 
@@ -86,10 +127,15 @@ export async function PUT(req: NextRequest) {
       });
     }
 
+    const updated_event_with_organizer_name = {
+      ...updated_event,
+      organizer_name,
+    };
+
     return NextResponse.json({
-      success: false,
+      success: true,
       message: "ok",
-      event: updated_event,
+      data: updated_event_with_organizer_name,
     });
   } catch (error) {
     console.log("ERROR WHILE EDITTING EVENT: ", error);

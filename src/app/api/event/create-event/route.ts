@@ -6,6 +6,7 @@ import { Event } from "@prisma/client";
 import path from "path";
 import { writeFileSync } from "fs";
 import { createSlug } from "@/lib/utils";
+import { IEvent } from "@/redux/slices/events";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,11 +20,13 @@ export async function POST(req: NextRequest) {
       location,
       price,
       date,
+      time,
+      duration,
       isPaid,
       capacity,
       keywords,
       type,
-      status
+      status,
     }: Partial<Event> = eventData ? JSON.parse(eventData.toString()) : {};
 
     if (!token) {
@@ -36,19 +39,23 @@ export async function POST(req: NextRequest) {
       location,
       price,
       date,
+      time,
+      duration,
       isPaid,
       capacity,
       type,
       keywords,
-      status
+      status,
     });
 
     if (
       !title ||
       !description ||
       !location ||
-      typeof price !== "number" ||
+      !price ||
       !date ||
+      !time ||
+      !duration ||
       !capacity ||
       !type ||
       !keywords ||
@@ -102,10 +109,16 @@ export async function POST(req: NextRequest) {
         description,
         slug,
         location,
-        price: isPaid ? price : 0,
+        time,
+        price: isPaid
+          ? typeof price === "string"
+            ? parseFloat(price)
+            : price
+          : 0,
         date: new Date(date),
+        duration,
         isPaid: isPaid ?? false,
-        capacity,
+        capacity: typeof capacity === "string" ? parseInt(capacity) : capacity,
         thumbnailUrl,
         type,
         keywords,
@@ -121,7 +134,18 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: true, message: "ok", event });
+    const event_with_organizer_name = {
+      ...event,
+      organizer_name: `${user.fname} ${user.lname}`,
+    };
+
+    console.log(event_with_organizer_name as IEvent);
+
+    return NextResponse.json({
+      success: true,
+      message: "ok",
+      data: event_with_organizer_name,
+    });
   } catch (error) {
     console.log("ERROR WHILE CREATING EVENT: ", error);
     return NextResponse.json({

@@ -20,7 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Course, CourseTag, Lesson } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, X } from "lucide-react";
+import { LoaderIcon, Plus, X } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { Switch } from "../ui/switch";
 import HtmlEditor from "./HtmlEditor";
@@ -48,7 +48,7 @@ export default function CreateCourseModal({
     {
       id: Date.now(),
       title: "",
-      duration: "",
+      videoDuration: "",
       videoUrl: "",
       order: 1,
       isPaid: false,
@@ -57,12 +57,15 @@ export default function CreateCourseModal({
   ]);
   const [editLessons, setEditLessons] = useState<Lesson[]>([]);
   const [course, setCourse] = useState<Course>({} as Course);
+  const [isUpdateLoading, setIsUpdateLoading] = useState(false);
+  const [isSubmiting, setIsSubmiting] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (editModal && edit_course) {
       const get_edit_course = async () => {
         try {
+          setIsUpdateLoading(true);
           const response = await fetch(
             `/api/course/get-course?courseId=${edit_course.id}`,
             {
@@ -83,6 +86,8 @@ export default function CreateCourseModal({
           console.log({ edit_lessons: res.lessons });
         } catch (error) {
           console.log("error while getting course: ", error);
+        } finally {
+          setIsUpdateLoading(false);
         }
       };
 
@@ -101,7 +106,7 @@ export default function CreateCourseModal({
       {
         id: Date.now(),
         title: "",
-        duration: "",
+        videoDuration: "",
         videoUrl: "",
         order: lessons.length + 1,
         isPaid: false,
@@ -144,6 +149,7 @@ export default function CreateCourseModal({
 
   const handle_publish = async () => {
     try {
+      setIsSubmiting(true);
       const formData = new FormData();
       formData.append("file", courseImage as File);
       formData.append("courseDetail", JSON.stringify(course));
@@ -165,17 +171,21 @@ export default function CreateCourseModal({
       console.log({ created_course: res.data });
     } catch (error) {
       console.log("error publishing coourse: ", error);
+    } finally {
+      setIsSubmiting(false);
     }
   };
 
   const handle_update = async () => {
     try {
+      setIsSubmiting(true);
       const response = await fetch("/api/course/edit", {
         method: "PUT",
         body: JSON.stringify({
           title: course.title,
           description: course.description,
           price: course.price,
+          tag: course.tag,
           duration: course.duration,
           published: course.published,
           courseId: course.id,
@@ -192,9 +202,11 @@ export default function CreateCourseModal({
       }
 
       console.log({ edit_course: res.data });
-      dispatch(update_course(res.data))
+      dispatch(update_course(res.data));
     } catch (error) {
       console.log("error update course: ", error);
+    } finally {
+      setIsSubmiting(false);
     }
   };
 
@@ -445,7 +457,7 @@ export default function CreateCourseModal({
                   <SelectValue placeholder="Select a tag" />
                 </SelectTrigger>
                 <SelectContent>
-                  {["new", "featured", "popular"].map((tag) => (
+                  {["new", "most_popular", "trending","best_seller"].map((tag) => (
                     <SelectItem key={tag} value={tag}>
                       {tag}
                     </SelectItem>
@@ -595,13 +607,13 @@ export default function CreateCourseModal({
                       <div>
                         <Label htmlFor="duration">Video Duration</Label>
                         <Input
-                          id="duration"
+                          id="videoDuration"
                           type="text"
-                          value={lesson.duration ?? ""}
+                          value={lesson.videoDuration ?? ""}
                           onChange={(e) =>
                             handleLessonChange(
                               lesson.id,
-                              "duration",
+                              "videoDuration",
                               e.target.value
                             )
                           }
@@ -831,7 +843,7 @@ export default function CreateCourseModal({
                 className="mt-2 w-full aspect-video object-cover rounded-md border"
               />
             )}
-            <p>
+            <p className="mt-4">
               <strong>Title:</strong> {course.title}
             </p>
             <p>
@@ -884,26 +896,32 @@ export default function CreateCourseModal({
       <DialogContent className="w-[95%] max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Create New Course
+            {editModal ? "Update Course" : "Create New Course"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="relative w-full min-h-[350px]">
-          <AnimatePresence custom={direction} mode="wait">
-            <motion.div
-              key={currentStep}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.35 }}
-              className="w-full"
-            >
-              {steps[currentStep].content}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        {!isUpdateLoading ? (
+          <div className="relative w-full min-h-[350px]">
+            <AnimatePresence custom={direction} mode="wait">
+              <motion.div
+                key={currentStep}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.35 }}
+                className="w-full"
+              >
+                {steps[currentStep].content}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="w-full h-40 flex items-center justify-center">
+            <LoaderIcon className="w-5 h-5 shrink-0 animate-spin" />
+          </div>
+        )}
 
         <DialogFooter className="mt-6 flex justify-between">
           <Button
@@ -921,6 +939,7 @@ export default function CreateCourseModal({
               <Button onClick={handleNext}>Next</Button>
             ) : (
               <Button
+                disabled={isSubmiting}
                 onClick={() => {
                   if (editModal) {
                     console.log({ course, editLessons });

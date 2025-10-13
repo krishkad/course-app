@@ -82,17 +82,17 @@ model Purchase {
 }
 
 model Payment {
-  id                  String        @id @default(uuid())
-  userId              String
-  amount              Float
-  currency            String        @default("USD")
-  provider            String // e.g., 'stripe', 'razorpay'
-  providerId          String // e.g., Stripe charge ID
+  id         String        @id @default(uuid())
+  userId     String
+  amount     Float
+  currency   String        @default("USD")
+  provider   String // e.g., 'stripe', 'razorpay'
+  providerId String // e.g., Stripe charge ID
   // razorpay_order_id   String
   // razorpay_payment_id String?
   // razorpay_signature  String?
-  status              PaymentStatus
-  createdAt           DateTime      @default(now())
+  status     PaymentStatus
+  createdAt  DateTime      @default(now())
 
   user              User                @relation(fields: [userId], references: [id])
   purchases         Purchase[]
@@ -128,12 +128,14 @@ model Event {
   description   String
   location      String
   date          DateTime
+  time          String
+  duration      String
   isPaid        Boolean             @default(false)
   price         Float? // Required if isPaid is true
   capacity      Int? // Max number of attendees
   thumbnailUrl  String?
   type          EventType
-  status        EventStatus         @default(upcomming)
+  status        EventStatus         @default(upcoming)
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   organizerId   String
@@ -175,13 +177,15 @@ enum EventType {
   workshop
   live
   conference
+  upcoming
 }
 
 enum EventStatus {
-  upcomming
+  upcoming
   today
   draft
   completed
+  published
 }
 
 enum CourseTag {

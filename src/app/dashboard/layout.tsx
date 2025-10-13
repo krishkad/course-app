@@ -6,13 +6,17 @@ import { cookies } from "next/headers";
 import React, { ReactNode } from "react";
 
 const DashboardLayout = async ({ children }: { children: ReactNode }) => {
-  const { students, courses, events, payments } = await getData();
+  const { students, courses, events, payments, display, lessonProgress, lessons } =
+    await getData();
   return (
     <AdminProviderInit
       students={students}
       all_courses={courses}
       events={events}
       payments={payments}
+      display={display}
+      lessonProgress={lessonProgress}
+      lessons={lessons}
     >
       <SidebarProvider
         style={
@@ -45,6 +49,9 @@ const getData = async () => {
     const coursesUrl = `${baseUrl}/api/course/get-all-admin`;
     const eventsUrl = `${baseUrl}/api/event/get-all-admin`;
     const paymentsUrl = `${baseUrl}/api/payment/get-all`;
+    const displayUrl = `${baseUrl}/api/display/get`;
+    const lessonProgressUrl = `${baseUrl}/api/lesson-progress/get-all-admin`;
+    const lessonsUrl = `${baseUrl}/api/lesson/get-all`;
 
     // Define fetch options
     const fetchOptions: RequestInit = {
@@ -56,33 +63,66 @@ const getData = async () => {
     };
 
     // Fetch both APIs in parallel
-    const [studentsRes, coursesRes, eventsRes, paymentRes] = await Promise.all([
+    const [
+      studentsRes,
+      coursesRes,
+      eventsRes,
+      paymentRes,
+      displayRes,
+      lessonProgressRes,
+      lessonsRes
+    ] = await Promise.all([
       fetch(studentsUrl, fetchOptions),
       fetch(coursesUrl, fetchOptions),
       fetch(eventsUrl, fetchOptions),
       fetch(paymentsUrl, fetchOptions),
+      fetch(displayUrl, fetchOptions),
+      fetch(lessonProgressUrl, fetchOptions),
+      fetch(lessonsUrl, fetchOptions),
     ]);
 
-    const [studentsJson, coursesJson, eventsJson, paymentsJson] =
-      await Promise.all([
-        studentsRes.json(),
-        coursesRes.json(),
-        eventsRes.json(),
-        paymentRes.json(),
-      ]);
+    const [
+      studentsJson,
+      coursesJson,
+      eventsJson,
+      paymentsJson,
+      displayJson,
+      lessonProgressJson,
+      lessonsJson
+    ] = await Promise.all([
+      studentsRes.json(),
+      coursesRes.json(),
+      eventsRes.json(),
+      paymentRes.json(),
+      displayRes.json(),
+      lessonProgressRes.json(),
+      lessonsRes.json(),
+    ]);
 
+    console.log({ displayJson });
 
     // Check success status of both
     const studentsData = studentsJson.success ? studentsJson.data : [];
     const coursesData = coursesJson.success ? coursesJson.data : [];
     const eventsData = eventsJson.success ? eventsJson.data : [];
     const paymentsData = paymentsJson.success ? paymentsJson.data : [];
+    const displayData = displayJson.success ? displayJson.data : {};
+    const lessonProgressData = lessonProgressJson.success
+      ? lessonProgressJson.data
+      : [];
+    const lessonsData = lessonsJson.success
+      ? lessonsJson.data
+      : [];
 
+    console.log({ lessonsData });
     return {
       students: studentsData,
       courses: coursesData,
       events: eventsData,
       payments: paymentsData,
+      display: displayData,
+      lessonProgress: lessonProgressData,
+      lessons: lessonsData,
     };
   } catch (error) {
     console.error("Error while fetching data:", error);
@@ -91,6 +131,9 @@ const getData = async () => {
       courses: [],
       events: [],
       payments: [],
+      display: {},
+      lessonProgress: [],
+      lessons: [],
     };
   }
 };

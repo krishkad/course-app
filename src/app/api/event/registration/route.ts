@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("course-app-authentication")?.value;
     const { userId, email, eventId } = await req.json();
+    console.log({ userId, email, eventId });
 
     if (!token) {
       return NextResponse.json({ success: false, message: "missing token!" });
@@ -53,6 +54,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: false,
         message: "failed to register!",
+      });
+    }
+
+    const update_event_registration_count = await prisma.event.update({
+      where: { id: eventId },
+      data: {
+        registered:
+          typeof event.registered === "string"
+            ? parseInt(event.registered) + 1
+            : typeof event.registered === "number"
+            ? event.registered + 1
+            : 1,
+      },
+    });
+
+    if (!update_event_registration_count) {
+      return NextResponse.json({
+        success: false,
+        message: "failed to update registration count",
       });
     }
 
