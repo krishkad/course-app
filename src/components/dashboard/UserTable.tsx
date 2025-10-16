@@ -159,7 +159,7 @@ export function UserTable() {
         courses,
         lessons,
         lessonsProgress,
-        payments,
+        payments: payments.filter((payment) => payment.status === "SUCCESS"),
       });
       setTopCourses(topCourses);
     }

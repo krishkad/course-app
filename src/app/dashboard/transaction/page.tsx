@@ -134,7 +134,9 @@ export default function AdminTransactions() {
     {
       title: "Total Revenue",
       value: `$${displayRazorpayAmount(
-        all_transactions.reduce((total, item) => total + item.amount, 0)
+        all_transactions
+          .filter((payment) => payment.status === "SUCCESS")
+          .reduce((total, item) => total + item.amount, 0)
       )}`,
       change: "+12.5%",
       trend: "up",
@@ -356,7 +358,9 @@ export default function AdminTransactions() {
                               className={cn(
                                 trans.status === "SUCCESS"
                                   ? "bg-green-600 text-white"
-                                  : "bg-amber-400 text-white"
+                                  : trans.status === "PENDING"
+                                  ? "bg-yellow-500 text-white"
+                                  : "bg-red-400 text-white"
                               )}
                             >
                               {trans.status.slice(0, 1).toUpperCase()}

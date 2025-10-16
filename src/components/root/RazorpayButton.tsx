@@ -89,6 +89,20 @@ export default function RazorpayButton({
       theme: {
         color: "#3399cc",
       },
+      modal: {
+        ondismiss: async function () {
+          console.log("Payment modal closed by user.");
+          // Notify backend of cancellation/failure
+          await fetch("/api/payment/fail", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paymentId: data.payment.id,
+              reason: "Modal closed by user",
+            }),
+          });
+        },
+      },
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const razor = new (window as any).Razorpay(options);

@@ -26,15 +26,13 @@ import {
   Clock,
   DollarSign,
   Edit,
-  Eye,
-  HandCoinsIcon,
   MoreHorizontal,
   Plus,
   Search,
   Star,
   Trash2,
   Users,
-  WalletIcon,
+  WalletIcon
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -314,13 +312,13 @@ export default function CoursesPage() {
               {publishedCourses.slice().reverse().map((course, i) => {
                 const enrolled = payments.reduce((total, pay) => {
                   const matches = pay.purchases.filter(
-                    (purchase) => purchase.courseId === course.id
+                    (purchase) => purchase.courseId === course.id && pay.status === "SUCCESS"
                   ).length;
                   return total + matches;
                 }, 0);
                 const revenue = payments.reduce((total, payment, index) => {
                   const courseRevenue = payment.purchases
-                    .filter((purchase) => purchase.courseId === course.id)
+                    .filter((purchase) => purchase.courseId === course.id && payment.status === "SUCCESS")
                     .reduce((sum, purchase) => sum + payments[index].amount, 0);
 
                   return total + courseRevenue;

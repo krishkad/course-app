@@ -386,13 +386,26 @@ const CourseDetail = ({
                       Limited time offer
                     </p>
                   </div>
-                  <>
-                    <RazorpayButton
-                      userId={userId || ""}
-                      courseId={current_course.id}
-                      price={current_course?.price}
-                    />
-                  </>
+                  <AuthComponent
+                    signOut={
+                      <>
+                        <RazorpayButton
+                          userId={userId || ""}
+                          courseId={current_course.id}
+                          price={current_course?.price}
+                        />
+                      </>
+                    }
+                    signIn={
+                      <>
+                        <Link href={`/sign-in?redirect=${pathname}`}>
+                          <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
+                            Enroll Now
+                          </Button>
+                        </Link>
+                      </>
+                    }
+                  />
 
                   {/* Course Stats */}
                   <div className="space-y-4 text-sm">

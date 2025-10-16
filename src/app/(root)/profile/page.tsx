@@ -1,5 +1,7 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,36 +10,32 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
+import Footer from "@/components/root/Footer";
+import Navigation from "@/components/root/Navigation";
+import { cn, displayRazorpayAmount } from "@/lib/utils";
+import { ICourse } from "@/redux/slices/courses";
+import { RootState } from "@/redux/store";
+import { Lesson, Payment } from "@prisma/client";
+import { format } from "date-fns";
 import {
-  BookOpen,
   Award,
+  BookOpen,
+  Calendar,
   CreditCard,
-  User,
+  Edit,
+  LoaderIcon,
+  LogOutIcon,
   Mail,
   Phone,
-  Calendar,
-  MapPin,
-  Edit,
-  LogOutIcon,
-  UserIcon,
-  LoaderIcon,
+  UserIcon
 } from "lucide-react";
-import Navigation from "@/components/root/Navigation";
-import Footer from "@/components/root/Footer";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { Course, Lesson, Payment } from "@prisma/client";
-import { ICourse } from "@/redux/slices/courses";
 import { toast } from "sonner";
-import { displayRazorpayAmount } from "@/lib/utils";
-import { format } from "date-fns";
-import Link from "next/link";
 
 interface PaymentCourseId extends Payment {
   courseId: string;
@@ -65,41 +63,41 @@ const Profile = () => {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const router = useRouter();
 
-  const [purchasedCourses] = useState([
-    {
-      id: 1,
-      title: "Complete Web Development Bootcamp",
-      thumbnail: "/placeholder.svg",
-      progress: 75,
-      status: "In Progress",
-      enrolled: "Feb 2024",
-      instructor: "Sarah Johnson",
-      lessonsCompleted: 45,
-      totalLessons: 60,
-    },
-    {
-      id: 2,
-      title: "UI/UX Design Masterclass",
-      thumbnail: "/placeholder.svg",
-      progress: 100,
-      status: "Completed",
-      enrolled: "Jan 2024",
-      instructor: "Mike Chen",
-      lessonsCompleted: 40,
-      totalLessons: 40,
-    },
-    {
-      id: 3,
-      title: "Data Science Fundamentals",
-      thumbnail: "/placeholder.svg",
-      progress: 30,
-      status: "In Progress",
-      enrolled: "Mar 2024",
-      instructor: "Dr. Emily Roberts",
-      lessonsCompleted: 18,
-      totalLessons: 60,
-    },
-  ]);
+  // const [purchasedCourses] = useState([
+  //   {
+  //     id: 1,
+  //     title: "Complete Web Development Bootcamp",
+  //     thumbnail: "/placeholder.svg",
+  //     progress: 75,
+  //     status: "In Progress",
+  //     enrolled: "Feb 2024",
+  //     instructor: "Sarah Johnson",
+  //     lessonsCompleted: 45,
+  //     totalLessons: 60,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "UI/UX Design Masterclass",
+  //     thumbnail: "/placeholder.svg",
+  //     progress: 100,
+  //     status: "Completed",
+  //     enrolled: "Jan 2024",
+  //     instructor: "Mike Chen",
+  //     lessonsCompleted: 40,
+  //     totalLessons: 40,
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Data Science Fundamentals",
+  //     thumbnail: "/placeholder.svg",
+  //     progress: 30,
+  //     status: "In Progress",
+  //     enrolled: "Mar 2024",
+  //     instructor: "Dr. Emily Roberts",
+  //     lessonsCompleted: 18,
+  //     totalLessons: 60,
+  //   },
+  // ]);
 
   const [transactions] = useState([
     {
@@ -150,20 +148,26 @@ const Profile = () => {
         }
 
         setPayments(res.data);
+        console.log({ paymentdata: res.data });
 
         const payment_set = new Set(
           res.data.map((pay: PaymentCourseId) => pay.courseId)
         );
 
+        const success_payments = res.data.filter(
+          (payment: PaymentCourseId) => payment.status === "SUCCESS"
+        );
+
         const published_courses = courses.filter((course) =>
           payment_set.has(course.id)
         );
+
         console.log({ published_courses });
         setPurchased_courses(published_courses);
 
         const courses_lessons = (
           await Promise.all(
-            res.data.map(async (pay: PaymentCourseId) => {
+            success_payments.map(async (pay: PaymentCourseId) => {
               try {
                 const response = await fetch(
                   `/api/course/get-course?courseId=${pay.courseId}&userId=${user.id}`,
@@ -236,11 +240,11 @@ const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    if (purchased_courses || lessons || lessonsProgress) {
-      console.log({ purchased_courses, lessons, lessonsProgress });
-    }
-  }, [purchased_courses, lessons, lessonsProgress]);
+  // useEffect(() => {
+  //   if (purchased_courses || lessons || lessonsProgress) {
+  //     console.log({ purchased_courses, lessons, lessonsProgress });
+  //   }
+  // }, [purchased_courses, lessons, lessonsProgress]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -324,7 +328,10 @@ const Profile = () => {
                     Total Courses
                   </p>
                   <p className="text-3xl font-bold text-foreground">
-                    {payments.length}
+                    {
+                      payments.filter((payment) => payment.status === "SUCCESS")
+                        .length
+                    }
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -342,10 +349,10 @@ const Profile = () => {
                     Completed
                   </p>
                   <p className="text-3xl font-bold text-foreground">
-                    {
-                      purchasedCourses.filter((c) => c.status === "Completed")
+                    {/* {
+                      purchased_courses.filter((c) => c.status === "Completed")
                         .length
-                    }
+                    } */}
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
@@ -363,10 +370,10 @@ const Profile = () => {
                     In Progress
                   </p>
                   <p className="text-3xl font-bold text-foreground">
-                    {
+                    {/* {
                       purchasedCourses.filter((c) => c.status === "In Progress")
                         .length
-                    }
+                    } */}
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -421,6 +428,14 @@ const Profile = () => {
               const progress = lessonsProgress.filter(
                 (prog) => prog.courseId === course.id
               );
+
+              console.log({ less, progress });
+
+              const is_purchased = payments.find(
+                (payment) => payment.courseId === course.id
+              );
+
+              if (!is_purchased || is_purchased.status !== "SUCCESS") return;
               return (
                 <Card
                   key={course.id}
@@ -549,7 +564,13 @@ const Profile = () => {
                             <td className="p-4">
                               <Badge
                                 variant="default"
-                                className="bg-green-500/10 text-green-700 hover:bg-green-500/20"
+                                className={cn(
+                                  transaction.status === "SUCCESS"
+                                    ? "bg-green-500/10 text-green-700 hover:bg-green-500/20"
+                                    : transaction.status === "PENDING"
+                                    ? "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20"
+                                    : "bg-red-500/10 text-red-700 hover:bg-red-500/20"
+                                )}
                               >
                                 {transaction.status}
                               </Badge>
@@ -584,7 +605,13 @@ const Profile = () => {
                         </div>
                         <Badge
                           variant="default"
-                          className="bg-green-500/10 text-green-700"
+                          className={cn(
+                            transaction.status === "SUCCESS"
+                              ? "bg-green-500/10 text-green-700 hover:bg-green-500/20"
+                              : transaction.status === "PENDING"
+                              ? "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20"
+                              : "bg-red-500/10 text-red-700 hover:bg-red-500/20"
+                          )}
                         >
                           {transaction.status}
                         </Badge>

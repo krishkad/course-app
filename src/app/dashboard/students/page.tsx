@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,28 +26,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Search,
-  Filter,
-  MoreHorizontal,
-  Eye,
-  MessageSquare,
-  UserMinus,
-  Download,
-  Calendar,
-} from "lucide-react";
-import { format } from "date-fns";
-import { useSelector } from "react-redux";
+import { getPaidStudentsCount } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import { User } from "@prisma/client";
-import { getPaidStudentsCount } from "@/lib/utils";
+import { format } from "date-fns";
+import {
+  Download,
+  Eye,
+  MoreHorizontal,
+  Search,
+  UserMinus
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 // Mock data
 const students = [
@@ -250,7 +245,7 @@ export default function StudentsPage() {
                       if (student.role === "ADMIN") return;
                       // const student_course = all_courses.find((course) => student )
                       const payment_count = payments.filter(
-                        (payment) => student.id === payment.userId
+                        (payment) => student.id === payment.userId && payment.status === "SUCCESS"
                       ).length;
                       return (
                         <TableRow

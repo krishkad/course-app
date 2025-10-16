@@ -29,7 +29,7 @@ export function SectionCards() {
           <CardTitle className="text-xl font-semibold tabular-nums @md/card:text-2xl @lg/card:text-3xl">
             $
             {displayRazorpayAmount(
-              all_transactions.reduce((total, item) => total + item.amount, 0)
+              all_transactions.filter((payment) => payment.status === "SUCCESS").reduce((total, item) => total + item.amount, 0)
             )}
           </CardTitle>
           <CardAction>

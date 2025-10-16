@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -8,14 +9,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { LogIn, LogOutIcon, Menu } from "lucide-react";
+import { RootState } from "@/redux/store";
+import { LogIn, Menu, UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { NavigationMenuDemo } from "./NavigationMenu";
-import AuthComponent from "../auth/AuthComponent";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import AuthComponent from "../auth/AuthComponent";
+import { NavigationMenuDemo } from "./NavigationMenu";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -159,20 +159,37 @@ const Navigation = () => {
                 <AuthComponent
                   signIn={
                     <>
-                      <Button variant="ghost" className="justify-start">
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Login
-                      </Button>
-                      <Button className="bg-gradient-primary hover:opacity-90">
-                        Sign Up
-                      </Button>
+                      <Link href={"/sign-in"}>
+                        <Button
+                          variant="ghost"
+                          className="justify-start"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <LogIn className="h-4 w-4 mr-2" />
+                          Login
+                        </Button>
+                      </Link>
+                      <Link href={"/sign-up"}>
+                        <Button
+                          className="bg-gradient-primary hover:opacity-90"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Sign Up
+                        </Button>
+                      </Link>
                     </>
                   }
                   signOut={
-                    <Button size={"sm"} variant={"ghost"}>
-                      <LogOutIcon className="inline-flex mr-1.5" />
-                      Log out
-                    </Button>
+                    <Link href={"/profile"}>
+                      <Button
+                        size={"sm"}
+                        variant={"ghost"}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <UserIcon className="inline-flex mr-1.5" />
+                        Profile
+                      </Button>
+                    </Link>
                   }
                 />
               </div>
