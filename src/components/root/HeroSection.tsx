@@ -3,36 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ProfessionSearch } from "./SearchBox";
 // import heroImage from "@/assets/hero-image.jpg";
 
 const HeroSection = () => {
- const benefits = [
-  {
-    icon: CheckCircle,
-    text: "Learn at your own pace",
-    gradient: "from-green-400 via-green-300 to-emerald-400", // fresh green
-  },
-  {
-    icon: Award,
-    text: "Industry recognized",
-    gradient: "from-yellow-400 via-yellow-300 to-orange-400", // sunny yellow-orange
-  },
-  {
-    icon: Users,
-    text: "Courses by top professionals",
-    gradient: "from-blue-400 via-sky-300 to-cyan-400", // cool blue-cyan
-  },
-  {
-    icon: Zap,
-    text: "Career focused learning",
-    gradient: "from-pink-400 via-rose-300 to-fuchsia-400", // energetic pink-fuchsia
-  },
-  {
-    icon: Clock,
-    text: "Lifetime course access",
-    gradient: "from-purple-400 via-violet-300 to-indigo-400", // calm purple-indigo
-  },
-];
+  const benefits = [
+    {
+      icon: CheckCircle,
+      text: "Learn at your own pace",
+      gradient: "from-green-400 via-green-300 to-emerald-400", // fresh green
+    },
+    {
+      icon: Award,
+      text: "Industry recognized",
+      gradient: "from-yellow-400 via-yellow-300 to-orange-400", // sunny yellow-orange
+    },
+    {
+      icon: Users,
+      text: "Courses by top professionals",
+      gradient: "from-blue-400 via-sky-300 to-cyan-400", // cool blue-cyan
+    },
+    {
+      icon: Zap,
+      text: "Career focused learning",
+      gradient: "from-pink-400 via-rose-300 to-fuchsia-400", // energetic pink-fuchsia
+    },
+    {
+      icon: Clock,
+      text: "Lifetime course access",
+      gradient: "from-purple-400 via-violet-300 to-indigo-400", // calm purple-indigo
+    },
+  ];
 
   return (
     <section className="relative min-h-screen flex items-center bg-black">
@@ -81,21 +82,18 @@ const HeroSection = () => {
             </div>
           </div> */}
 
-          <div className="w-full max-w-xl mx-auto mb-16">
+          {/* <div className="w-full max-w-xl mx-auto mb-16">
             <div className="flex items-center shadow-card rounded-full bg-background overflow-hidden focus-within:ring-1 focus-within:ring-primary transition">
-              {/* Search Icon */}
               <div className="pl-4">
                 <Search className="h-5 w-5 text-muted-foreground" />
               </div>
 
-              {/* Input */}
               <Input
                 type="text"
                 placeholder="What is your profession?"
                 className="flex-1 border-none ring-0 focus-visible:ring-0 focus:outline-none focus:border-none bg-transparent px-4 py-3 text-base"
               />
 
-              {/* Button */}
               <Button
                 type="submit"
                 variant="ghost"
@@ -104,30 +102,36 @@ const HeroSection = () => {
                 Search
               </Button>
             </div>
-          </div>
+          </div> */}
+          <ProfessionSearch />
 
           {/* Benefits Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
-        {benefits.map((benefit, index) => (
-          <div key={index} >
-            <div
-              className="flex flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 hover:shadow-blue-500/50"
-              // whileHover={{ scale: 1.05, rotate: 2 }}
-              // whileTap={{ scale: 0.95 }}
-              // initial={{ opacity: 0, y: 20 }}
-              // animate={{ opacity: 1, y: 0 }}
-              // transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <div className={cn("flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl mb-3", benefit.gradient)}>
-                <benefit.icon className="h-7 w-7 text-white" />
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+            {benefits.map((benefit, index) => (
+              <div key={index}>
+                <div
+                  className="flex flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 hover:shadow-blue-500/50"
+                  // whileHover={{ scale: 1.05, rotate: 2 }}
+                  // whileTap={{ scale: 0.95 }}
+                  // initial={{ opacity: 0, y: 20 }}
+                  // animate={{ opacity: 1, y: 0 }}
+                  // transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl mb-3",
+                      benefit.gradient
+                    )}
+                  >
+                    <benefit.icon className="h-7 w-7 text-white" />
+                  </div>
+                  <p className="text-sm font-semibold text-center text-white leading-snug">
+                    {benefit.text}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm font-semibold text-center text-white leading-snug">
-                {benefit.text}
-              </p>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
             <Button

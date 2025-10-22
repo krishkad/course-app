@@ -1,9 +1,10 @@
 "use client";
 
-import { Clock, Users, Star, ArrowRight, Filter, Search } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import Footer from "@/components/root/Footer";
+import Navigation from "@/components/root/Navigation";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -11,163 +12,136 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Navigation from "@/components/root/Navigation";
-import Link from "next/link";
-import Footer from "@/components/root/Footer";
-import { Input } from "@/components/ui/input";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import { getRating } from "@/lib/utils";
+import { RootState } from "@/redux/store";
+import { ArrowRight, Clock, Search, Star, Users } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [query, setQuery] = useState<string>("");
+  const pathname = useSearchParams();
 
   const courses = useSelector((state: RootState) => state.courses.courses);
 
-  // const courses = [
-  //   {
-  //     id: "digital-marketing-mastery",
-  //     title: "Digital Marketing Mastery",
-  //     description:
-  //       "Learn modern marketing strategies and tools to grow your business online with comprehensive hands-on projects",
-  //     instructor: "Sarah Johnson",
-  //     price: "$89",
-  //     priceValue: 89,
-  //     duration: "8 weeks",
-  //     durationValue: 8,
-  //     students: "2,341",
-  //     rating: 4.8,
-  //     badge: "Best Seller",
-  //     badgeVariant: "default" as const,
-  //     category: "marketing",
-  //     image: "/images/course-digital-marketing.jpeg",
-  //   },
-  //   {
-  //     id: "full-stack-web-development",
-  //     title: "Full-Stack Web Development",
-  //     description:
-  //       "Build complete web applications with React, Node.js, and modern tools from scratch to deployment",
-  //     instructor: "Mike Chen",
-  //     price: "$129",
-  //     priceValue: 129,
-  //     duration: "12 weeks",
-  //     durationValue: 12,
-  //     students: "1,876",
-  //     rating: 4.9,
-  //     badge: "Most Popular",
-  //     badgeVariant: "secondary" as const,
-  //     category: "development",
-  //     image: "/images/course-web-development.jpeg",
-  //   },
-  //   {
-  //     id: "project-management-pro",
-  //     title: "Project Management Pro",
-  //     description:
-  //       "Master Agile, Scrum, and traditional project management methodologies with real-world case studies",
-  //     instructor: "Lisa Rodriguez",
-  //     price: "$79",
-  //     priceValue: 79,
-  //     duration: "6 weeks",
-  //     durationValue: 6,
-  //     students: "3,102",
-  //     rating: 4.7,
-  //     badge: "Trending",
-  //     badgeVariant: "outline" as const,
-  //     category: "business",
-  //     image: "/images/course-project-management.jpeg",
-  //   },
-  //   {
-  //     id: "data-science-fundamentals",
-  //     title: "Data Science Fundamentals",
-  //     description:
-  //       "Python, statistics, and machine learning for beginners to advanced with industry datasets",
-  //     instructor: "Dr. James Wilson",
-  //     price: "$149",
-  //     priceValue: 149,
-  //     duration: "10 weeks",
-  //     durationValue: 10,
-  //     students: "1,543",
-  //     rating: 4.9,
-  //     badge: "New",
-  //     badgeVariant: "destructive" as const,
-  //     category: "data-science",
-  //     image: "/images/course-data-science.jpeg",
-  //   },
-  //   {
-  //     id: "ui-ux-design-principles",
-  //     title: "UI/UX Design Principles",
-  //     description:
-  //       "Create beautiful and user-friendly interfaces with design thinking and modern tools",
-  //     instructor: "Emma Thompson",
-  //     price: "$99",
-  //     priceValue: 99,
-  //     duration: "7 weeks",
-  //     durationValue: 7,
-  //     students: "2,087",
-  //     rating: 4.8,
-  //     badge: "Editor's Choice",
-  //     badgeVariant: "default" as const,
-  //     category: "design",
-  //     image: "/images/course-ui-ux-design.jpeg",
-  //   },
-  //   {
-  //     id: "financial-planning-analysis",
-  //     title: "Financial Planning & Analysis",
-  //     description:
-  //       "Corporate finance, budgeting, and financial modeling for professionals in modern business",
-  //     instructor: "Robert Kim",
-  //     price: "$119",
-  //     priceValue: 119,
-  //     duration: "9 weeks",
-  //     durationValue: 9,
-  //     students: "1,234",
-  //     rating: 4.6,
-  //     badge: "Professional",
-  //     badgeVariant: "secondary" as const,
-  //     category: "finance",
-  //     image: "/images/course-financial-planing.jpeg",
-  //   },
-  // ];
+  useEffect(() => {
+    const q = pathname.get("q");
+    if (q) {
+      setSearchTerm(q);
+    }
+    console.log({ q });
+  }, []);
 
-  // Filter courses based on selected filters
   // const filteredCourses = courses.filter((course) => {
-  //   if (selectedCategory !== "all" && course.category !== selectedCategory)
-  //     return false;
-  //   if (selectedDuration !== "all") {
-  //     if (selectedDuration === "short" && course.durationValue > 6)
-  //       return false;
-  //     if (
-  //       selectedDuration === "medium" &&
-  //       (course.durationValue <= 6 || course.durationValue > 10)
-  //     )
-  //       return false;
-  //     if (selectedDuration === "long" && course.durationValue <= 10)
-  //       return false;
-  //   }
-  //   if (selectedPrice !== "all") {
-  //     if (selectedPrice === "free" && course.priceValue > 0) return false;
-  //     if (
-  //       selectedPrice === "low" &&
-  //       (course.priceValue <= 0 || course.priceValue > 100)
-  //     )
-  //       return false;
-  //     if (
-  //       selectedPrice === "medium" &&
-  //       (course.priceValue <= 100 || course.priceValue > 150)
-  //     )
-  //       return false;
-  //     if (selectedPrice === "high" && course.priceValue <= 150) return false;
-  //   }
-  //   if (selectedRating !== "all") {
-  //     if (selectedRating === "4+" && course.rating < 4.0) return false;
-  //     if (selectedRating === "4.5+" && course.rating < 4.5) return false;
-  //     if (selectedRating === "4.8+" && course.rating < 4.8) return false;
-  //   }
-  //   return true;
+  //   const matchesSearch = (
+  //     course.title ||
+  //     course.description ||
+  //     course.keywords.toString()
+  //   )
+  //     .toLowerCase()
+  //     .includes(searchTerm.toLowerCase());
+
+  //   return matchesSearch;
   // });
 
+  function advancedStemming(word: string) {
+    if (!word || word.length < 3) return word;
+
+    const lowerWord = word.toLowerCase();
+
+    // Multiple stemming patterns for common suffixes
+    const stemmingPatterns = [
+      // Profession suffixes
+      /(er|or|ist|ian|ant|ent|eer|ier|yer|man|woman|person)$/,
+      // Plural and verb forms
+      /(s|es|ies|ed|ied|ing|ying|ness|ment|ship|hood|dom|ism|ist|ity|ty|ic|al|ial|ful|ive|ative|able|ible|ish|ory|ous|eous|ious|ent|ant|ance|ence|ary|ery|ory|ize|ise|ify|fy|ate|en)$/,
+      // Comparative and superlative
+      /(er|est)$/,
+    ];
+
+    let stemmed = lowerWord;
+
+    // Apply stemming patterns
+    for (const pattern of stemmingPatterns) {
+      if (pattern.test(stemmed)) {
+        stemmed = stemmed.replace(pattern, "");
+        break; // Stop after first successful stem
+      }
+    }
+
+    return stemmed.length > 2 ? stemmed : lowerWord;
+  }
+
+  function findSimilarWords(searchTerm: string, text: string) {
+    const searchLower = searchTerm.toLowerCase();
+    const textLower = text.toLowerCase();
+
+    // Exact match
+    if (textLower.includes(searchLower)) {
+      return true;
+    }
+
+    // Split into words and clean them
+    const cleanWords = (str: string) =>
+      str
+        .split(/\s+/)
+        .map((word: string) => word.replace(/[^a-z0-9]/g, ""))
+        .filter((word: string) => word.length > 2);
+
+    const searchWords = cleanWords(searchLower);
+    const textWords = cleanWords(textLower);
+
+    // Check each search word against each text word
+    for (const searchWord of searchWords) {
+      const searchStem = advancedStemming(searchWord);
+
+      for (const textWord of textWords) {
+        const textStem = advancedStemming(textWord);
+
+        // Multiple matching strategies
+        if (
+          // Stem exact match
+          textStem === searchStem ||
+          // Stem contains match
+          textStem.includes(searchStem) ||
+          searchStem.includes(textStem) ||
+          // Original word contains match (for cases like "design" in "designer")
+          textWord.includes(searchStem) ||
+          searchWord.includes(textStem) ||
+          // Shared substring of significant length
+          (searchStem.length > 3 &&
+            textStem.length > 3 &&
+            (textStem.includes(
+              searchStem.substring(0, Math.floor(searchStem.length * 0.7))
+            ) ||
+              searchStem.includes(
+                textStem.substring(0, Math.floor(textStem.length * 0.7))
+              )))
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  const filteredCourses = courses.filter((course) => {
+    const searchText = (
+      course.title +
+      " " +
+      course.description +
+      " " +
+      course.keywords.toString()
+    ).toLowerCase();
+
+    return findSimilarWords(searchTerm, searchText);
+  });
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -228,7 +202,7 @@ const AllCourses = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-              {courses.map((course) => (
+              {filteredCourses.map((course) => (
                 <Link
                   key={course.id}
                   href={`/courses/${course.slug}`}

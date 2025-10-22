@@ -282,7 +282,7 @@ const Profile = () => {
                     </div>
                     <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      <span>Joined {userData.joinDate}</span>
+                      <span>Joined {format(new Date(user.createdAt as Date), "MMM yyyy")}</span>
                     </div>
                     <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                       <UserIcon className="h-4 w-4" />
