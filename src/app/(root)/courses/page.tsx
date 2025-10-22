@@ -17,6 +17,7 @@ import Footer from "@/components/root/Footer";
 import { Input } from "@/components/ui/input";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { getRating } from "@/lib/utils";
 
 const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -243,20 +244,19 @@ const AllCourses = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <div className="absolute top-4 left-4">
-                        <Badge
-                          variant={"default"}
-                          className="shadow-sm"
-                        >
+                        <Badge variant={"default"} className="shadow-sm">
                           {/* {course.badge} */}
                           Best Seller
                         </Badge>
                       </div>
-                      <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs font-medium text-gray-800">
-                          {course.rating}
-                        </span>
-                      </div>
+                      {course.Rating && course.Rating.length > 0 && (
+                        <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span className="text-xs font-medium text-gray-800">
+                            {getRating(course.Rating)}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Course Content */}

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { cn, sortByIdAscending } from "@/lib/utils";
+import { cn, getRating, sortByIdAscending } from "@/lib/utils";
 import { ICourse } from "@/redux/slices/courses";
 import { initializeLessonProgress } from "@/redux/slices/lessons-progress";
 import { RootState } from "@/redux/store";
@@ -431,13 +431,15 @@ const CourseDetail = ({
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Rating:</span>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{current_course?.rating}</span>
-                        <span className="text-muted-foreground">
-                          ({static_course.reviews} reviews)
-                        </span>
-                      </div>
+                      {current_course.Rating && (
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span>{getRating(current_course.Rating)}</span>
+                          <span className="text-muted-foreground">
+                            ({current_course.Rating?.length} reviews)
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -546,13 +548,23 @@ const CourseDetail = ({
 
                 {/* Additional Information */}
                 <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="description">
+                    <AccordionTrigger className="text-xl font-semibold">
+                      Description
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="w-full">
+                        <p>{current_course.description}</p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
                   <AccordionItem value="what-you-learn">
                     <AccordionTrigger className="text-xl font-semibold">
                       What You&apos;ll Learn
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {static_course.whatYouLearn.map((item, index) => (
+                      <div className="grid grid-cols-1 gap-4">
+                        {current_course.what_you_learn.map((item, index) => (
                           <div
                             key={index}
                             className="flex items-start space-x-3"
@@ -594,7 +606,7 @@ const CourseDetail = ({
                     </AccordionTrigger>
                     <AccordionContent>
                       <ul className="space-y-2">
-                        {static_course.requirements.map(
+                        {current_course.requirements.map(
                           (requirement, index) => (
                             <li
                               key={index}
@@ -729,16 +741,18 @@ const CourseDetail = ({
                         <span>{current_course?.students}</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Rating:</span>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{current_course?.rating}</span>
-                        <span className="text-muted-foreground">
-                          ({static_course.reviews} reviews)
-                        </span>
+                    {current_course.Rating && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Rating:</span>
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span>{getRating(current_course.Rating)}</span>
+                          <span className="text-muted-foreground">
+                            ({current_course.Rating?.length} reviews)
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -2,47 +2,53 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { CustomJWTPayload } from "@/types/types";
-import { CourseTag, Lesson } from "@prisma/client";
+import { Course, CourseTag, Lesson } from "@prisma/client";
+import { writeFileSync } from "fs";
+import path from "path";
+import { createSlug } from "@/lib/utils";
 
 export async function PUT(req: NextRequest) {
   try {
-    const {
-      title,
-      description,
-      price,
-      duration,
-      tag,
-      published,
-      courseId,
-      lessons,
-    }: {
-      title: string;
-      description: string;
-      price: number;
-      duration: string;
-      tag: CourseTag;
-      published: boolean;
-      courseId: string;
-      lessons: Lesson[];
-    } = await req.json();
     const token = req.cookies.get("course-app-authentication")?.value;
+    const formData = await req.formData();
+    const file = formData.get("updateCourseFile") as File;
+    const courseDetailRaw = formData.get("courseDetail");
+    const lessonsRaw = formData.get("editLessons");
+    const whatYouLearnRaw = formData.get("editWhatYouLearn");
+    const requirementsRaw = formData.get("editRequirements");
+    const courseDetail: Partial<Course> = courseDetailRaw
+      ? JSON.parse(courseDetailRaw.toString())
+      : {};
+    const lessons: Partial<Lesson[]> = lessonsRaw
+      ? JSON.parse(lessonsRaw.toString())
+      : [];
+    const whatYouLearn: string[] = whatYouLearnRaw
+      ? JSON.parse(whatYouLearnRaw.toString())
+      : [];
+    const requirements: string[] = requirementsRaw
+      ? JSON.parse(requirementsRaw.toString())
+      : [];
 
     if (!token) {
       return NextResponse.json({ success: false, message: "token missing" });
     }
 
     if (
-      !title ||
-      !description ||
-      !price ||
-      !duration ||
-      !tag ||
-      typeof published !== "boolean" ||
-      !courseId ||
-      !lessons ||
-      lessons.length <= 0
+      !courseDetail.id ||
+      !courseDetail.title ||
+      !courseDetail.description ||
+      !courseDetail.price ||
+      !courseDetail.duration ||
+      !courseDetail.category ||
+      !courseDetail.keywords ||
+      courseDetail.keywords.length <= 0 ||
+      whatYouLearn?.length <= 0 ||
+      requirements?.length <= 0
     ) {
-      return NextResponse.json({ sucess: false, message: "missing fields!" });
+      return NextResponse.json({
+        success: false,
+        message: "missing required fields",
+      });
     }
 
     const token_data = jwt.verify(
@@ -55,7 +61,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const is_course = await prisma.course.findFirst({
-      where: { id: courseId },
+      where: { id: courseDetail.id },
     });
 
     if (!is_course) {
@@ -65,9 +71,41 @@ export async function PUT(req: NextRequest) {
       });
     }
 
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    const filePath = path.join(uploadDir, file.name);
+
+    writeFileSync(filePath, buffer);
+
+    const image_path = `/uploads/${file.name}`;
+
+    const slug = createSlug(courseDetail.title);
+    const thumbnailUrl = image_path;
+
     const updated_course = await prisma.course.update({
-      where: { id: courseId },
-      data: { title, description, price, duration, published, tag },
+      where: { id: is_course.id },
+      data: {
+        title: courseDetail.title,
+        description: courseDetail.description,
+        price:
+          typeof courseDetail.price !== "number"
+            ? parseFloat(courseDetail.price)
+            : courseDetail.price,
+        duration: courseDetail.duration,
+        published: courseDetail.published ?? false,
+        instructorId: token_data.id,
+        thumbnailUrl,
+        tag: courseDetail.tag,
+        category: courseDetail.category,
+        keywords: courseDetail.keywords,
+        students: courseDetail.students ? courseDetail.students : null,
+        rating: courseDetail.rating ? courseDetail.rating : null,
+        reviews: courseDetail.reviews ? courseDetail.reviews : null,
+        what_you_learn: whatYouLearn,
+        requirements: requirements,
+      },
     });
 
     if (!updated_course) {
@@ -79,7 +117,7 @@ export async function PUT(req: NextRequest) {
 
     const updated_lessons = lessons.map(async (lesson) => {
       const updated_lesson = await prisma.lesson.update({
-        where: { id: lesson.id },
+        where: { id: lesson?.id },
         data: { ...lesson },
       });
 

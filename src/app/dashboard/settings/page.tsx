@@ -59,59 +59,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
-// Mock data
-const admins = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    role: "Super Admin",
-    avatar: "/api/placeholder/32/32",
-    lastActive: "2024-03-12",
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    role: "Admin",
-    avatar: "/api/placeholder/32/32",
-    lastActive: "2024-03-11",
-    status: "active",
-  },
-  {
-    id: 3,
-    name: "Mike Johnson",
-    email: "mike@example.com",
-    role: "Moderator",
-    avatar: "/api/placeholder/32/32",
-    lastActive: "2024-03-10",
-    status: "inactive",
-  },
-];
 
-const emailTemplates = [
-  {
-    name: "Welcome Email",
-    description: "Sent when a user registers",
-    status: "active",
-  },
-  {
-    name: "Course Enrollment",
-    description: "Sent when a user enrolls in a course",
-    status: "active",
-  },
-  {
-    name: "Certificate Completion",
-    description: "Sent when a user completes a course",
-    status: "active",
-  },
-  {
-    name: "Payment Confirmation",
-    description: "Sent after successful payment",
-    status: "active",
-  },
-];
 
 export default function SettingsPage() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -216,57 +164,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Separator />
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Branding Colors</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                    <div>
-                      <Label htmlFor="primary-color">Primary Color</Label>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Input
-                          id="primary-color"
-                          defaultValue="#3b82f6"
-                          className="flex-1"
-                        />
-                        <div className="w-10 h-10 bg-primary rounded border flex-shrink-0"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="secondary-color">Secondary Color</Label>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Input
-                          id="secondary-color"
-                          defaultValue="#f1f5f9"
-                          className="flex-1"
-                        />
-                        <div className="w-10 h-10 bg-secondary rounded border flex-shrink-0"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="accent-color">Accent Color</Label>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Input
-                          id="accent-color"
-                          defaultValue="#06a3da"
-                          className="flex-1"
-                        />
-                        <div className="w-10 h-10 bg-accent rounded border flex-shrink-0"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="success-color">Success Color</Label>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Input
-                          id="success-color"
-                          defaultValue="#16a34a"
-                          className="flex-1"
-                        />
-                        <div className="w-10 h-10 bg-success rounded border flex-shrink-0"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            
 
                 <div className="flex justify-end pt-4">
                   <Button className="w-full sm:w-auto">

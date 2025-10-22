@@ -19,9 +19,21 @@ import { Loader2, UserPlus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { toast } from "sonner";
+import EventRazorpayButton from "./EventRazorpayButton";
 
-export default function RegisterModal({ eventId, registerModalOpen, setRegisterModalOpen }: { eventId: string; registerModalOpen: boolean; setRegisterModalOpen: (value: boolean) => void }) {
+export default function RegisterModal({
+  eventId,
+  registerModalOpen,
+  setRegisterModalOpen,
+  price,
+}: {
+  eventId: string;
+  registerModalOpen: boolean;
+  setRegisterModalOpen: (value: boolean) => void;
+  price: number;
+}) {
   const user = useSelector((state: RootState) => state.user.user);
+  const events = useSelector((state: RootState) => state.events.events);
   const [formData, setFormData] = React.useState({
     userId: "",
     fname: "",
@@ -69,6 +81,7 @@ export default function RegisterModal({ eventId, registerModalOpen, setRegisterM
   React.useEffect(() => {
     if (user || eventId) {
       console.log({ eventId });
+      console.log({eventPrice: events.filter((event) => event.id === eventId)[0].price});
       setFormData({
         lname: user.lname ?? "",
         fname: user.fname ?? "",
@@ -94,7 +107,7 @@ export default function RegisterModal({ eventId, registerModalOpen, setRegisterM
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="fname">First Name</Label>
@@ -145,19 +158,15 @@ export default function RegisterModal({ eventId, registerModalOpen, setRegisterM
             />
           </div>
 
-          <DialogFooter className="pt-4">
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Registration"
-              )}
-            </Button>
+          <DialogFooter className="pt-4" onClick={() => setRegisterModalOpen(false)}>
+            <EventRazorpayButton
+              eventId={eventId}
+              price={price}
+              userId={user.id!}
+              key={user.id}
+            />
           </DialogFooter>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

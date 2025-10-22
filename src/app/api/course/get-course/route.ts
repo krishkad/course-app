@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
 
     const course = await prisma.course.findFirst({
       where: { id: courseId },
+      include: {Rating: true}
     });
 
     if (!course) {

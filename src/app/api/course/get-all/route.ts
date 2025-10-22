@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const courses = await prisma.course.findMany({
-      include: { instructor: true },
+      include: { instructor: true, Rating: true },
     });
 
     if (!courses || courses.length <= 0) {

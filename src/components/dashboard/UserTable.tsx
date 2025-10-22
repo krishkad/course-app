@@ -23,7 +23,11 @@ import { Progress } from "../ui/progress";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
-import { displayRazorpayAmount, getTopPerformingCourse } from "@/lib/utils";
+import {
+  displayRazorpayAmount,
+  generateRecentActivity,
+  getTopPerformingCourse,
+} from "@/lib/utils";
 import Link from "next/link";
 
 export function UserTable() {
@@ -31,6 +35,8 @@ export function UserTable() {
   const courses = useSelector(
     (state: RootState) => state.all_courses.all_courses
   );
+  const students = useSelector((state: RootState) => state.students.students);
+  const events = useSelector((state: RootState) => state.all_events.all_events);
   const lessons = useSelector((state: RootState) => state.all_lessons.lessons);
   const lessonsProgress = useSelector(
     (state: RootState) => state.all_lessonProgress.lessonProgress
@@ -215,40 +221,45 @@ export function UserTable() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center space-x-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={activity.avatar} alt={activity.user} />
-                    <AvatarFallback>{activity.user.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">
-                      {activity.user}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {activity.type === "enrollment" && "Enrolled in"}
-                      {activity.type === "purchase" && "Purchased"}
-                      {activity.type === "completion" && "Completed"}
-                      {" " + activity.course}
-                    </p>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {activity.time}
-                  </div>
-                  <Badge
-                    variant={
-                      activity.type === "enrollment"
-                        ? "default"
-                        : activity.type === "purchase"
-                        ? "secondary"
-                        : "outline"
-                    }
-                    className="capitalize"
+              {generateRecentActivity(payments, students, courses, events).map(
+                (activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-center space-x-3"
                   >
-                    {activity.type}
-                  </Badge>
-                </div>
-              ))}
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={activity.avatar} alt={activity.user} />
+                      <AvatarFallback>{activity.user.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">
+                        {activity.user}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {activity.type === "enrollment" && "Enrolled in"}
+                        {activity.type === "purchase" && "Purchased"}
+                        {activity.type === "completion" && "Completed"}
+                        {" " + activity.course}
+                      </p>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {activity.time}
+                    </div>
+                    <Badge
+                      variant={
+                        activity.type === "enrollment"
+                          ? "default"
+                          : activity.type === "purchase"
+                          ? "secondary"
+                          : "outline"
+                      }
+                      className="capitalize"
+                    >
+                      {activity.type}
+                    </Badge>
+                  </div>
+                )
+              )}
             </div>
           </CardContent>
         </Card>
@@ -292,7 +303,7 @@ export function UserTable() {
           </CardContent>
         </Card>
       </div>
-      <Card className="w-full mx-auto">
+      {/* <Card className="w-full mx-auto">
         <CardHeader>
           <CardTitle>Recent Enrollment</CardTitle>
           <CardDescription>
@@ -327,7 +338,7 @@ export function UserTable() {
             </Table>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </>
   );
 }

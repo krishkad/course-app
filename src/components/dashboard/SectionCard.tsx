@@ -12,11 +12,14 @@ import {
 } from "@/components/ui/card";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { displayRazorpayAmount } from "@/lib/utils";
+import { displayRazorpayAmount, getUserGrowthRate } from "@/lib/utils";
 
 export function SectionCards() {
   const all_transactions = useSelector(
     (state: RootState) => state.payments.payments
+  );
+  const students = useSelector(
+    (state: RootState) => state.students.students
   );
   const all_students = useSelector(
     (state: RootState) => state.students.students
@@ -94,7 +97,7 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Growth Rate</CardDescription>
           <CardTitle className="text-xl font-semibold tabular-nums @md/card:text-2xl @lg/card:text-3xl">
-            4.5%
+            {getUserGrowthRate(students)}%
           </CardTitle>
           <CardAction>
             <Badge variant="outline">

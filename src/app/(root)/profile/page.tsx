@@ -30,7 +30,7 @@ import {
   LogOutIcon,
   Mail,
   Phone,
-  UserIcon
+  UserIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -202,7 +202,7 @@ const Profile = () => {
     };
 
     fetch_profile_data();
-  }, [user, courses]);
+  }, [user, courses, setPayments, setPurchased_courses, setLessons, toast]);
 
   const getStatusColor = (status: string) => {
     return status === "Completed" ? "default" : "secondary";
@@ -393,7 +393,9 @@ const Profile = () => {
                   <p className="text-3xl font-bold text-foreground">
                     $
                     {displayRazorpayAmount(
-                      payments.reduce((total, item) => total + item.amount, 0)
+                      payments
+                        .filter((payment) => payment.status === "SUCCESS")
+                        .reduce((total, item) => total + item.amount, 0)
                     )}
                   </p>
                 </div>
@@ -410,7 +412,7 @@ const Profile = () => {
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 h-auto p-1">
             <TabsTrigger value="courses" className="gap-2 py-3">
               <BookOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">My Courses</span>
+              <span className="hidden sm:inline">My Materials</span>
               <span className="sm:hidden">Courses</span>
             </TabsTrigger>
             <TabsTrigger value="transactions" className="gap-2 py-3">

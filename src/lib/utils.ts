@@ -1,9 +1,18 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { jwtVerify } from "jose";
-import { CustomJWTPayload } from "@/types/types";
-import { Course, Lesson, LessonProgress, Payment, User } from "@prisma/client";
+import { ActivityItem, CustomJWTPayload } from "@/types/types";
+import {
+  Course,
+  Lesson,
+  LessonProgress,
+  Payment,
+  Rating,
+  User,
+} from "@prisma/client";
 import { IPayment } from "@/redux/admin/slice/payment";
+import { ICourse } from "@/redux/slices/courses";
+import { IEvent } from "@/redux/slices/events";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -109,7 +118,7 @@ export function getTopPerformingCourse({
 
   for (const payment of payments) {
     for (const purchase of payment.purchases) {
-      const courseId = purchase.courseId;
+      const courseId = purchase.courseId!;
 
       if (!studentsPerCourse[courseId]) {
         studentsPerCourse[courseId] = new Set();
@@ -208,4 +217,95 @@ export const getPaidStudentsCount = (
   ).length;
 
   return paidStudentsCount;
+};
+
+export const getRating = (ratings: Rating[]): number => {
+  if (ratings.length <= 0) return 0;
+  const rated_stars = ratings.reduce(
+    (total, rating) => total + rating.rating,
+    0
+  );
+  const total_stars = ratings.length;
+  const avg = rated_stars / total_stars;
+
+  return avg;
+};
+
+const getTimeAgo = (createdAt: string | Date): string => {
+  const now = new Date();
+  const past = new Date(createdAt);
+  const diffMs = now.getTime() - past.getTime();
+
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+
+  const days = Math.floor(hours / 24);
+  return `${days} day${days !== 1 ? "s" : ""} ago`;
+};
+
+export const generateRecentActivity = (
+  payments: IPayment[],
+  users: User[],
+  courses: ICourse[],
+  events: IEvent[]
+): ActivityItem[] => {
+  return [...payments]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ) // newest first
+    .map((payment) => {
+      const user = users.find((u) => u.id === payment.userId);
+      const course = courses.find(
+        (c) => c.id === payment.purchases[0].courseId
+      );
+      const event = events.find((c) => c.id === payment.purchases[0].eventId);
+
+      return {
+        id: payment.id,
+        type: event?.title ? "enrollment" : "purchase",
+        user: user?.fname ?? "Unknown User",
+        course: course?.title
+          ? course?.title
+          : event?.title
+          ? event.title
+          : "Unknown Course",
+        time: getTimeAgo(payment.createdAt),
+        avatar: "/api/placeholder/32/32",
+      };
+    });
+};
+
+export const getUserGrowthRate = (users: User[]): number => {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+  let currentCount = 0;
+  let lastCount = 0;
+
+  for (const user of users) {
+    const createdDate = new Date(user.createdAt);
+    const userMonth = createdDate.getMonth();
+    const userYear = createdDate.getFullYear();
+
+    if (userYear === currentYear && userMonth === currentMonth) {
+      currentCount++;
+    } else if (userYear === lastMonthYear && userMonth === lastMonth) {
+      lastCount++;
+    }
+  }
+
+  if (lastCount === 0) {
+    return currentCount > 0 ? 100 : 0; // Avoid divide-by-zero
+  }
+
+  const growth = ((currentCount - lastCount) / lastCount) * 100;
+  return growth;
 };

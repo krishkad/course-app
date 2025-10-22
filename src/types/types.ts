@@ -5,3 +5,13 @@ export interface CustomJWTPayload extends JwtPayload {
   id: string;
   role: "STUDENT" | "ADMIN";
 }
+
+
+export type ActivityItem = {
+  id: string;
+  type: "enrollment" | "purchase" | "completion";
+  user: string;
+  course: string;
+  time: string;
+  avatar: string;
+};

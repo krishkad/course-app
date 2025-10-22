@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       capacity,
       keywords,
       type,
+      demoVideoUrl,
       status,
     }: Partial<Event> = eventData ? JSON.parse(eventData.toString()) : {};
 
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
       duration,
       isPaid,
       capacity,
+      demoVideoUrl,
       type,
       keywords,
       status,
@@ -57,6 +59,7 @@ export async function POST(req: NextRequest) {
       !time ||
       !duration ||
       !capacity ||
+      !demoVideoUrl ||
       !type ||
       !keywords ||
       keywords.length <= 0 ||
@@ -120,6 +123,7 @@ export async function POST(req: NextRequest) {
         isPaid: isPaid ?? false,
         capacity: typeof capacity === "string" ? parseInt(capacity) : capacity,
         thumbnailUrl,
+        demoVideoUrl,
         type,
         keywords,
         status,

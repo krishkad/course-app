@@ -45,6 +45,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { format } from "date-fns";
 import { cn, displayRazorpayAmount } from "@/lib/utils";
+import { IPayment } from "@/redux/admin/slice/payment";
 
 // Mock transaction data
 const transactions = [
@@ -129,6 +130,17 @@ export default function AdminTransactions() {
   const all_courses = useSelector(
     (state: RootState) => state.all_courses.all_courses
   );
+  const all_events = useSelector(
+    (state: RootState) => state.all_events.all_events
+  );
+
+  const getSuccessRate = (transactions: IPayment[]): number => {
+    if (!transactions || transactions.length <= 0) return 0;
+    const success_payments_count = transactions.filter(
+      (trans) => trans.status === "SUCCESS"
+    ).length;
+    return (success_payments_count / transactions.length) * 100;
+  };
 
   const stats = [
     {
@@ -151,18 +163,12 @@ export default function AdminTransactions() {
     },
     {
       title: "Success Rate",
-      value: "96.8%",
+      value: `${getSuccessRate(all_transactions)}%`,
       change: "+2.1%",
       trend: "up",
       icon: CheckCircle2,
     },
-    {
-      title: "Processing Fees",
-      value: "$1,248",
-      change: "-3.5%",
-      trend: "down",
-      icon: CreditCard,
-    },
+   
   ];
 
   const getStatusBadge = (status: string) => {
@@ -233,7 +239,7 @@ export default function AdminTransactions() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {stats.map((stat, index) => (
             <Card
               key={index}
@@ -297,164 +303,195 @@ export default function AdminTransactions() {
             </div>
 
             {/* Desktop Table */}
-            <div className="hidden lg:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Transaction ID</TableHead>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    {/* <TableHead>Payment Method</TableHead> */}
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {all_transactions
-                    .slice()
-                    .reverse()
-                    .map((transaction, i) => {
-                      const trans = all_transactions[i];
-                      const student = students.filter(
-                        (sud) => sud.id === trans?.userId
-                      );
-                      const course = all_courses.filter(
-                        (cour) => cour.id === trans?.purchases[0]?.courseId
-                      );
-                      console.log({ trans, student });
+            <div className="hidden lg:block w-full overflow-auto">
+              {all_transactions.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Transaction ID</TableHead>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Course</TableHead>
+                      <TableHead>Event</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {all_transactions
+                      .slice()
+                      .reverse()
+                      .map((transaction, i) => {
+                        const trans = all_transactions[i];
+                        const student = students.find(
+                          (sud) => sud.id === trans?.userId
+                        );
+                        const course = all_courses.find(
+                          (cour) => cour.id === trans?.purchases[0]?.courseId
+                        );
+                        const trans_event = all_events.find(
+                          (event) => trans?.purchases[0]?.eventId === event.id
+                        );
 
-                      const student_name = `${student[0]?.fname} ${student[0]?.lname}`;
-                      const student_email = student[0]?.email;
-                      return (
-                        <TableRow key={transaction.id}>
-                          <TableCell className="font-mono text-sm">
-                            <span className="bg-secondary p-1 rounded-xs">
-                              TX-{transaction.id.slice(0, 6)}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium text-foreground">
-                                {!student_name.includes("undefined") &&
-                                  student_name}
+                        const student_name = `${student?.fname ?? ""} ${
+                          student?.lname ?? ""
+                        }`;
+                        const student_email = student?.email ?? "";
+
+                        const pur_course = course?.title ?? "";
+                        const pur_event = trans_event?.title ?? "";
+
+                        return (
+                          <TableRow key={transaction.id}>
+                            <TableCell className="font-mono text-sm">
+                              <span className="bg-secondary p-1 rounded-xs">
+                                TX-{transaction.id.slice(0, 6)}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium text-foreground">
+                                  {student_name.trim()}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {student_email}
+                                </div>
                               </div>
-                              <div className="text-xs text-muted-foreground">
-                                {student_email}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="max-w-xs">
-                            <p className="w-full truncate">
-                              {course[0]?.title}
-                            </p>
-                          </TableCell>
-                          <TableCell className="font-semibold">
-                            ${displayRazorpayAmount(trans?.amount)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              className={cn(
-                                trans.status === "SUCCESS"
-                                  ? "bg-green-600 text-white"
-                                  : trans.status === "PENDING"
-                                  ? "bg-yellow-500 text-white"
-                                  : "bg-red-400 text-white"
-                              )}
-                            >
-                              {trans.status.slice(0, 1).toUpperCase()}
-                              {trans.status.slice(1).toLowerCase()}
-                            </Badge>
-                          </TableCell>
-                          {/* <TableCell className="capitalize">
-                          {transaction.paymentMethod.replace("_", " ")}
-                        </TableCell> */}
-                          <TableCell className="text-sm text-muted-foreground">
-                            {format(trans?.createdAt, "MMM dd yyyy h:mm a")}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              // onClick={() => setSelectedTransaction(transaction)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                              <p className="truncate">{pur_course}</p>
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                              <p className="truncate">{pur_event}</p>
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              ${displayRazorpayAmount(trans?.amount)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={cn(
+                                  trans.status === "SUCCESS"
+                                    ? "bg-green-600 text-white"
+                                    : trans.status === "PENDING"
+                                    ? "bg-yellow-500 text-white"
+                                    : "bg-red-400 text-white"
+                                )}
+                              >
+                                {trans.status[0] +
+                                  trans.status.slice(1).toLowerCase()}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(trans?.createdAt, "MMM dd yyyy h:mm a")}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="sm">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="w-full min-h-[200px] flex flex-col items-center justify-center bg-gray-100 rounded-md p-6">
+                  <p className="text-gray-700 text-lg mb-4">
+                    No transactions yet
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden space-y-4">
-              {filteredTransactions.map((transaction) => (
-                <Card
-                  key={transaction.id}
-                  className="hover:shadow-card-hover transition-shadow"
-                >
-                  <CardContent className="pt-6">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-mono text-sm text-muted-foreground">
-                            {transaction.id}
-                          </div>
-                          <div className="font-semibold text-foreground mt-1">
-                            {transaction.student}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {transaction.email}
-                          </div>
-                        </div>
-                        {getStatusIcon(transaction.status)}
-                      </div>
+              {all_transactions.map((transaction, i) => {
+                const trans = all_transactions[i];
+                const student = students.find(
+                  (sud) => sud.id === trans?.userId
+                );
+                const course = all_courses.find(
+                  (cour) => cour.id === trans?.purchases[0]?.courseId
+                );
+                const trans_event = all_events.find(
+                  (event) => trans?.purchases[0]?.eventId === event.id
+                );
 
-                      <div className="border-t pt-3 space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Course:</span>
-                          <span className="font-medium text-right max-w-[60%] truncate">
-                            {transaction.course}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Amount:</span>
-                          <span className="font-semibold text-foreground">
-                            ${transaction.amount.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Payment:
-                          </span>
-                          <span className="capitalize">
-                            {transaction.paymentMethod.replace("_", " ")}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Date:</span>
-                          <span>{transaction.date}</span>
-                        </div>
-                      </div>
+                const student_name = `${student?.fname ?? ""} ${
+                  student?.lname ?? ""
+                }`;
+                const student_email = student?.email ?? "";
 
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        {getStatusBadge(transaction.status)}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedTransaction(transaction)}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Details
-                        </Button>
+                const pur_course = course?.title ?? "";
+                const pur_event = trans_event?.title ?? "";
+                return (
+                  <Card
+                    key={transaction.id}
+                    className="hover:shadow-card-hover transition-shadow"
+                  >
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <div className="font-mono text-sm text-muted-foreground">
+                              TX-{transaction.id.slice(0, 6)}
+                            </div>
+                            <div className="font-semibold text-foreground mt-1">
+                              {student_name}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {student_email}
+                            </div>
+                          </div>
+                          {getStatusIcon(transaction.status)}
+                        </div>
+
+                        <div className="border-t pt-3 space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Course:
+                            </span>
+                            <span className="font-medium text-right max-w-[60%] truncate">
+                              {pur_course}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Event:
+                            </span>
+                            <span className="font-medium text-right max-w-[60%] truncate">
+                              {pur_event}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Amount:
+                            </span>
+                            <span className="font-semibold text-foreground">
+                              ${displayRazorpayAmount(transaction.amount)}
+                            </span>
+                          </div>
+                          {/* <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Payment:
+                            </span>
+                            <span className="capitalize">
+                              {transaction.paymentMethod.replace("_", " ")}
+                            </span>
+                          </div> */}
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Date:</span>
+                            <span>
+                              {format(trans?.createdAt, "MMM dd yyyy h:mm a")}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             {filteredTransactions.length === 0 && (

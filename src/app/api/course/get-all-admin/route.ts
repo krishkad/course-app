@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     }
 
     const courses = await prisma.course.findMany({
-      include: { instructor: true },
+      include: { instructor: true, Rating: true },
     });
 
     if (!courses || courses.length <= 0) {

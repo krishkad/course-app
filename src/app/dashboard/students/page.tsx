@@ -30,13 +30,7 @@ import { getPaidStudentsCount } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import { User } from "@prisma/client";
 import { format } from "date-fns";
-import {
-  Download,
-  Eye,
-  MoreHorizontal,
-  Search,
-  UserMinus
-} from "lucide-react";
+import { Download, Eye, MoreHorizontal, Search, UserMinus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -129,8 +123,9 @@ export default function StudentsPage() {
   useEffect(() => {
     if (all_students) {
       setDisplay_students(all_students);
+      console.log({ payments });
     }
-  }, [all_students]);
+  }, [all_students, payments]);
 
   const stats = [
     {
@@ -139,7 +134,11 @@ export default function StudentsPage() {
       change: "+12.5%",
     },
     { label: "Active This Week", value: "1,234", change: "+5.2%" },
-    { label: "Premium Members", value: `${getPaidStudentsCount(all_students, payments)}`, change: "+8.1%" },
+    {
+      label: "Premium Members",
+      value: `${getPaidStudentsCount(all_students, payments)}`,
+      change: "+8.1%",
+    },
     { label: "Course Completions", value: "1,567", change: "+15.3%" },
   ];
 
@@ -225,74 +224,90 @@ export default function StudentsPage() {
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Professon</TableHead>
-                    <TableHead>Courses</TableHead>
-                    <TableHead>Joined</TableHead>
-                    {/* <TableHead>Status</TableHead> */}
-                    <TableHead className="w-10"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {display_students
-                    .slice()
-                    .reverse()
-                    .map((student) => {
-                      if (student.role === "ADMIN") return;
-                      // const student_course = all_courses.find((course) => student )
-                      const payment_count = payments.filter(
-                        (payment) => student.id === payment.userId && payment.status === "SUCCESS"
-                      ).length;
-                      return (
-                        <TableRow
-                          key={student.id}
-                          className="hover:bg-muted/50"
-                        >
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage
-                                  src={student.fname}
-                                  alt={student.fname}
-                                />
-                                <AvatarFallback>
-                                  {student.fname.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="font-medium text-foreground">
-                                  {student.fname} {student.lname}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {student.email}
+              {display_students.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Professon</TableHead>
+                      <TableHead>Courses</TableHead>
+                      <TableHead>Events</TableHead>
+                      <TableHead>Joined</TableHead>
+                      {/* <TableHead>Status</TableHead> */}
+                      <TableHead className="w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {display_students
+                      .slice()
+                      .reverse()
+                      .map((student) => {
+                        if (student.role === "ADMIN") return;
+                        // const student_course = all_courses.find((course) => student )
+                        const course_count = payments.filter(
+                          (payment) =>
+                            student.id === payment.userId &&
+                            payment.status === "SUCCESS" &&
+                            payment.purchases[0].courseId
+                        ).length;
+                        const event_count = payments.filter(
+                          (payment) =>
+                            student.id === payment.userId &&
+                            payment.status === "SUCCESS" &&
+                            payment.purchases[0].eventId
+                        ).length;
+                        return (
+                          <TableRow
+                            key={student.id}
+                            className="hover:bg-muted/50"
+                          >
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage
+                                    src={student.fname}
+                                    alt={student.fname}
+                                  />
+                                  <AvatarFallback>
+                                    {student.fname.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium text-foreground">
+                                    {student.fname} {student.lname}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {student.email}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                payment_count <= 0 ? "secondary" : "default"
-                              }
-                            >
-                              {/* {student.type} */}
-                              {payment_count <= 0 ? "Free" : "Premium"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{student.profession}</TableCell>
-                          <TableCell>{payment_count ?? 0}</TableCell>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  course_count <= 0 && event_count <= 0
+                                    ? "secondary"
+                                    : "default"
+                                }
+                              >
+                                {/* {student.type} */}
+                                {course_count <= 0 && event_count <= 0
+                                  ? "Free"
+                                  : "Premium"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{student.profession}</TableCell>
+                            <TableCell>{course_count ?? 0}</TableCell>
+                            <TableCell>{event_count ?? 0}</TableCell>
 
-                          <TableCell className="text-muted-foreground">
-                            {format(
-                              new Date(student.createdAt),
-                              "MMM dd yyyy - h:mm a"
-                            )}
-                          </TableCell>
-                          {/* <TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {format(
+                                new Date(student.createdAt),
+                                "MMM dd yyyy - h:mm a"
+                              )}
+                            </TableCell>
+                            {/* <TableCell>
                         <Badge
                           variant={
                             student.status === "active"
@@ -303,30 +318,37 @@ export default function StudentsPage() {
                           {student.status}
                         </Badge>
                       </TableCell> */}
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  View Profile
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">
-                                  <UserMinus className="w-4 h-4 mr-2" />
-                                  Remove Student
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem>
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    View Profile
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-destructive">
+                                    <UserMinus className="w-4 h-4 mr-2" />
+                                    Remove Student
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="w-full min-h-[200px] flex flex-col items-center justify-center bg-gray-100 rounded-md p-6">
+                  <p className="text-gray-700 text-lg mb-4">
+                    No transactions yet
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

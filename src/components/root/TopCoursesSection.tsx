@@ -8,6 +8,7 @@ import { Course } from "@prisma/client";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { ICourse } from "@/redux/slices/courses";
+import { getRating } from "@/lib/utils";
 
 const TopCoursesSection = () => {
   const [topCourses, setTopCourses] = useState<ICourse[]>([]);
@@ -176,12 +177,14 @@ const TopCoursesSection = () => {
                       {course.tag.replace("_", " ")}
                     </Badge>
                   </div>
-                  <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs font-medium text-gray-800">
-                      {course.rating}
-                    </span>
-                  </div>
+                  {course.Rating && course.Rating.length > 0 && (
+                    <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      <span className="text-xs font-medium text-gray-800">
+                        {getRating(course.Rating)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Course Content */}

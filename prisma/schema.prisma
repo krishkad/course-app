@@ -29,31 +29,35 @@ model User {
   LessonProgress    LessonProgress[]
   Event             Event[]
   EventRegistration EventRegistration[]
+  Rating            Rating[]
 }
 
 model Course {
-  id           String    @id @default(uuid())
-  slug         String    @unique
-  title        String    @unique
-  description  String
-  price        Float
-  thumbnailUrl String
-  duration     String?
-  students     String?
-  rating       Int?
-  reviews      Int?
-  published    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  keywords     String[]
-  category     String
-  tag          CourseTag @default(new)
-  updatedAt    DateTime  @updatedAt
-  instructorId String
-  instructor   User      @relation("InstructorCourses", fields: [instructorId], references: [id])
+  id             String    @id @default(uuid())
+  slug           String    @unique
+  title          String    @unique
+  description    String
+  price          Float
+  thumbnailUrl   String
+  duration       String?
+  students       String?
+  rating         Int?
+  reviews        Int?
+  what_you_learn String[]
+  requirements   String[]
+  published      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  keywords       String[]
+  category       String
+  tag            CourseTag @default(new)
+  updatedAt      DateTime  @updatedAt
+  instructorId   String
+  instructor     User      @relation("InstructorCourses", fields: [instructorId], references: [id])
 
   lessons        Lesson[]
   purchases      Purchase[]
   LessonProgress LessonProgress[]
+  Rating         Rating[]
 }
 
 model Lesson {
@@ -72,27 +76,29 @@ model Lesson {
 model Purchase {
   id          String   @id @default(uuid())
   userId      String
-  courseId    String
+  courseId    String? // optional
+  eventId     String? // optional
   paymentId   String
   purchasedAt DateTime @default(now())
 
   user    User     @relation(fields: [userId], references: [id])
-  course  Course   @relation(fields: [courseId], references: [id])
+  course  Course?  @relation(fields: [courseId], references: [id])
+  event   Event?   @relation(fields: [eventId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [id])
 }
 
 model Payment {
-  id         String        @id @default(uuid())
-  userId     String
-  amount     Float
-  currency   String        @default("USD")
-  provider   String // e.g., 'stripe', 'razorpay'
-  providerId String // e.g., Stripe charge ID
-  // razorpay_order_id   String
-  // razorpay_payment_id String?
-  // razorpay_signature  String?
-  status     PaymentStatus
-  createdAt  DateTime      @default(now())
+  id                  String        @id @default(uuid())
+  userId              String
+  amount              Float
+  currency            String        @default("USD")
+  provider            String // e.g., 'stripe', 'razorpay'
+  providerId          String // e.g., Stripe charge ID
+  razorpay_order_id   String
+  razorpay_payment_id String?
+  razorpay_signature  String?
+  status              PaymentStatus
+  createdAt           DateTime      @default(now())
 
   user              User                @relation(fields: [userId], references: [id])
   purchases         Purchase[]
@@ -134,6 +140,7 @@ model Event {
   price         Float? // Required if isPaid is true
   capacity      Int? // Max number of attendees
   thumbnailUrl  String?
+  demoVideoUrl  String
   type          EventType
   status        EventStatus         @default(upcoming)
   createdAt     DateTime            @default(now())
@@ -143,6 +150,8 @@ model Event {
   organizer     User                @relation(fields: [organizerId], references: [id])
   registered    Int?                @default(0)
   registrations EventRegistration[]
+  Purchase      Purchase[]
+  Rating        Rating[]
 
   @@index([date])
 }
@@ -159,6 +168,23 @@ model EventRegistration {
   payment Payment? @relation(fields: [paymentId], references: [id])
 
   @@unique([userId, eventId]) // A user can't register for the same event twice
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  rating    Int // e.g., 1 to 5 stars
+  course    Course?  @relation(fields: [courseId], references: [id])
+  courseId  String?
+  event     Event?   @relation(fields: [eventId], references: [id])
+  eventId   String?
+  content   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@unique([userId, eventId])
 }
 
 enum Role {

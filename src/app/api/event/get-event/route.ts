@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
 
     const event = await prisma.event.findFirst({
       where: { id: eventId },
+      include: { Rating: true },
     });
 
     if (!event) {

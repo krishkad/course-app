@@ -2,7 +2,14 @@
 
 import CourseDetail from "@/components/root/CourseDetails";
 import React, { useEffect, useState } from "react";
-import { Calendar, Clock, Users, Youtube, ExternalLink } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  Youtube,
+  ExternalLink,
+  LoaderIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/root/Navigation";
@@ -14,6 +21,7 @@ import RegisterModal from "./RegisterModal";
 import AuthComponent from "../auth/AuthComponent";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { format } from "date-fns";
 
 const EventDetail = ({ event_slug }: { event_slug: string }) => {
   const [event, setEvent] = useState<IEvent>({} as IEvent);
@@ -64,10 +72,17 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
 
   useEffect(() => {
     fetch_course();
+    console.log({ event });
   }, [event_slug, events]);
 
-  if (!event) {
-    return <>Loading...</>;
+  if (!event || event.date === undefined) {
+    return (
+      <>
+        <div className="w-full min-h-screen flex items-center justify-center">
+          <LoaderIcon className="h-8 w-8 shrink-0 animate-spin" />
+        </div>
+      </>
+    );
   }
 
   return (
@@ -82,7 +97,8 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
               {/* YouTube Embed */}
               <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl mb-8">
                 <iframe
-                  src={`https://www.youtube.com/embed/${eventData.videoId}?autoplay=0&modestbranding=1&rel=0`}
+                  // src={`https://www.youtube.com/embed/${eventData.videoId}?autoplay=0&modestbranding=1&rel=0`}
+                  src={event.demoVideoUrl}
                   title={eventData.title}
                   className="absolute inset-0 w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -118,7 +134,7 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                     <div className="text-center p-4 bg-muted/30 rounded-lg">
                       <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
                       <div className="text-2xl font-bold">
-                        {eventData.registeredUsers.toLocaleString()}
+                        {event.registered}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         Registered
@@ -126,16 +142,14 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                     </div>
                     <div className="text-center p-4 bg-muted/30 rounded-lg">
                       <Clock className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      <div className="text-2xl font-bold">
-                        {eventData.duration}
-                      </div>
+                      <div className="text-2xl font-bold">{event.duration}</div>
                       <div className="text-sm text-muted-foreground">
                         Duration
                       </div>
                     </div>
                     <div className="text-center p-4 bg-muted/30 rounded-lg">
                       <Youtube className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      <div className="text-2xl font-bold">Free</div>
+                      <div className="text-2xl font-bold">${event.price}</div>
                       <div className="text-sm text-muted-foreground">
                         Access
                       </div>
@@ -152,8 +166,7 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Capacity:</span>
                         <span>
-                          {eventData.registeredUsers.toLocaleString()} /{" "}
-                          {eventData.maxCapacity.toLocaleString()}
+                          {event.registered} / {event.capacity}
                         </span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
@@ -161,9 +174,7 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                           className="bg-primary h-2 rounded-full transition-all duration-500"
                           style={{
                             width: `${
-                              (eventData.registeredUsers /
-                                eventData.maxCapacity) *
-                              100
+                              (event.registered! / event.capacity!) * 100
                             }%`,
                           }}
                         ></div>
@@ -208,7 +219,17 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                       <div className="flex items-center space-x-3">
                         <Calendar className="h-5 w-5 text-primary" />
                         <div>
-                          <div className="font-medium">{eventData.date}</div>
+                          <div className="font-medium">
+                            {" "}
+                            {event.date
+                              ? format(
+                                  event.date
+                                    ? new Date(event.date)
+                                    : new Date(),
+                                  "MMM dd yyyy"
+                                )
+                              : "date"}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             Date
                           </div>
@@ -217,7 +238,7 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                       <div className="flex items-center space-x-3">
                         <Clock className="h-5 w-5 text-primary" />
                         <div>
-                          <div className="font-medium">{eventData.time}</div>
+                          <div className="font-medium">{event.time}</div>
                           <div className="text-sm text-muted-foreground">
                             Start Time
                           </div>
@@ -226,7 +247,9 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
                       <div className="flex items-center space-x-3">
                         <Youtube className="h-5 w-5 text-primary" />
                         <div>
-                          <div className="font-medium">YouTube Live</div>
+                          <div className="font-medium">
+                            YouTube {event.type}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             Platform
                           </div>
@@ -265,6 +288,7 @@ const EventDetail = ({ event_slug }: { event_slug: string }) => {
         eventId={event.id}
         registerModalOpen={registerModalOpen}
         setRegisterModalOpen={setRegisterModalOpen}
+        price={event.price || 0}
       />
       <Footer />
     </div>

@@ -141,6 +141,7 @@ const initialEventState: IEvent = {
   time: "",
   duration: "",
   isPaid: false,
+  demoVideoUrl: "",
   price: 0,
   capacity: 0,
   thumbnailUrl: "",
@@ -162,6 +163,7 @@ interface EventProps {
   time: string;
   duration: string;
   capacity: string;
+  demoVideoUrl: string;
   course: string;
   instructor: string;
   image: File | null;
@@ -196,6 +198,7 @@ export default function AdminEvents() {
     duration: "",
     capacity: "",
     course: "",
+    demoVideoUrl: "",
     instructor: "",
     image: null,
     status: "draft",
@@ -218,7 +221,7 @@ export default function AdminEvents() {
   });
 
   const upcomingEvents = filteredEvents.filter(
-    (event) => event.type === "upcoming"
+    (event) => event.type === "upcoming" || event.status === "upcoming"
   );
   const pastEvents = filteredEvents.filter(
     (event) => event.status === "completed"
@@ -415,8 +418,10 @@ export default function AdminEvents() {
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
                 {
-                  all_events.filter((e) =>
-                    e.date.toString().startsWith("2024-04")
+                  all_events.filter(
+                    (e) =>
+                      format(e.date, "MMM yyyy") ===
+                      format(new Date(), "MMM yyyy")
                   ).length
                 }
               </div>
@@ -476,104 +481,121 @@ export default function AdminEvents() {
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Event</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Registrations</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-10"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {all_events
-                    .slice()
-                    .reverse()
-                    .map((event) => (
-                      <TableRow key={event.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          <div>
-                            <div className="font-medium text-foreground">
-                              {event.title}
+              {all_events.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Event</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Registrations</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {all_events
+                      .slice()
+                      .reverse()
+                      .map((event) => (
+                        <TableRow key={event.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-foreground">
+                                {event.title}
+                              </div>
+                              <div className="max-w-sm">
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {event.description}
+                                </p>
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {event.organizer_name}
+                              </div>
                             </div>
-                            <div className="text-sm text-muted-foreground line-clamp-1 truncate">
-                              {event.description}
+                          </TableCell>
+                          <TableCell>{getTypeBadge(event.type)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1 text-sm">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              <span>
+                                {/* {new Date(event.date).toLocaleDateString()} */}
+                                {format(new Date(event.date), "MMM dd yyyy")}
+                              </span>
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {event.organizer_name}
+                            <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                              <Clock className="w-4 h-4" />
+                              <span>{event.time}</span>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{getTypeBadge(event.type)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1 text-sm">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span>
-                              {/* {new Date(event.date).toLocaleDateString()} */}
-                              {format(new Date(event.date), "MMM dd yyyy")}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Clock className="w-4 h-4" />
-                            <span>{event.time}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm">
-                              {event.registered}/{event.capacity}
-                            </span>
-                          </div>
-                          <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden mt-1">
-                            <div
-                              className="h-full bg-primary"
-                              style={{
-                                width: `${
-                                  (event.registered! / event.capacity!) * 100
-                                }%`,
-                              }}
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(event.status)}</TableCell>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <Users className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                {event.registered}/{event.capacity}
+                              </span>
+                            </div>
+                            <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden mt-1">
+                              <div
+                                className="h-full bg-primary"
+                                style={{
+                                  width: `${
+                                    (event.registered! / event.capacity!) * 100
+                                  }%`,
+                                }}
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(event.status)}</TableCell>
 
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setUpdateEventOpen(true);
-                                  setUpdateEvent(event);
-                                }}
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Edit Event
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setdeleteEvent(event);
-                                  setDeleteEventOpen(true);
-                                }}
-                                className="text-destructive hover:!bg-destructive/10 hover:!text-destructive"
-                              >
-                                <TrashIcon className="w-4 h-4 mr-2" />
-                                Delete Event
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setUpdateEventOpen(true);
+                                    setUpdateEvent(event);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Edit Event
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setdeleteEvent(event);
+                                    setDeleteEventOpen(true);
+                                  }}
+                                  className="text-destructive hover:!bg-destructive/10 hover:!text-destructive"
+                                >
+                                  <TrashIcon className="w-4 h-4 mr-2" />
+                                  Delete Event
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="w-full min-h-[200px] flex flex-col items-center justify-center bg-gray-100 rounded-md p-6">
+                  <p className="text-gray-700 text-lg mb-4">
+                    No events created yet
+                  </p>
+                  <Button
+                    onClick={() => setCreateModalOpen(true)}
+                    className="max-sm:w-full max-sm:h-10 mt-3"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Event
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -644,6 +666,7 @@ const CreateEventModal = ({
           time: "",
           duration: "",
           capacity: "",
+          demoVideoUrl: "",
           course: "",
           instructor: "",
           image: null as File | null,
@@ -846,6 +869,21 @@ const CreateEventModal = ({
                 placeholder="react, nextjs, frontend"
               />
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="capacity">Demo Video</Label>
+              <Input
+                id="demoVideoUrl"
+                name="demoVideoUrl"
+                value={formData.demoVideoUrl ?? ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    demoVideoUrl: e.target.value,
+                  })
+                }
+                placeholder="Demo Youtube Url"
+              />
+            </div>
           </div>
         </div>
         {!file?.name ? (
@@ -947,6 +985,7 @@ const CreateEventModal = ({
                 duration: "",
                 capacity: "",
                 course: "",
+                demoVideoUrl: "",
                 instructor: "",
                 image: null as File | null,
                 status: "draft" as "draft" | "published",
@@ -1228,6 +1267,21 @@ const UpdateEventModal = ({
                   })
                 }
                 placeholder="react, nextjs, frontend"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="demoVideoUrl">Demo Video</Label>
+              <Input
+                id="demoVideoUrl"
+                name="demoVideoUrl"
+                value={updateEvent.demoVideoUrl ?? ""}
+                onChange={(e) =>
+                  setUpdateEvent({
+                    ...updateEvent,
+                    demoVideoUrl: e.target.value,
+                  })
+                }
+                placeholder="Demo Youtube Url"
               />
             </div>
           </div>

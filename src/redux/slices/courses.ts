@@ -1,8 +1,9 @@
-import { Course } from "@prisma/client";
+import { Course, Rating } from "@prisma/client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface ICourse extends Course {
   instructor: string;
+  Rating?: Rating[]
 }
 
 interface CourseState {

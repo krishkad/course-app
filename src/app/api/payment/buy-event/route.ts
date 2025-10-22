@@ -11,17 +11,17 @@ const razorpay = new Razorpay({
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, courseId, price, provider, providerId } = await req.json();
+    const { userId, eventId, price, provider, providerId } = await req.json();
     const token = req.cookies.get("course-app-authentication")?.value;
     console.log({
       userId,
-      courseId,
+      eventId,
       price,
       provider,
       providerId,
       amount: price * 100,
     });
-    if (!userId || !courseId || !price || !provider || !providerId) {
+    if (!userId || !eventId || !price || !provider || !providerId) {
       return NextResponse.json({
         success: false,
         message: "missing required fields",
@@ -57,19 +57,25 @@ export async function POST(req: NextRequest) {
       return response;
     }
 
-    const is_course_exist = await prisma.course.findFirst({
-      where: { id: courseId },
+    const is_event = await prisma.event.findFirst({
+      where: { id: eventId },
     });
 
-    if (!is_course_exist) {
+    if (!is_event) {
       return NextResponse.json({
         success: false,
         message: "no course",
       });
     }
 
+    console.log({
+      event_price: price,
+      is_event: is_event.price,
+      round_price: (is_event.price ?? 0) * 100,
+    });
+
     const options = {
-      amount: Math.round(is_course_exist.price * 100), // amount in smallest currency unit (paise)
+      amount: Math.round((is_event.price ?? 0) * 100), // amount in smallest currency unit (paise)
       currency: "USD",
       receipt: `receipt_${Date.now()}`,
     };
@@ -84,7 +90,7 @@ export async function POST(req: NextRequest) {
         provider,
         providerId,
         status: "PENDING",
-        razorpay_order_id: is_course_exist.id
+        razorpay_order_id: is_event.id,
       },
     });
 
@@ -99,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     const purchase = await prisma.purchase.create({
       data: {
-        courseId,
+        eventId,
         userId: is_user_exist.id,
         paymentId: payment.id,
       },
@@ -112,16 +118,6 @@ export async function POST(req: NextRequest) {
         message: "failed to create purchase",
       });
     }
-
-    await prisma.course.update({
-      where: { id: courseId },
-      data: {
-        students: `${
-          parseInt(is_course_exist.students ? is_course_exist.students : "0") +
-          1
-        }`,
-      },
-    });
 
     return NextResponse.json({
       success: true,

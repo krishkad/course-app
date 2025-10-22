@@ -9,9 +9,11 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger
+  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface Topic {
   label: string;
@@ -88,6 +90,7 @@ const topics: Topic[] = [
 // ];
 
 export function NavigationMenuDemo() {
+  const courses = useSelector((state: RootState) => state.courses.courses);
   return (
     <NavigationMenu viewport={false}>
       <NavigationMenuList>
@@ -97,11 +100,11 @@ export function NavigationMenuDemo() {
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[400px] gap-2 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              {topics.map((component) => (
+              {courses.map((component) => (
                 <ListItem
-                  key={component.label}
-                  title={component.label}
-                  href={component.keyword}
+                  key={component.id}
+                  title={component.title}
+                  href={`/courses/${component.slug}`}
                   tag={component.tag}
                 ></ListItem>
               ))}
@@ -137,7 +140,7 @@ function ListItem({
                   tag === "NEW" ? "bg-green-600" : "bg-red-600"
                 )}
               >
-                {tag}
+                {tag.replace("_", " ")}
               </span>
             )}
           </div>

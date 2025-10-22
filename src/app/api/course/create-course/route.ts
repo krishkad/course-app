@@ -13,11 +13,19 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File;
     const courseDetailRaw = formData.get("courseDetail");
     const lessonsRaw = formData.get("lessons");
+    const whatYouLearnRaw = formData.get("whatYouLearn");
+    const requirementsRaw = formData.get("requirements");
     const courseDetail: Partial<Course> = courseDetailRaw
       ? JSON.parse(courseDetailRaw.toString())
       : {};
     const lessons: Partial<Lesson[]> = lessonsRaw
       ? JSON.parse(lessonsRaw.toString())
+      : [];
+    const whatYouLearn: string[] = whatYouLearnRaw
+      ? JSON.parse(whatYouLearnRaw.toString())
+      : [];
+    const requirements: string[] = requirementsRaw
+      ? JSON.parse(requirementsRaw.toString())
       : [];
     const token = req.cookies.get("course-app-authentication")?.value;
 
@@ -31,9 +39,10 @@ export async function POST(req: NextRequest) {
 
     console.log({
       token,
-      secret: process.env.NEXTAUTH_SECRET,
       courseDetail,
       lessons,
+      whatYouLearn,
+      requirements
     });
 
     if (
@@ -43,7 +52,9 @@ export async function POST(req: NextRequest) {
       !courseDetail.duration ||
       !courseDetail.category ||
       !courseDetail.keywords ||
-      courseDetail.keywords.length <= 0
+      courseDetail.keywords.length <= 0 ||
+      whatYouLearn?.length <= 0 ||
+      requirements?.length <= 0
     ) {
       return NextResponse.json({
         success: false,
@@ -95,6 +106,8 @@ export async function POST(req: NextRequest) {
         students: courseDetail.students ? courseDetail.students : null,
         rating: courseDetail.rating ? courseDetail.rating : null,
         reviews: courseDetail.reviews ? courseDetail.reviews : null,
+        what_you_learn: whatYouLearn,
+        requirements: requirements,
       },
       include: {
         instructor: true,

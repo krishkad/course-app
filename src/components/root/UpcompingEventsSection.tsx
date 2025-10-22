@@ -118,7 +118,8 @@ const UpcomingEventsSection = () => {
                         <Clock className="h-4 w-4 text-primary" />
                       </div>
                       <span className="text-muted-foreground">
-                        {format(event.date, "h:mm a")}
+                        {/* {format(event.time, "h:mm a")} */}
+                        {event.time}
                       </span>
                     </div>
 

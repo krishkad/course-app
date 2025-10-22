@@ -55,6 +55,12 @@ export default function CreateCourseModal({
       content: "",
     },
   ]);
+  const [whatYouLearn, setWhatYouLearn] = useState<string[]>([""]);
+  const [requirements, setRequirements] = useState<string[]>([""]);
+  const [editWhatYouLearn, setEditWhatYouLearn] = useState<string[]>([""]);
+  const [editRequirements, setEditRequirements] = useState<string[]>([""]);
+  const [updateCourseFile, setUpdateCourseFile] = useState<File | null>(null);
+
   const [editLessons, setEditLessons] = useState<Lesson[]>([]);
   const [course, setCourse] = useState<Course>({} as Course);
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
@@ -83,6 +89,8 @@ export default function CreateCourseModal({
 
           setCourse(res.course as Course);
           setEditLessons(res.lessons as Lesson[]);
+          setEditWhatYouLearn(res.course.what_you_learn as string[]);
+          setEditRequirements(res.course.requirements as string[]);
           console.log({ edit_lessons: res.lessons });
         } catch (error) {
           console.log("error while getting course: ", error);
@@ -97,7 +105,11 @@ export default function CreateCourseModal({
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setCourseImage(file);
+    if (editModal) {
+      if (file) setUpdateCourseFile(file);
+    } else {
+      if (file) setCourseImage(file);
+    }
   };
 
   const handleAddLesson = () => {
@@ -147,6 +159,85 @@ export default function CreateCourseModal({
     setCourse({ ...course, [e.target.name]: e.target.value });
   };
 
+  const handleArrayChange = (
+    arrayName:
+      | "whatYouLearn"
+      | "requirements"
+      | "editWhatYouLearn"
+      | "editRequirements",
+    index: number,
+    value: string
+  ) => {
+    if (editModal) {
+      const updater =
+        arrayName === "editWhatYouLearn"
+          ? setEditWhatYouLearn
+          : setEditRequirements;
+      const currentArray =
+        arrayName === "editWhatYouLearn"
+          ? [...editWhatYouLearn]
+          : [...editRequirements];
+      currentArray[index] = value;
+      updater(currentArray);
+    } else {
+      const updater =
+        arrayName === "whatYouLearn" ? setWhatYouLearn : setRequirements;
+      const currentArray =
+        arrayName === "whatYouLearn" ? [...whatYouLearn] : [...requirements];
+      currentArray[index] = value;
+      updater(currentArray);
+    }
+  };
+
+  const handleAddItem = (
+    arrayName:
+      | "whatYouLearn"
+      | "requirements"
+      | "editWhatYouLearn"
+      | "editRequirements"
+  ) => {
+    if (!editModal) {
+      const updater =
+        arrayName === "whatYouLearn" ? setWhatYouLearn : setRequirements;
+      updater((prev) => [...prev, ""]);
+    } else {
+      const updater =
+        arrayName === "editWhatYouLearn"
+          ? setEditWhatYouLearn
+          : setEditRequirements;
+      updater((prev) => [...prev, ""]);
+    }
+  };
+
+  const handleRemoveItem = (
+    arrayName:
+      | "whatYouLearn"
+      | "requirements"
+      | "editRequirements"
+      | "editWhatYouLearn",
+    index: number
+  ) => {
+    if (!editModal) {
+      const updater =
+        arrayName === "whatYouLearn" ? setWhatYouLearn : setRequirements;
+      const currentArray =
+        arrayName === "whatYouLearn" ? [...whatYouLearn] : [...requirements];
+      currentArray.splice(index, 1);
+      updater(currentArray);
+    } else {
+      const updater =
+        arrayName === "editWhatYouLearn"
+          ? setEditWhatYouLearn
+          : setEditRequirements;
+      const currentArray =
+        arrayName === "editWhatYouLearn"
+          ? [...editWhatYouLearn]
+          : [...editRequirements];
+      currentArray.splice(index, 1);
+      updater(currentArray);
+    }
+  };
+
   const handle_publish = async () => {
     try {
       setIsSubmiting(true);
@@ -154,6 +245,8 @@ export default function CreateCourseModal({
       formData.append("file", courseImage as File);
       formData.append("courseDetail", JSON.stringify(course));
       formData.append("lessons", JSON.stringify(lessons));
+      formData.append("whatYouLearn", JSON.stringify(whatYouLearn));
+      formData.append("requirements", JSON.stringify(requirements));
       const response = await fetch("/api/course/create-course", {
         method: "POST",
         body: formData,
@@ -179,18 +272,15 @@ export default function CreateCourseModal({
   const handle_update = async () => {
     try {
       setIsSubmiting(true);
+      const formData = new FormData();
+      formData.append("updateCourseFile", updateCourseFile as File);
+      formData.append("courseDetail", JSON.stringify(course));
+      formData.append("editLessons", JSON.stringify(editLessons));
+      formData.append("editWhatYouLearn", JSON.stringify(editWhatYouLearn));
+      formData.append("editRequirements", JSON.stringify(editRequirements));
       const response = await fetch("/api/course/edit", {
         method: "PUT",
-        body: JSON.stringify({
-          title: course.title,
-          description: course.description,
-          price: course.price,
-          tag: course.tag,
-          duration: course.duration,
-          published: course.published,
-          courseId: course.id,
-          lessons: editLessons,
-        }),
+        body: formData,
         credentials: "include",
       });
 
@@ -457,11 +547,13 @@ export default function CreateCourseModal({
                   <SelectValue placeholder="Select a tag" />
                 </SelectTrigger>
                 <SelectContent>
-                  {["new", "most_popular", "trending","best_seller"].map((tag) => (
-                    <SelectItem key={tag} value={tag}>
-                      {tag}
-                    </SelectItem>
-                  ))}
+                  {["new", "most_popular", "trending", "best_seller"].map(
+                    (tag) => (
+                      <SelectItem key={tag} value={tag}>
+                        {tag}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -497,13 +589,21 @@ export default function CreateCourseModal({
                 accept="image/*"
                 onChange={handleImageChange}
               />
-              {courseImage && (
-                <img
-                  src={URL.createObjectURL(courseImage)}
-                  alt="Preview"
-                  className="mt-2 w-full h-32 object-cover rounded-md border"
-                />
-              )}
+              {editModal
+                ? courseImage && (
+                    <img
+                      src={URL.createObjectURL(courseImage)}
+                      alt="Preview"
+                      className="mt-2 w-full h-32 object-cover rounded-md border"
+                    />
+                  )
+                : updateCourseFile && (
+                    <img
+                      src={URL.createObjectURL(updateCourseFile)}
+                      alt="Preview"
+                      className="mt-2 w-full h-32 object-cover rounded-md border"
+                    />
+                  )}
               {editModal && course.thumbnailUrl && (
                 <img
                   src={course.thumbnailUrl}
@@ -636,7 +736,7 @@ export default function CreateCourseModal({
                         onChange={(value: string) =>
                           handleLessonChange(lesson.id, "content", value)
                         }
-                        disabled={!!lesson.videoUrl}
+                        // disabled={!!lesson.videoUrl}
                       />
                     </div>
 
@@ -653,36 +753,43 @@ export default function CreateCourseModal({
                   </div>
                 </div>
               ))
-            : editLessons.map((lesson, index) => (
-                <div
-                  key={lesson.id}
-                  className="border p-4 rounded-md relative bg-white shadow-sm"
-                >
-                  <div className="absolute top-2 right-2 flex items-center space-x-1">
-                    {lessons.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveLesson(lesson.id)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Lesson Title</Label>
-                      <Input
-                        value={lesson.title}
-                        onChange={(e) =>
-                          handleLessonChange(lesson.id, "title", e.target.value)
-                        }
-                        placeholder="Lesson 1: Introduction"
-                      />
+            : editLessons
+                .slice()
+                .reverse()
+                .map((lesson, index) => (
+                  <div
+                    key={lesson.id}
+                    className="border p-4 rounded-md relative bg-white shadow-sm"
+                  >
+                    <div className="absolute top-2 right-2 flex items-center space-x-1">
+                      {lessons.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveLesson(lesson.id)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
 
-                    {/* <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Lesson Title</Label>
+                        <Input
+                          value={lesson.title}
+                          onChange={(e) =>
+                            handleLessonChange(
+                              lesson.id,
+                              "title",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Lesson 1: Introduction"
+                        />
+                      </div>
+
+                      {/* <div>
                   <Label>Order</Label>
                   <Input
                     type="number"
@@ -698,24 +805,24 @@ export default function CreateCourseModal({
                   />
                 </div> */}
 
-                    <div>
-                      <Label>Video URL</Label>
-                      <Input
-                        type="url"
-                        value={lesson.videoUrl ?? ""}
-                        onChange={(e) =>
-                          handleLessonChange(
-                            lesson.id,
-                            "videoUrl",
-                            e.target.value
-                          )
-                        }
-                        placeholder="https://..."
-                      />
-                    </div>
+                      <div>
+                        <Label>Video URL</Label>
+                        <Input
+                          type="url"
+                          value={lesson.videoUrl ?? ""}
+                          onChange={(e) =>
+                            handleLessonChange(
+                              lesson.id,
+                              "videoUrl",
+                              e.target.value
+                            )
+                          }
+                          placeholder="https://..."
+                        />
+                      </div>
 
-                    <div>
-                      {/* <Label>Video Duration</Label>
+                      <div>
+                        {/* <Label>Video Duration</Label>
                   <Input
                     type="time"
                     step="60"
@@ -724,55 +831,55 @@ export default function CreateCourseModal({
                       handleLessonChange(lesson.id, "duration", e.target.value)
                     }
                   /> */}
-                      <div>
-                        <Label htmlFor="duration">Video Duration</Label>
-                        <Input
-                          id="duration"
-                          type="text"
-                          value={lesson.videoDuration ?? ""}
-                          onChange={(e) =>
-                            handleLessonChange(
-                              lesson.id,
-                              "videoDuration",
-                              e.target.value
-                            )
-                          }
-                          placeholder="3h 20m"
-                        />
+                        <div>
+                          <Label htmlFor="duration">Video Duration</Label>
+                          <Input
+                            id="duration"
+                            type="text"
+                            value={lesson.videoDuration ?? ""}
+                            onChange={(e) =>
+                              handleLessonChange(
+                                lesson.id,
+                                "videoDuration",
+                                e.target.value
+                              )
+                            }
+                            placeholder="3h 20m"
+                          />
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="col-span-1 md:col-span-2">
-                      <Label>Lesson Content (optional)</Label>
-                      {/* <Textarea
+                      <div className="col-span-1 md:col-span-2">
+                        <Label>Lesson Content (optional)</Label>
+                        {/* <Textarea
                     value={lesson.content ?? ""}
                     onChange={(e) =>
                       handleLessonChange(lesson.id, "content", e.target.value)
                     }
                     placeholder="Write content or notes for this lesson..."
                   /> */}
-                      <HtmlEditor
-                        value={lesson.content ?? ""}
-                        onChange={(value: string) =>
-                          handleLessonChange(lesson.id, "content", value)
-                        }
-                        disabled={!!lesson.videoUrl}
-                      />
-                    </div>
+                        <HtmlEditor
+                          value={lesson.content ?? ""}
+                          onChange={(value: string) =>
+                            handleLessonChange(lesson.id, "content", value)
+                          }
+                          disabled={!!lesson.videoUrl}
+                        />
+                      </div>
 
-                    <div className="flex items-center gap-2 mt-2">
-                      <Label htmlFor={`isPaid-${lesson.id}`}>Is Paid?</Label>
-                      <Switch
-                        id={`isPaid-${lesson.id}`}
-                        checked={lesson.isPaid}
-                        onCheckedChange={(checked) =>
-                          handleLessonChange(lesson.id, "isPaid", checked)
-                        }
-                      />
+                      <div className="flex items-center gap-2 mt-2">
+                        <Label htmlFor={`isPaid-${lesson.id}`}>Is Paid?</Label>
+                        <Switch
+                          id={`isPaid-${lesson.id}`}
+                          checked={lesson.isPaid}
+                          onCheckedChange={(checked) =>
+                            handleLessonChange(lesson.id, "isPaid", checked)
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
           <Button
             variant="outline"
@@ -824,25 +931,255 @@ export default function CreateCourseModal({
       ),
     },
     {
+      title: "InstructorInfo",
+      content: (
+        <div className="space-y-6">
+          {!editModal ? (
+            <div className="space-y-6">
+              {/* === What You Learn Section === */}
+              <div>
+                <h2 className="text-lg font-semibold mb-2">
+                  What You Will Learn
+                </h2>
+                {whatYouLearn.map((line, index) => (
+                  <div
+                    key={`learn-${index}`}
+                    className="border p-4 rounded-md relative bg-white shadow-sm"
+                  >
+                    <div className="absolute top-2 right-2">
+                      {whatYouLearn.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            handleRemoveItem("whatYouLearn", index)
+                          }
+                          type="button"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`learn-${index}`}>Line {index + 1}</Label>
+                      <Input
+                        id={`learn-${index}`}
+                        value={line}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "whatYouLearn",
+                            index,
+                            e.target.value
+                          )
+                        }
+                        placeholder="E.g. Understand React Hooks"
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() => handleAddItem("whatYouLearn")}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add More
+                </Button>
+              </div>
+
+              {/* === Requirements Section === */}
+              <div>
+                <h2 className="text-lg font-semibold mb-2">Requirements</h2>
+                {requirements.map((item, index) => (
+                  <div
+                    key={`req-${index}`}
+                    className="border p-4 rounded-md relative bg-white shadow-sm"
+                  >
+                    <div className="absolute top-2 right-2">
+                      {requirements.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            handleRemoveItem("requirements", index)
+                          }
+                          type="button"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`req-${index}`}>
+                        Requirement {index + 1}
+                      </Label>
+                      <Input
+                        id={`req-${index}`}
+                        value={item}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "requirements",
+                            index,
+                            e.target.value
+                          )
+                        }
+                        placeholder="E.g. Basic JavaScript knowledge"
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() => handleAddItem("requirements")}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add More
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6 mt-6">
+              {/* === What You Will Learn Section === */}
+              <div>
+                <h2 className="text-lg font-semibold mb-2">
+                  What You Will Learn
+                </h2>
+                {editWhatYouLearn.map((line, index) => (
+                  <div
+                    key={`learn-${index}`}
+                    className="border p-4 rounded-md relative bg-white shadow-sm"
+                  >
+                    <div className="absolute top-2 right-2">
+                      {editWhatYouLearn.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            handleRemoveItem("editWhatYouLearn", index)
+                          }
+                          type="button"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`learn-${index}`}>Line {index + 1}</Label>
+                      <Input
+                        id={`learn-${index}`}
+                        value={line}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "editWhatYouLearn",
+                            index,
+                            e.target.value
+                          )
+                        }
+                        placeholder="E.g. Understand React Hooks"
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() => handleAddItem("editWhatYouLearn")}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add More
+                </Button>
+              </div>
+
+              {/* === Requirements Section === */}
+              <div>
+                <h2 className="text-lg font-semibold mb-2">Requirements</h2>
+                {editRequirements.map((item, index) => (
+                  <div
+                    key={`req-${index}`}
+                    className="border p-4 rounded-md relative bg-white shadow-sm"
+                  >
+                    <div className="absolute top-2 right-2">
+                      {editRequirements.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            handleRemoveItem("editRequirements", index)
+                          }
+                          type="button"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`req-${index}`}>
+                        Requirement {index + 1}
+                      </Label>
+                      <Input
+                        id={`req-${index}`}
+                        value={item}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "editRequirements",
+                            index,
+                            e.target.value
+                          )
+                        }
+                        placeholder="E.g. Basic JavaScript knowledge"
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() => handleAddItem("editRequirements")}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add More
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
       title: "Preview",
       content: (
         <div className="space-y-4 text-sm">
           <h4 className="font-semibold">Course Summary</h4>
           <div className="bg-muted/30 rounded-md p-4">
-            {courseImage && (
+            {!editModal && courseImage && (
               <img
                 src={URL.createObjectURL(courseImage)}
                 alt="Preview"
                 className="mt-2 w-full aspect-video object-cover rounded-md border"
               />
             )}
-            {editModal && course.thumbnailUrl && (
+            {editModal && updateCourseFile !== null ? (
+              <img
+                src={URL.createObjectURL(updateCourseFile)}
+                alt="Preview"
+                className="mt-2 w-full aspect-video object-cover rounded-md border"
+              />
+            ) : editModal ? (
               <img
                 src={course.thumbnailUrl}
                 alt="Preview"
                 className="mt-2 w-full aspect-video object-cover rounded-md border"
               />
-            )}
+            ) : null}
             <p className="mt-4">
               <strong>Title:</strong> {course.title}
             </p>
@@ -882,6 +1219,10 @@ export default function CreateCourseModal({
     setDirection(-1);
     setCurrentStep((s) => Math.max(s - 1, 0));
   };
+
+  useEffect(() => {
+    console.log({ editWhatYouLearn, editRequirements });
+  }, [editRequirements, editWhatYouLearn]);
 
   return (
     <Dialog
@@ -932,7 +1273,12 @@ export default function CreateCourseModal({
             Previous
           </Button>
           <div className="space-x-2">
-            <Button variant="outline" onClick={() => setCreateModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCreateModalOpen(false);
+              }}
+            >
               Save Draft
             </Button>
             {currentStep < steps.length - 1 ? (
@@ -945,9 +1291,24 @@ export default function CreateCourseModal({
                     console.log({ course, editLessons });
                     handle_update();
                     setCreateModalOpen(false);
+                    setCurrentStep(0);
                   } else {
                     handle_publish();
                     setCreateModalOpen(false);
+                    setCourse({} as ICourse);
+                    setCourseImage(null);
+                    setLessons([
+                      {
+                        id: Date.now(),
+                        title: "",
+                        videoDuration: "",
+                        videoUrl: "",
+                        order: 1,
+                        isPaid: false,
+                        content: "",
+                      },
+                    ]);
+                    setCurrentStep(0);
                     console.log({ course, lessons });
                   }
                 }}

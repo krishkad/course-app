@@ -82,6 +82,8 @@ const getData = async () => {
       : [];
     const userData = userJson.success ? userJson.data : {};
 
+    console.log({ courses: coursesData });
+
     return {
       courses: coursesData,
       events: eventsData,
