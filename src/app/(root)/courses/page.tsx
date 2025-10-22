@@ -16,7 +16,6 @@ import { getRating } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import { ArrowRight, Clock, Search, Star, Users } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -25,14 +24,16 @@ const AllCourses = () => {
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [query, setQuery] = useState<string>("");
-  const pathname = useSearchParams();
 
   const courses = useSelector((state: RootState) => state.courses.courses);
 
   useEffect(() => {
-    const q = pathname.get("q");
+    const fullUrl = window.location.href;
+
+    const q = fullUrl.split("q=")[1];
     if (q) {
-      setSearchTerm(q);
+      const base64Decode = decodeURI(q);
+      setSearchTerm(base64Decode);
     }
     console.log({ q });
   }, []);
