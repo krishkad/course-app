@@ -17,7 +17,7 @@ import { RootState } from "@/redux/store";
 import { ArrowRight, Clock, Search, Star, Users } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 const AllCourses = () => {
@@ -143,145 +143,150 @@ const AllCourses = () => {
     return findSimilarWords(searchTerm, searchText);
   });
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <Suspense fallback={<>Loading...</>}>
+      <div className="min-h-screen bg-background">
+        <Navigation />
 
-      <main className="">
-        {/* Hero Section */}
-        <section className="pt-24 pb-16 px-4">
-          <div className="container mx-auto text-center">
-            <div className="animate-fade-in">
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-6">
-                All Courses
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Discover our complete collection of professional development
-                courses
-              </p>
+        <main className="">
+          {/* Hero Section */}
+          <section className="pt-24 pb-16 px-4">
+            <div className="container mx-auto text-center">
+              <div className="animate-fade-in">
+                <h1 className="text-4xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-6">
+                  All Courses
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                  Discover our complete collection of professional development
+                  courses
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Filters Section */}
-        <section className="px-4 pb-12">
-          <div className="container mx-auto">
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 shadow-elegant border border-border/50">
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search profession, skill, hobbies..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Cost" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="upcoming">Free</SelectItem>
-                      <SelectItem value="completed">Paid</SelectItem>
-                    </SelectContent>
-                  </Select>
+          {/* Filters Section */}
+          <section className="px-4 pb-12">
+            <div className="container mx-auto">
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 shadow-elegant border border-border/50">
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search profession, skill, hobbies..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <Select
+                      value={filterStatus}
+                      onValueChange={setFilterStatus}
+                    >
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Cost" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="upcoming">Free</SelectItem>
+                        <SelectItem value="completed">Paid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Courses Grid */}
-        <section className="pb-24">
-          <div className="container mx-auto px-4">
-            <div className="mb-6">
-              <p className="text-muted-foreground">
-                Showing {courses.length} of {courses.length} courses
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-              {filteredCourses.map((course) => (
-                <Link
-                  key={course.id}
-                  href={`/courses/${course.slug}`}
-                  className="group block"
-                >
-                  <div className="bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
-                    {/* Course Image */}
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={course.thumbnailUrl}
-                        alt={course.title}
-                        className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                      <div className="absolute top-4 left-4">
-                        <Badge variant={"default"} className="shadow-sm">
-                          {/* {course.badge} */}
-                          Best Seller
-                        </Badge>
-                      </div>
-                      {course.Rating && course.Rating.length > 0 && (
-                        <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-xs font-medium text-gray-800">
-                            {getRating(course.Rating)}
-                          </span>
+          {/* Courses Grid */}
+          <section className="pb-24">
+            <div className="container mx-auto px-4">
+              <div className="mb-6">
+                <p className="text-muted-foreground">
+                  Showing {courses.length} of {courses.length} courses
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                {filteredCourses.map((course) => (
+                  <Link
+                    key={course.id}
+                    href={`/courses/${course.slug}`}
+                    className="group block"
+                  >
+                    <div className="bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
+                      {/* Course Image */}
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={course.thumbnailUrl}
+                          alt={course.title}
+                          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        <div className="absolute top-4 left-4">
+                          <Badge variant={"default"} className="shadow-sm">
+                            {/* {course.badge} */}
+                            Best Seller
+                          </Badge>
                         </div>
-                      )}
+                        {course.Rating && course.Rating.length > 0 && (
+                          <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs font-medium text-gray-800">
+                              {getRating(course.Rating)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Course Content */}
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
+                          {course.title}
+                        </h3>
+
+                        <p className="text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-3">
+                          {course.description}
+                        </p>
+
+                        <p className="text-sm font-medium text-primary mb-4">
+                          by {course.instructor}
+                        </p>
+
+                        {/* Course Stats */}
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-6 bg-muted/30 rounded-lg p-3">
+                          <div className="flex items-center space-x-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{course.duration}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Users className="h-3 w-3" />
+                            <span>{course.students}</span>
+                          </div>
+                        </div>
+
+                        {/* Course Footer */}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-2xl font-bold !text-primary">
+                              {course.price}
+                            </span>
+                          </div>
+                          <Button className="bg-gradient-primary hover:opacity-90 shadow-glow group">
+                            View Course
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-
-                    {/* Course Content */}
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
-                        {course.title}
-                      </h3>
-
-                      <p className="text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-3">
-                        {course.description}
-                      </p>
-
-                      <p className="text-sm font-medium text-primary mb-4">
-                        by {course.instructor}
-                      </p>
-
-                      {/* Course Stats */}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-6 bg-muted/30 rounded-lg p-3">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="h-3 w-3" />
-                          <span>{course.duration}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Users className="h-3 w-3" />
-                          <span>{course.students}</span>
-                        </div>
-                      </div>
-
-                      {/* Course Footer */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-2xl font-bold !text-primary">
-                            {course.price}
-                          </span>
-                        </div>
-                        <Button className="bg-gradient-primary hover:opacity-90 shadow-glow group">
-                          View Course
-                          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      </main>
+          </section>
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </Suspense>
   );
 };
 
