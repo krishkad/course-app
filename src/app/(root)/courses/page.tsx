@@ -193,7 +193,7 @@ const AllCourses = () => {
             <div className="container mx-auto px-4">
               <div className="mb-6">
                 <p className="text-muted-foreground">
-                  Showing {courses.length} of {courses.length} courses
+                  Showing {filteredCourses.length} of {courses.length} courses
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
