@@ -3,6 +3,8 @@ import { User } from "@prisma/client";
 import { cookies } from "next/headers";
 import React, { ReactNode } from "react";
 
+export const dynamic = "force-dynamic"; // Add this to force dynamic rendering
+
 const RootLayout = async ({ children }: { children: ReactNode }) => {
   const { courses, events, users, display, lessonProgress } = await getData();
   return (
