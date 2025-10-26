@@ -381,7 +381,7 @@ export default function AdminEvents() {
             </CardHeader>
             <CardContent className="">
               <div className="text-2xl font-bold text-foreground">
-                {all_events.length}
+                {filteredEvents.length}
               </div>
             </CardContent>
           </Card>
@@ -405,7 +405,7 @@ export default function AdminEvents() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {all_events.reduce((sum, event) => sum + event.registered!, 0)}
+                {filteredEvents.reduce((sum, event) => sum + event.registered!, 0)}
               </div>
             </CardContent>
           </Card>
@@ -418,7 +418,7 @@ export default function AdminEvents() {
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
                 {
-                  all_events.filter(
+                  filteredEvents.filter(
                     (e) =>
                       format(e.date, "MMM yyyy") ===
                       format(new Date(), "MMM yyyy")
@@ -481,7 +481,7 @@ export default function AdminEvents() {
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
-              {all_events.length > 0 ? (
+              {filteredEvents.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -494,7 +494,7 @@ export default function AdminEvents() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {all_events
+                    {filteredEvents
                       .slice()
                       .reverse()
                       .map((event) => (

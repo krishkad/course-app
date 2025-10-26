@@ -46,6 +46,9 @@ import { RootState } from "@/redux/store";
 import { format } from "date-fns";
 import { cn, displayRazorpayAmount } from "@/lib/utils";
 import { IPayment } from "@/redux/admin/slice/payment";
+import { User } from "@prisma/client";
+import { ICourse } from "@/redux/admin/slice/all-courses";
+import { IEvent } from "@/redux/admin/slice/all-events";
 
 // Mock transaction data
 const transactions = [
@@ -204,14 +207,55 @@ export default function AdminTransactions() {
     }
   };
 
-  const filteredTransactions = transactions.filter((txn) => {
+  function formatTransactions({
+    all_transactions,
+    students,
+    all_courses,
+    all_events,
+    displayRazorpayAmount,
+  }: {
+    all_transactions: IPayment[];
+    students: User[];
+    all_courses: ICourse[];
+    all_events: IEvent[];
+    displayRazorpayAmount: (value: number) => number;
+  }) {
+    return all_transactions.map((trans) => {
+      const student = students.find((s) => s.id === trans?.userId);
+      const purchase = trans?.purchases?.[0];
+
+      const course = all_courses.find((c) => c.id === purchase?.courseId);
+      const event = all_events.find((e) => e.id === purchase?.eventId);
+
+      return {
+        id: trans.id,
+        txCode: `TX-${trans.id.slice(0, 6)}`,
+        studentName: `${student?.fname ?? ""} ${student?.lname ?? ""}`.trim(),
+        studentEmail: student?.email ?? "",
+        studentPhone: student?.phoneNo ?? "",
+        courseTitle: course?.title ?? "",
+        eventTitle: event?.title ?? "",
+        amount: displayRazorpayAmount(trans?.amount),
+        status: trans?.status ?? "UNKNOWN",
+        createdAt: format(new Date(trans?.createdAt), "MMM dd yyyy h:mm a"),
+      };
+    });
+  }
+
+  const filteredTransactions = formatTransactions({
+    all_courses,
+    all_transactions,
+    all_events,
+    students,
+    displayRazorpayAmount,
+  }).filter((txn) => {
     const matchesSearch =
       txn.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.course.toLowerCase().includes(searchTerm.toLowerCase());
+      txn.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      txn.studentEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      txn.courseTitle.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || txn.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || txn.status === statusFilter.toUpperCase();
 
     return matchesSearch && matchesStatus;
   });
@@ -277,7 +321,7 @@ export default function AdminTransactions() {
             <CardTitle>All Transactions</CardTitle>
           </CardHeader>
           <CardContent className="w-full overflow-hidden">
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 mt-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -303,7 +347,7 @@ export default function AdminTransactions() {
 
             {/* Desktop Table */}
             <div className="hidden lg:block w-full overflow-hidden">
-              {all_transactions.length > 0 ? (
+              {filteredTransactions.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -319,7 +363,7 @@ export default function AdminTransactions() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {all_transactions
+                    {filteredTransactions
                       .slice()
                       .reverse()
                       .map((transaction, i) => {

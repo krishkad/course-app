@@ -18,22 +18,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Course, CourseTag, Lesson } from "@prisma/client";
-import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronsUpDown, LoaderIcon, Plus, X } from "lucide-react";
-import { ChangeEvent, useEffect, useState } from "react";
-import { Switch } from "../ui/switch";
-import HtmlEditor from "./HtmlEditor";
-import { useDispatch } from "react-redux";
 import { add_course, update_course } from "@/redux/admin/slice/all-courses";
 import { ICourse } from "@/redux/slices/courses";
-import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Course, CourseTag, Lesson } from "@prisma/client";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, LoaderIcon, Plus, X } from "lucide-react";
+import { ChangeEvent, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { professions } from "../root/SearchBox";
+import { Switch } from "../ui/switch";
+import HtmlEditor from "./HtmlEditor";
 
 const categories = ["Web Development", "Design", "Marketing", "Photography"];
 
