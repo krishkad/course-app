@@ -17,7 +17,7 @@ const CallToActionSection = () => {
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Headline */}
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary-foreground">
-            Don't Let Your Career Fall Behind
+            Don&apos;t Let Your Career Fall Behind
           </h2>
 
           {/* Supporting Text */}

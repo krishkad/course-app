@@ -63,7 +63,7 @@ const CareerAccelaration = () => {
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Generic AI courses teach theory. We teach you how to apply AI in
-            your actual role—whether you're in marketing, finance, healthcare,
+            your actual role—whether you&apos;re in marketing, finance, healthcare,
             operations, or leadership.
           </p>
         </div>
