@@ -35,7 +35,7 @@ export function SectionCards() {
   // 📅 Helper: Get start date for a given period
   const getPeriodRange = (period: string) => {
     const now = new Date();
-    let start = new Date();
+    const start = new Date();
     switch (period) {
       case "week":
         start.setDate(now.getDate() - 7);
@@ -56,38 +56,61 @@ export function SectionCards() {
   };
 
   // 🧠 Filter data by date range
-  const filterByDateRange = (data: any[], dateKey: string, start: Date, end: Date) =>
+  const filterByDateRange = (
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any[],
+    dateKey: string,
+    start: Date,
+    end: Date
+  ) =>
     data.filter((item) => {
       const d = new Date(item[dateKey]);
       return d >= start && d <= end;
     });
 
   // 🧮 Compute filtered and previous-period data
-  const { currentData: currentTransactions, prevData: prevTransactions } = useMemo(() => {
-    const { start, end } = getPeriodRange(selectedPeriod);
+  const { currentData: currentTransactions, prevData: prevTransactions } =
+    useMemo(() => {
+      const { start, end } = getPeriodRange(selectedPeriod);
 
-    // previous period range
-    const duration = end.getTime() - start.getTime();
-    const prevEnd = new Date(start);
-    const prevStart = new Date(start.getTime() - duration);
+      // previous period range
+      const duration = end.getTime() - start.getTime();
+      const prevEnd = new Date(start);
+      const prevStart = new Date(start.getTime() - duration);
 
-    return {
-      currentData: filterByDateRange(all_transactions, "createdAt", start, end),
-      prevData: filterByDateRange(all_transactions, "createdAt", prevStart, prevEnd),
-    };
-  }, [all_transactions, selectedPeriod]);
+      return {
+        currentData: filterByDateRange(
+          all_transactions,
+          "createdAt",
+          start,
+          end
+        ),
+        prevData: filterByDateRange(
+          all_transactions,
+          "createdAt",
+          prevStart,
+          prevEnd
+        ),
+      };
+    }, [all_transactions, selectedPeriod]);
 
-  const { currentData: currentStudents, prevData: prevStudents } = useMemo(() => {
-    const { start, end } = getPeriodRange(selectedPeriod);
-    const duration = end.getTime() - start.getTime();
-    const prevEnd = new Date(start);
-    const prevStart = new Date(start.getTime() - duration);
+  const { currentData: currentStudents, prevData: prevStudents } =
+    useMemo(() => {
+      const { start, end } = getPeriodRange(selectedPeriod);
+      const duration = end.getTime() - start.getTime();
+      const prevEnd = new Date(start);
+      const prevStart = new Date(start.getTime() - duration);
 
-    return {
-      currentData: filterByDateRange(all_students, "createdAt", start, end),
-      prevData: filterByDateRange(all_students, "createdAt", prevStart, prevEnd),
-    };
-  }, [all_students, selectedPeriod]);
+      return {
+        currentData: filterByDateRange(all_students, "createdAt", start, end),
+        prevData: filterByDateRange(
+          all_students,
+          "createdAt",
+          prevStart,
+          prevEnd
+        ),
+      };
+    }, [all_students, selectedPeriod]);
 
   // 💰 Metrics
   const currentRevenue = currentTransactions
@@ -99,7 +122,9 @@ export function SectionCards() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const revenueChange =
-    prevRevenue === 0 ? 0 : ((currentRevenue - prevRevenue) / prevRevenue) * 100;
+    prevRevenue === 0
+      ? 0
+      : ((currentRevenue - prevRevenue) / prevRevenue) * 100;
 
   const currentStudentsCount = currentStudents.filter(
     (s) => s.role === "STUDENT"
@@ -177,7 +202,9 @@ export function SectionCards() {
                 <IconTrendingDown className="size-4 text-red-600" />
               )}
             </div>
-            <div className="text-muted-foreground">Compared to previous period</div>
+            <div className="text-muted-foreground">
+              Compared to previous period
+            </div>
           </CardFooter>
         </Card>
 
@@ -240,7 +267,9 @@ export function SectionCards() {
             <div className="flex gap-2 font-medium">
               Steady performance increase <IconTrendingUp className="size-4" />
             </div>
-            <div className="text-muted-foreground">Meets growth projections</div>
+            <div className="text-muted-foreground">
+              Meets growth projections
+            </div>
           </CardFooter>
         </Card>
       </div>
