@@ -23,8 +23,8 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Skeleton } from "../ui/skeleton";
 import Footer from "./Footer";
@@ -43,6 +43,9 @@ const CourseDetail = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const click_on_enroll_ref = useRef<null | HTMLButtonElement>(null);
+  const enrolled_click = searchParams.get("enrolled");
   const courses = useSelector((state: RootState) => state.courses.courses);
   const [activeLesson, setActiveLesson] = useState<Lesson>({} as Lesson);
   const [current_course, setCurrent_course] = useState<ICourse>();
@@ -258,8 +261,20 @@ const CourseDetail = ({
   }, [courseId, courses]);
 
   useEffect(() => {
-    console.log({ activeLesson, lessonProgress });
-  }, [activeLesson, lessonProgress]);
+    if (
+      enrolled_click &&
+      current_course?.title &&
+      click_on_enroll_ref.current !== null
+    ) {
+      click_on_enroll_ref.current?.click();
+      alert(click_on_enroll_ref);
+    }
+  }, [
+    enrolled_click,
+    current_course,
+    current_course?.title,
+    click_on_enroll_ref.current,
+  ]);
 
   if (!current_course) {
     return (
@@ -390,6 +405,7 @@ const CourseDetail = ({
                     signOut={
                       <>
                         <RazorpayButton
+                          ref={click_on_enroll_ref}
                           userId={userId || ""}
                           courseId={current_course.id}
                           price={current_course?.price}
@@ -701,16 +717,29 @@ const CourseDetail = ({
                   <AuthComponent
                     signOut={
                       <>
-                        <RazorpayButton
-                          userId={userId || ""}
-                          courseId={current_course.id}
-                          price={current_course?.price}
-                        />
+                        {lessons.filter(
+                          (lesson) =>
+                            lesson.isPaid === true &&
+                            typeof lesson.videoUrl === "string"
+                        ).length > 0 ? (
+                          <Button className="w-full mb-6 bg-yellow-500 hover:opacity-90 shadow-glow h-12 text-lg">
+                            Enrolled
+                          </Button>
+                        ) : (
+                          <RazorpayButton
+                            ref={click_on_enroll_ref}
+                            userId={userId || ""}
+                            courseId={current_course.id}
+                            price={current_course?.price}
+                          />
+                        )}
                       </>
                     }
                     signIn={
                       <>
-                        <Link href={`/sign-in?redirect=${pathname}`}>
+                        <Link
+                          href={`/sign-in?redirect=${pathname}&enroll=true`}
+                        >
                           <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
                             Enroll Now
                           </Button>

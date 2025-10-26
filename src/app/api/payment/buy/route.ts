@@ -113,15 +113,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    await prisma.course.update({
-      where: { id: courseId },
-      data: {
-        students: `${
-          parseInt(is_course_exist.students ? is_course_exist.students : "0") +
-          1
-        }`,
-      },
-    });
+   
 
     return NextResponse.json({
       success: true,

@@ -10,17 +10,17 @@ const HeroSection = () => {
   const benefits = [
     {
       icon: CheckCircle,
-      text: "Learn at your own pace",
+      text: "Learn Anytime, Anywheree",
       gradient: "from-green-400 via-green-300 to-emerald-400", // fresh green
     },
     {
       icon: Award,
-      text: "Industry recognized",
+      text: "Globally Recognized Expertise.",
       gradient: "from-yellow-400 via-yellow-300 to-orange-400", // sunny yellow-orange
     },
     {
       icon: Users,
-      text: "Courses by top professionals",
+      text: "Taught by AI-Driven Professionals",
       gradient: "from-blue-400 via-sky-300 to-cyan-400", // cool blue-cyan
     },
     {
@@ -42,7 +42,7 @@ const HeroSection = () => {
         <img
           src={"/images/hero-image.png"}
           alt="Professional learning environment"
-          className="w-full h-full object-cover opacity-60"
+          className="w-full h-full object-cover opacity-50"
         />
       </div>
 
@@ -50,18 +50,19 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Headline */}
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight">
-            Unlock Your Career Potential
+            Unlock Your Future with AI – Grow Your Career, Not Just Your Skills
           </h1>
           {/* <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
             Learn from Industry Experts
           </h2> */}
           <p className="text-xl md:text-2xl text-white  max-w-2xl mx-auto">
-            Learn from Industry Experts
+            Master practical AI applications in your industry.
           </p>
 
           {/* Subheading */}
           <p className="text-xl md:text-2xl text-white mb-12 max-w-2xl mx-auto">
-            Courses tailored to your profession, goals, and schedule
+            Lead initiatives. Unlock promotions. Stay irreplaceable in the age
+            of automation.
           </p>
 
           {/* Search Section */}
@@ -110,7 +111,7 @@ const HeroSection = () => {
             {benefits.map((benefit, index) => (
               <div key={index}>
                 <div
-                  className="flex flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 hover:shadow-blue-500/50"
+                  className="flex h-full aspect-square flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 hover:shadow-blue-500/50"
                   // whileHover={{ scale: 1.05, rotate: 2 }}
                   // whileTap={{ scale: 0.95 }}
                   // initial={{ opacity: 0, y: 20 }}
@@ -119,7 +120,7 @@ const HeroSection = () => {
                 >
                   <div
                     className={cn(
-                      "flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl mb-3",
+                      "flex items-center justify-center shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl mb-3",
                       benefit.gradient
                     )}
                   >
@@ -138,7 +139,7 @@ const HeroSection = () => {
               size="lg"
               className="bg-gradient-primary hover:opacity-90 px-8 py-4 text-lg shadow-hero"
             >
-              Start Learning Now
+              Start Your AI Journey
             </Button>
             <Link href={"/courses"} className="max-sm:w-full">
               <Button

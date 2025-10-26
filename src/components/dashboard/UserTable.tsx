@@ -221,7 +221,7 @@ export function UserTable() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {generateRecentActivity(payments, students, courses, events).map(
+              {generateRecentActivity(payments.filter((payment) => payment.status === "SUCCESS"), students, courses, events).map(
                 (activity) => (
                   <div
                     key={activity.id}

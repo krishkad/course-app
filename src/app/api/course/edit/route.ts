@@ -1,11 +1,11 @@
 import prisma from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
-import { CustomJWTPayload } from "@/types/types";
-import { Course, CourseTag, Lesson } from "@prisma/client";
-import { writeFileSync } from "fs";
-import path from "path";
 import { createSlug } from "@/lib/utils";
+import { CustomJWTPayload } from "@/types/types";
+import { Course, Lesson } from "@prisma/client";
+import { writeFileSync } from "fs";
+import jwt from "jsonwebtoken";
+import { NextRequest, NextResponse } from "next/server";
+import path from "path";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -41,6 +41,8 @@ export async function PUT(req: NextRequest) {
       !courseDetail.duration ||
       !courseDetail.category ||
       !courseDetail.keywords ||
+      !courseDetail.profession ||
+      courseDetail.profession.length <= 0 ||
       courseDetail.keywords.length <= 0 ||
       whatYouLearn?.length <= 0 ||
       requirements?.length <= 0
@@ -100,6 +102,7 @@ export async function PUT(req: NextRequest) {
         tag: courseDetail.tag,
         category: courseDetail.category,
         keywords: courseDetail.keywords,
+        profession: courseDetail.profession,
         students: courseDetail.students ? courseDetail.students : null,
         rating: courseDetail.rating ? courseDetail.rating : null,
         reviews: courseDetail.reviews ? courseDetail.reviews : null,

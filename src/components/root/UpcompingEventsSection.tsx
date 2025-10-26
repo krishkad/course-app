@@ -32,7 +32,7 @@ const UpcomingEventsSection = () => {
 
   if (!display.view_events) return null;
   return (
-    <section className="py-24 bg-gradient-secondary">
+    <section className="py-24 bg-primary/5">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-20">

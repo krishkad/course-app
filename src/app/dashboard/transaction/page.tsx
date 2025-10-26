@@ -168,7 +168,6 @@ export default function AdminTransactions() {
       trend: "up",
       icon: CheckCircle2,
     },
-   
   ];
 
   const getStatusBadge = (status: string) => {
@@ -273,11 +272,11 @@ export default function AdminTransactions() {
         </div>
 
         {/* Filters and Search */}
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>All Transactions</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="w-full overflow-hidden">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -303,13 +302,14 @@ export default function AdminTransactions() {
             </div>
 
             {/* Desktop Table */}
-            <div className="hidden lg:block w-full overflow-auto">
+            <div className="hidden lg:block w-full overflow-hidden">
               {all_transactions.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Transaction ID</TableHead>
                       <TableHead>Student</TableHead>
+                      <TableHead>Phone no.</TableHead>
                       <TableHead>Course</TableHead>
                       <TableHead>Event</TableHead>
                       <TableHead>Amount</TableHead>
@@ -358,6 +358,9 @@ export default function AdminTransactions() {
                                   {student_email}
                                 </div>
                               </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="">{student?.phoneNo}</span>
                             </TableCell>
                             <TableCell className="max-w-xs">
                               <p className="truncate">{pur_course}</p>
@@ -448,6 +451,14 @@ export default function AdminTransactions() {
                         </div>
 
                         <div className="border-t pt-3 space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Phone no:
+                            </span>
+                            <span className="font-medium text-right max-w-[60%] truncate">
+                              {student?.phoneNo}
+                            </span>
+                          </div>
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
                               Course:

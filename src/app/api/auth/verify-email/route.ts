@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const code_token = req.cookies.get("verify-email-token")?.value;
 
-    const { code, fname, lname, email, password, profession } =
+    const { code, fname, lname, email, password, profession , phoneNo} =
       await req.json();
 
     if (!code) {
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "token missing!" });
     }
 
-    if (!fname || !lname || !email || !password || !profession) {
+    if (!fname || !lname || !email || !password || !profession || !phoneNo) {
       return NextResponse.json({ success: false, message: "missing fields" });
     }
     console.log({ code_token });
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const hashed_password = bcrypt.hashSync(password, 10);
 
     const user = await prisma.user.create({
-      data: { fname, lname, email, password: hashed_password, profession },
+      data: { fname, lname, email, password: hashed_password, profession, phoneNo },
     });
 
     if (!user) {

@@ -20,13 +20,20 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Course, CourseTag, Lesson } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
-import { LoaderIcon, Plus, X } from "lucide-react";
+import { Check, ChevronsUpDown, LoaderIcon, Plus, X } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { Switch } from "../ui/switch";
 import HtmlEditor from "./HtmlEditor";
 import { useDispatch } from "react-redux";
 import { add_course, update_course } from "@/redux/admin/slice/all-courses";
 import { ICourse } from "@/redux/slices/courses";
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { professions } from "../root/SearchBox";
 
 const categories = ["Web Development", "Design", "Marketing", "Photography"];
 
@@ -65,6 +72,7 @@ export default function CreateCourseModal({
   const [course, setCourse] = useState<Course>({} as Course);
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
+  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -236,6 +244,18 @@ export default function CreateCourseModal({
       currentArray.splice(index, 1);
       updater(currentArray);
     }
+  };
+
+  const toggleValue = (tag: string) => {
+    setCourse((prev) => ({
+      ...prev,
+      profession:
+        prev.profession && prev.profession.includes(tag)
+          ? prev.profession.filter((t) => t !== tag)
+          : prev.profession
+          ? [...prev.profession, tag]
+          : [tag],
+    }));
   };
 
   const handle_publish = async () => {
@@ -504,7 +524,7 @@ export default function CreateCourseModal({
       title: "Course Info",
       content: (
         <div className="space-y-6">
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="w-full h-max grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="title">Course Title</Label>
               <Input
@@ -582,6 +602,41 @@ export default function CreateCourseModal({
                 placeholder="3h 20m"
               />
             </div>
+            <div className="w-full">
+              <Label>Profession</Label>
+
+              <Select onValueChange={toggleValue} value={""}>
+                <SelectTrigger className="w-full justify-between">
+                  <p>
+                    {course.profession && course.profession.length > 0
+                      ? course.profession.join(", ")
+                      : "Select professions..."}
+                  </p>
+                </SelectTrigger>
+
+                {/* 👇 Scrollable content */}
+                <SelectContent className="max-h-[200px] overflow-y-auto">
+                  {["All", ...professions].map((profession) => (
+                    <SelectItem
+                      key={profession}
+                      value={profession}
+                      className="flex items-center justify-between"
+                      onClick={(e) => {
+                        e.preventDefault(); // prevent closing on each click
+                        toggleValue(profession);
+                      }}
+                    >
+                      <span>{profession}</span>
+                      {course.profession &&
+                        course.profession.includes(profession) && (
+                          <Check className="h-4 w-4 text-primary" />
+                        )}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label htmlFor="image">Course Cover Image</Label>
               <Input
@@ -1196,6 +1251,9 @@ export default function CreateCourseModal({
               <strong>Keywords:</strong> {course.keywords?.join(", ")}
             </p>
             <p>
+              <strong>Profession:</strong> {course.profession?.join(", ")}
+            </p>
+            <p>
               <strong>Lessons:</strong> {lessons.length}
             </p>
             <p>
@@ -1308,6 +1366,8 @@ export default function CreateCourseModal({
                         content: "",
                       },
                     ]);
+                    setWhatYouLearn([""]);
+                    setRequirements([""]);
                     setCurrentStep(0);
                     console.log({ course, lessons });
                   }

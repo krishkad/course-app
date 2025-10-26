@@ -49,13 +49,35 @@ export async function POST(req: NextRequest) {
     }
 
     // Update payment status in database
-    await prisma.payment.update({
+    const updated_payment = await prisma.payment.update({
       where: { id: paymentId },
       data: {
         status: "SUCCESS",
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
+      },
+      include: { purchases: true },
+    });
+
+    const is_course_exist = await prisma.course.findFirst({
+      where: { id: updated_payment.purchases[0].courseId ?? "" },
+    });
+
+    if (!is_course_exist) {
+      return NextResponse.json({
+        success: false,
+        message: "no course",
+      });
+    }
+
+    await prisma.course.update({
+      where: { id: updated_payment.purchases[0].courseId ?? "" },
+      data: {
+        students: `${
+          parseInt(is_course_exist.students ? is_course_exist.students : "0") +
+          1
+        }`,
       },
     });
 

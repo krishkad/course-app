@@ -229,6 +229,7 @@ export default function StudentsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Student</TableHead>
+                      <TableHead>Phone no.</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Professon</TableHead>
                       <TableHead>Courses</TableHead>
@@ -282,6 +283,9 @@ export default function StudentsPage() {
                                   </div>
                                 </div>
                               </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="">{student.phoneNo}</span>
                             </TableCell>
                             <TableCell>
                               <Badge

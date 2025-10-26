@@ -17,13 +17,14 @@ const CallToActionSection = () => {
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Headline */}
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary-foreground">
-            Ready to Transform Your Career?
+            Don't Let Your Career Fall Behind
           </h2>
 
           {/* Supporting Text */}
           <p className="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Join thousands of professionals leveling up their skills and
-            advancing their careers
+            AI is transforming every industry right now. The professionals who
+            master it today will lead tomorrow. Those who wait will be left
+            behind.
           </p>
 
           {/* Testimonial Quote */}

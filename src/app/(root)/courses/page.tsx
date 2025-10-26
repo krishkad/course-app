@@ -38,17 +38,7 @@ const AllCourses = () => {
     console.log({ q });
   }, []);
 
-  // const filteredCourses = courses.filter((course) => {
-  //   const matchesSearch = (
-  //     course.title ||
-  //     course.description ||
-  //     course.keywords.toString()
-  //   )
-  //     .toLowerCase()
-  //     .includes(searchTerm.toLowerCase());
-
-  //   return matchesSearch;
-  // });
+  
 
   function advancedStemming(word: string) {
     if (!word || word.length < 3) return word;
@@ -138,7 +128,7 @@ const AllCourses = () => {
       " " +
       course.description +
       " " +
-      course.keywords.toString()
+      course.keywords.toString() + course.profession + course.profession.includes("All")
     ).toLowerCase();
 
     return findSimilarWords(searchTerm, searchText);
@@ -213,7 +203,7 @@ const AllCourses = () => {
                     href={`/courses/${course.slug}`}
                     className="group block"
                   >
-                    <div className="bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
+                    <div className="bg-card h-full rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
                       {/* Course Image */}
                       <div className="relative overflow-hidden">
                         <img

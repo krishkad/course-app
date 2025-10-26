@@ -20,6 +20,7 @@ export function LoginForm({
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
+  const enrolled = searchParams.get("enroll");
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
@@ -44,7 +45,11 @@ export function LoginForm({
         return;
       }
       if (redirectUrl) {
-        router.push(redirectUrl);
+        if (enrolled) {
+          router.push(`${redirectUrl}?enrolled=${enrolled}`);
+          return;
+        }
+        router.push(`${redirectUrl}`);
       } else {
         router.refresh();
       }
@@ -58,59 +63,103 @@ export function LoginForm({
     }
   };
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Login to your account</h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          Enter your email below to login to your account
+    <form
+      className={cn(
+        "flex flex-col gap-8 bg-white rounded-xl max-w-md mx-auto",
+        className
+      )}
+      {...props}
+    >
+      {/* Header */}
+      <div className="flex flex-col items-center gap-3 text-center">
+        <h1 className="text-3xl font-extrabold text-gray-900">Welcome Back</h1>
+        <p className="text-gray-500 text-sm">
+          Enter your email and password to access your account
         </p>
       </div>
+
+      {/* Input Fields */}
       <div className="grid gap-6">
-        <div className="grid gap-3">
-          <Label htmlFor="email">Email</Label>
+        {/* Email */}
+        <div className="grid gap-2">
+          <Label htmlFor="email" className="text-gray-700 font-medium">
+            Email
+          </Label>
           <Input
             id="email"
             type="email"
             name="email"
             onChange={handleOnChange}
             value={data.email}
-            placeholder="m@example.com"
+            placeholder="you@example.com"
             required
+            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
           />
         </div>
-        <div className="grid gap-3">
-          <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
-            <a
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Forgot your password?
+
+        {/* Password */}
+        <div className="grid gap-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password" className="text-gray-700 font-medium">
+              Password
+            </Label>
+            <a href="#" className="text-indigo-600 text-sm hover:underline">
+              Forgot password?
             </a>
           </div>
           <Input
             id="password"
             name="password"
+            type="password"
             onChange={handleOnChange}
             value={data.password}
-            type="password"
             required
+            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
           />
+          <p className="text-gray-500 text-xs">
+            By logging in, you agree to our{" "}
+            <Link
+              href="/terms-and-conditions"
+              className="text-indigo-600 hover:underline font-medium"
+            >
+              Terms and Conditions
+            </Link>
+            .
+          </p>
         </div>
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-          onClick={handleLogIn}
-        >
-          Login
-        </Button>
       </div>
-      <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <Link href="/sign-up" className="underline underline-offset-4">
+
+      {/* Submit Button */}
+      <Button
+        type="submit"
+        className="w-full py-3  text-white font-semibold rounded-lg shadow-md transition-colors duration-200"
+        disabled={isLoading}
+        onClick={handleLogIn}
+      >
+        {isLoading ? "Logging in..." : "Login"}
+      </Button>
+
+      {/* Sign Up Link */}
+      <div className="text-center text-gray-500 text-sm">
+        Don’t have an account?{" "}
+        <Link
+          href="/sign-up"
+          className="text-indigo-600 hover:underline font-medium"
+        >
           Sign up
         </Link>
+      </div>
+
+      {/* Terms & Conditions Snippet */}
+      <div className="mt-4 text-xs text-gray-400 text-center">
+        Your data is protected according to our{" "}
+        <Link
+          href="/terms-and-conditions"
+          className="hover:underline text-indigo-500 font-medium"
+        >
+          Terms & Conditions
+        </Link>
+        .
       </div>
     </form>
   );

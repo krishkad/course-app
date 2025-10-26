@@ -1,20 +1,27 @@
 // components/RazorpayButton.tsx
 "use client";
 
-import React from "react";
+import React, { Ref } from "react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+
+interface RazorpayButtonProps {
+  userId: string;
+  courseId: string;
+  price: number;
+  ref: Ref<null | HTMLButtonElement>;
+}
 
 export default function RazorpayButton({
   userId,
   courseId,
   price,
-}: {
-  userId: string;
-  courseId: string;
-  price: number;
-}) {
+  ref,
+}: RazorpayButtonProps) {
   const router = useRouter();
+  const user = useSelector((state: RootState) => state.user.user);
   const loadRazorpay = () => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -82,9 +89,9 @@ export default function RazorpayButton({
         router.refresh();
       },
       prefill: {
-        name: "John Doe",
-        email: "john@example.com",
-        contact: "9999999999",
+        name: `${user.fname} ${user.lname}`,
+        email: user.email,
+        contact: user.phoneNo,
       },
       theme: {
         color: "#3399cc",
@@ -113,6 +120,7 @@ export default function RazorpayButton({
     <Button
       className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg"
       onClick={handlePayment}
+      ref={ref}
     >
       Enroll Now
     </Button>

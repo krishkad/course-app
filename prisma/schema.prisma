@@ -20,6 +20,7 @@ model User {
   lname             String
   password          String // hashed password
   profession        String?
+  phoneNo           String
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   role              Role                @default(STUDENT)
@@ -45,6 +46,7 @@ model Course {
   reviews        Int?
   what_you_learn String[]
   requirements   String[]
+  profession     String[]
   published      Boolean   @default(false)
   createdAt      DateTime  @default(now())
   keywords       String[]

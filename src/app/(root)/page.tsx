@@ -1,9 +1,11 @@
 import CallToActionSection from "@/components/root/CallToActionSection";
+import CareerAccelaration from "@/components/root/CareerAccelaration";
 import CareerGrowthSection from "@/components/root/CareerGrowthSection";
 import Footer from "@/components/root/Footer";
 import HeroSection from "@/components/root/HeroSection";
 import InteractiveLearningSteps from "@/components/root/InteractiveLearningSteps";
 import Navigation from "@/components/root/Navigation";
+import Outcomes from "@/components/root/Outcomes";
 import TopCoursesSection from "@/components/root/TopCoursesSection";
 import UpcomingEventsSection from "@/components/root/UpcompingEventsSection";
 
@@ -12,6 +14,8 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <HeroSection />
+      <CareerAccelaration />
+      <Outcomes />
       <CareerGrowthSection />
       <TopCoursesSection />
       <UpcomingEventsSection />

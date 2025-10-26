@@ -137,16 +137,29 @@ const About = () => {
                     Our Mission
                   </h2>
                   <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                    At EduPlatform, we believe that quality education should be
-                    accessible to everyone, everywhere. We&apos;re breaking down
-                    barriers and creating pathways for individuals to unlock
-                    their potential and transform their careers.
+                    At [Your Platform Name], our mission is to make Artificial
+                    Intelligence education accessible, practical, and
+                    transformative for every professional in India and beyond.
                   </p>
                   <p className="text-muted-foreground leading-relaxed mb-8">
-                    Through our comprehensive curriculum, expert instructors,
-                    and supportive community, we&apos;ve helped thousands of
-                    students achieve their professional goals and build the
-                    careers they&apos;ve always dreamed of.
+                    We aim to bridge the gap between AI innovation and
+                    real-world application by offering industry-aligned,
+                    hands-on courses designed for working professionals across
+                    fields — from business and healthcare to design and
+                    engineering.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-8">
+                    Our purpose is to empower learners to use AI responsibly and
+                    creatively to enhance their careers, organizations, and
+                    communities. Through expert-led instruction, case studies,
+                    and real-world use cases, we help learners move from
+                    curiosity to capability — and from knowledge to career
+                    impact.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-8">
+                    We believe AI education should be inclusive, affordable, and
+                    action-driven — equipping every professional with the
+                    confidence to lead in the age of intelligent transformation.
                   </p>
                   <Button size="lg" className="shadow-glow">
                     Join Our Community
@@ -169,6 +182,64 @@ const About = () => {
                   <div className="absolute -bottom-4 -left-4 bg-primary-accent/20 backdrop-blur-sm rounded-full p-4">
                     <Target className="h-8 w-8 text-white" />
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* Vision Section */}
+        <section className="px-4 pb-16">
+          <div className="container mx-auto">
+            <div className="bg-card/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-elegant border border-border/50">
+              <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div className="relative">
+                  <div className="aspect-square rounded-2xl bg-gradient-primaryflex items-center justify-center">
+                    {/* <BookOpen className="h-24 w-24 text-white" /> */}
+                    <img
+                      src={
+                        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                      }
+                      className="w-full h-full object-cover rounded-3xl shrink-0"
+                      alt="about us image"
+                    />
+                  </div>
+                  <div className="absolute -top-4 -right-4 bg-secondary/20 backdrop-blur-sm rounded-full p-4">
+                    <Zap className="h-8 w-8 text-secondary" />
+                  </div>
+                  <div className="absolute -bottom-4 -left-4 bg-primary-accent/20 backdrop-blur-sm rounded-full p-4">
+                    <Target className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+                    Our Vision
+                  </h2>
+                  <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                    Our vision is to create a future where every Indian
+                    professional is AI-empowered — capable of leveraging
+                    technology to innovate, solve problems, and shape the
+                    industries of tomorrow.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-8">
+                    We aspire to become India’s most trusted and transformative
+                    AI learning platform, recognized globally for our practical
+                    approach, industry relevance, and learner success.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-8">
+                    By combining expert knowledge, community learning, and
+                    continuous innovation, we aim to cultivate a generation of
+                    professionals who can adapt confidently to the future of
+                    work, balancing efficiency with ethical responsibility.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-8">
+                    We envision [Your Platform Name] as a catalyst for India’s
+                    AI revolution — enabling organizations, educators, and
+                    individuals to grow together toward a smarter, more
+                    sustainable, and inclusive digital economy.
+                  </p>
+                  <Button size="lg" className="shadow-glow">
+                    Join Our Community
+                  </Button>
                 </div>
               </div>
             </div>

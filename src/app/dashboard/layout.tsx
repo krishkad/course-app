@@ -6,8 +6,15 @@ import { cookies } from "next/headers";
 import React, { ReactNode } from "react";
 
 const DashboardLayout = async ({ children }: { children: ReactNode }) => {
-  const { students, courses, events, payments, display, lessonProgress, lessons } =
-    await getData();
+  const {
+    students,
+    courses,
+    events,
+    payments,
+    display,
+    lessonProgress,
+    lessons,
+  } = await getData();
   return (
     <AdminProviderInit
       students={students}
@@ -27,7 +34,7 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
         }
       >
         <AppSidebar variant="inset" />
-        <SidebarInset>
+        <SidebarInset className="w-full overflow-hidden">
           <SiteHeader />
           <div className="flex flex-1 flex-col bg-secondary">{children}</div>
         </SidebarInset>
@@ -70,7 +77,7 @@ const getData = async () => {
       paymentRes,
       displayRes,
       lessonProgressRes,
-      lessonsRes
+      lessonsRes,
     ] = await Promise.all([
       fetch(studentsUrl, fetchOptions),
       fetch(coursesUrl, fetchOptions),
@@ -88,7 +95,7 @@ const getData = async () => {
       paymentsJson,
       displayJson,
       lessonProgressJson,
-      lessonsJson
+      lessonsJson,
     ] = await Promise.all([
       studentsRes.json(),
       coursesRes.json(),
@@ -110,9 +117,7 @@ const getData = async () => {
     const lessonProgressData = lessonProgressJson.success
       ? lessonProgressJson.data
       : [];
-    const lessonsData = lessonsJson.success
-      ? lessonsJson.data
-      : [];
+    const lessonsData = lessonsJson.success ? lessonsJson.data : [];
 
     console.log({ lessonsData });
     return {

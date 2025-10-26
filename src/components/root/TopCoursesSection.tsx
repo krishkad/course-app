@@ -128,7 +128,7 @@ const TopCoursesSection = () => {
 
   if (!display.view_courses) return null;
   return (
-    <section className="py-24 bg-gradient-secondary">
+    <section className="py-24 bg-primary/5">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-20">
@@ -152,7 +152,7 @@ const TopCoursesSection = () => {
               href={`/courses/${course.slug}`}
               className="group block"
             >
-              <div className="bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
+              <div className="bg-card h-full rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-[1.02] overflow-hidden border border-border/50 hover:border-primary/20">
                 {/* Course Image */}
                 <div className="relative overflow-hidden">
                   <img

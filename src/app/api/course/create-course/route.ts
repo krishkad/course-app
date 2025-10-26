@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       courseDetail,
       lessons,
       whatYouLearn,
-      requirements
+      requirements,
     });
 
     if (
@@ -52,6 +52,8 @@ export async function POST(req: NextRequest) {
       !courseDetail.duration ||
       !courseDetail.category ||
       !courseDetail.keywords ||
+      !courseDetail.profession ||
+      courseDetail.profession.length <= 0 ||
       courseDetail.keywords.length <= 0 ||
       whatYouLearn?.length <= 0 ||
       requirements?.length <= 0
@@ -101,6 +103,7 @@ export async function POST(req: NextRequest) {
         instructorId: token_data.id,
         thumbnailUrl,
         tag: courseDetail.tag,
+        profession: courseDetail.profession,
         category: courseDetail.category,
         keywords: courseDetail.keywords,
         students: courseDetail.students ? courseDetail.students : null,
