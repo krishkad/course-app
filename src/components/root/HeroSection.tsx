@@ -49,9 +49,21 @@ const HeroSection = () => {
       <div className="container relative z-10 mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Headline */}
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight">
+          {/* <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight">
             Unlock Your Future with AI – Grow Your Career, Not Just Your Skills
+          </h1> */}
+          <h1
+            className="text-5xl md:text-6xl font-extrabold mb-6 text-center leading-tight 
+  text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-500 
+  animate-gradient-x bg-[length:200%_auto]
+  drop-shadow-[0_0_25px_rgba(139,92,246,0.4)] tracking-tight"
+          >
+            Unlock Your Future with AI <br className="hidden md:block" />
+            <span className="text-white/90">
+              Grow Your Career, Not Just Your Skills
+            </span>
           </h1>
+
           {/* <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
             Learn from Industry Experts
           </h2> */}

@@ -282,7 +282,12 @@ const Profile = () => {
                     </div>
                     <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      <span>Joined {format(new Date(user.createdAt as Date), "MMM yyyy")}</span>
+                      <span>
+                        Joined{" "}
+                        {user.createdAt
+                          ? format(new Date(user.createdAt as Date), "MMM yyyy")
+                          : "no date"}
+                      </span>
                     </div>
                     <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                       <UserIcon className="h-4 w-4" />
@@ -434,10 +439,11 @@ const Profile = () => {
               console.log({ less, progress });
 
               const is_purchased = payments.find(
-                (payment) => payment.courseId === course.id
+                (payment) =>
+                  payment.courseId === course.id && payment.status === "SUCCESS"
               );
 
-              if (!is_purchased || is_purchased.status !== "SUCCESS") return;
+              if (!is_purchased) return;
               return (
                 <Card
                   key={course.id}
@@ -534,52 +540,57 @@ const Profile = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {payments.map((transaction, i) => {
-                        const pay = payments[i];
-                        const trans_course = purchased_courses.filter(
-                          (cour) => cour.id === pay?.courseId
-                        );
-                        return (
-                          <tr
-                            key={transaction.id}
-                            className="border-b hover:bg-muted/30 transition-colors"
-                          >
-                            <td className="p-4">
-                              <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
-                                TX-{transaction.id.slice(0, 6)}
-                              </code>
-                            </td>
-                            <td className="p-4 font-medium">
-                              {trans_course[0]?.title}
-                            </td>
-                            <td className="p-4 font-semibold text-primary">
-                              {payments[i]?.amount
-                                ? `$${displayRazorpayAmount(
-                                    payments[i].amount
-                                  )}`
-                                : transaction.amount}
-                            </td>
-                            <td className="p-4 text-muted-foreground">
-                              {format(transaction?.createdAt, "MMM, dd yyyy")}
-                            </td>
+                      {payments
+                        .slice()
+                        .reverse()
+                        .map((transaction, i) => {
+                          const pay = payments.filter(
+                            (pay) => pay.id === transaction.id
+                          )[0];
+                          const trans_course = purchased_courses.filter(
+                            (cour) => cour.id === pay?.courseId
+                          );
+                          return (
+                            <tr
+                              key={transaction.id}
+                              className="border-b hover:bg-muted/30 transition-colors"
+                            >
+                              <td className="p-4">
+                                <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                                  TX-{transaction.id.slice(0, 6)}
+                                </code>
+                              </td>
+                              <td className="p-4 font-medium">
+                                {trans_course[0]?.title}
+                              </td>
+                              <td className="p-4 font-semibold text-primary">
+                                {payments[i]?.amount
+                                  ? `$${displayRazorpayAmount(
+                                      payments[i].amount
+                                    )}`
+                                  : transaction.amount}
+                              </td>
+                              <td className="p-4 text-muted-foreground">
+                                {format(transaction?.createdAt, "MMM, dd yyyy")}
+                              </td>
 
-                            <td className="p-4">
-                              <Badge
-                                variant="default"
-                                className={cn(
-                                  transaction.status === "SUCCESS"
-                                    ? "bg-green-500/10 text-green-700 hover:bg-green-500/20"
-                                    : transaction.status === "PENDING"
-                                    ? "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20"
-                                    : "bg-red-500/10 text-red-700 hover:bg-red-500/20"
-                                )}
-                              >
-                                {transaction.status}
-                              </Badge>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                              <td className="p-4">
+                                <Badge
+                                  variant="default"
+                                  className={cn(
+                                    transaction.status === "SUCCESS"
+                                      ? "bg-green-500/10 text-green-700 hover:bg-green-500/20"
+                                      : transaction.status === "PENDING"
+                                      ? "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20"
+                                      : "bg-red-500/10 text-red-700 hover:bg-red-500/20"
+                                  )}
+                                >
+                                  {transaction.status}
+                                </Badge>
+                              </td>
+                            </tr>
+                          );
+                        })}
                     </tbody>
                   </table>
                 </div>

@@ -236,7 +236,7 @@ export default function AdminTransactions() {
         courseTitle: course?.title ?? "",
         eventTitle: event?.title ?? "",
         amount: displayRazorpayAmount(trans?.amount),
-        status: trans?.status ?? "UNKNOWN",
+        status: trans?.status ? trans.status : "UNKNOWN",
         createdAt: format(new Date(trans?.createdAt), "MMM dd yyyy h:mm a"),
       };
     });
@@ -249,13 +249,19 @@ export default function AdminTransactions() {
     students,
     displayRazorpayAmount,
   }).filter((txn) => {
-    const matchesSearch =
-      txn.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.studentEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.courseTitle.toLowerCase().includes(searchTerm.toLowerCase());
+    const search = searchTerm.toLowerCase();
 
-    const matchesStatus = statusFilter === "all" || txn.status === statusFilter.toUpperCase();
+    // Safely handle missing fields
+    const matchesSearch =
+      txn.id?.toLowerCase().includes(search) ||
+      txn.studentName?.toLowerCase().includes(search) ||
+      txn.studentEmail?.toLowerCase().includes(search) ||
+      txn.courseTitle?.toLowerCase().includes(search);
+
+    // Normalize both values to lowercase for reliable comparison
+    const matchesStatus =
+      statusFilter === "all" ||
+      txn.status?.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
@@ -338,7 +344,7 @@ export default function AdminTransactions() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="success">Success</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="failed">Failed</SelectItem>
                 </SelectContent>
@@ -367,7 +373,9 @@ export default function AdminTransactions() {
                       .slice()
                       .reverse()
                       .map((transaction, i) => {
-                        const trans = all_transactions[i];
+                        const trans = all_transactions.filter(
+                          (transa) => transa.id === transaction.id
+                        )[0];
                         const student = students.find(
                           (sud) => sud.id === trans?.userId
                         );
@@ -454,7 +462,9 @@ export default function AdminTransactions() {
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden space-y-4">
               {all_transactions.map((transaction, i) => {
-                const trans = all_transactions[i];
+                const trans = all_transactions.filter(
+                  (transa) => transa.id === transaction.id
+                )[0];
                 const student = students.find(
                   (sud) => sud.id === trans?.userId
                 );

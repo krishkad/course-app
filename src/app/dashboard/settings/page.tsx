@@ -42,6 +42,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { initializePlatform } from "@/redux/admin/slice/platform";
 import { initializeDisplay } from "@/redux/slices/display";
 import { RootState } from "@/redux/store";
 import { Display } from "@prisma/client";
@@ -55,7 +56,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
@@ -70,22 +71,29 @@ export default function SettingsPage() {
   );
   const [display_show, setDisplay_show] = useState<Display>({} as Display);
   const [platform_edit, setPlatform_edit] = useState({
+    id: "",
     platformName: "",
     supportEmail: "",
   });
   const [isDisplaySaving, setIsDisplaySaving] = useState(false);
+  const [isPlatformSaving, setIsPlatformSaving] = useState(false);
 
   const dispatch = useDispatch();
   useEffect(() => {
     if (display && platform) {
       setDisplay_show(display);
       setPlatform_edit({
-        platformName: platform.platformName,
-        supportEmail: platform.supportEmail,
+        id: platform.id ?? "",
+        platformName: platform.platformName ?? "",
+        supportEmail: platform.supportEmail ?? "",
       });
       console.log({ display });
     }
   }, [display]);
+
+  const handlePlatformOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPlatform_edit({ ...platform_edit, [e.target.name]: e.target.value });
+  };
 
   const handleDisplaySave = async () => {
     try {
@@ -113,6 +121,37 @@ export default function SettingsPage() {
       console.log("error saving display changes: ", error);
     } finally {
       setIsDisplaySaving(false);
+    }
+  };
+
+  const handlePlatformSave = async () => {
+    try {
+      setIsPlatformSaving(true);
+      const response = await fetch("/api/platform/edit", {
+        method: "PUT",
+        credentials: "include",
+        body: JSON.stringify({
+          platformName: platform_edit.platformName,
+          supportEmail: platform.supportEmail,
+          id: platform.id
+        }),
+      });
+
+      const res = await response.json();
+
+      if (!res.success) {
+        console.log(res.message);
+        return;
+      }
+
+      dispatch(
+        initializePlatform(res.data)
+      );
+      toast.success("updated successfully");
+    } catch (error) {
+      console.log("error saving platform: ", error);
+    } finally {
+      setIsPlatformSaving(false);
     }
   };
   return (
@@ -159,7 +198,9 @@ export default function SettingsPage() {
                     <Label htmlFor="platform-name">Platform Name</Label>
                     <Input
                       id="platform-name"
-                      defaultValue={platform_edit.platformName}
+                      name="platformName"
+                      onChange={handlePlatformOnChange}
+                      value={platform_edit.platformName}
                       className="mt-1"
                     />
                   </div>
@@ -167,14 +208,19 @@ export default function SettingsPage() {
                     <Label htmlFor="support-email">Support Email</Label>
                     <Input
                       id="support-email"
-                      defaultValue={platform_edit.supportEmail}
+                      name="supportEmail"
+                      onChange={handlePlatformOnChange}
+                      value={platform_edit.supportEmail}
                       className="mt-1"
                     />
                   </div>
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button className="w-full sm:w-auto">
+                  <Button
+                    className="w-full sm:w-auto"
+                    onClick={handlePlatformSave}
+                  >
                     <Save className="w-4 h-4 mr-2" />
                     Save Changes
                   </Button>

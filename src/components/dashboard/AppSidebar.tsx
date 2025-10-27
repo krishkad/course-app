@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { NavMain } from "./NavMain";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const data = {
   user: {
@@ -158,6 +160,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const platform = useSelector((state: RootState) => state.platform.platform);
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -173,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     L
                   </span>
                 </div>
-                <span className="text-base font-semibold">Learn Pro</span>
+                <span className="text-base font-semibold">{platform.platformName}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

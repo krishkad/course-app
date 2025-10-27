@@ -40,16 +40,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "no such course" });
     }
 
-    const is_purchase = await prisma.purchase.findFirst({
-      where: { courseId: is_course.id },
-    });
-    const is_payment = await prisma.payment.findFirst({
-      where: { id: is_purchase?.paymentId },
+    const is_purchase = await prisma.purchase.findMany({
+      where: { courseId: is_course.id, userId: user.id },
+      include: { payment: true },
     });
 
-  
+    console.log(
+      !is_purchase,
+      is_purchase.find((purchase) => purchase.payment?.status === "SUCCESS")
+        ?.payment?.status !== "SUCCESS"
+    );
 
-    if (!is_payment || is_payment.status !== "SUCCESS") {
+    if (
+      !is_purchase ||
+      is_purchase.find((purchase) => purchase.payment?.status === "SUCCESS")
+        ?.payment?.status !== "SUCCESS"
+    ) {
       return NextResponse.json({
         success: false,
         message: "no purchase found",

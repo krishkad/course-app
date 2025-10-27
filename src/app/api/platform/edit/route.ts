@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { CustomJWTPayload } from "@/types/types";
 import prisma from "@/lib/prisma";
 
-export async function PATCH(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
     const token = req.cookies.get("course-app-authentication")?.value;
     const { id, platformName, supportEmail } = await req.json();
