@@ -44,6 +44,8 @@ export function LoginForm({
         console.log(res.message);
         return;
       }
+      console.log({ user: res.data });
+      dispatch(initializeUser(res.data));
       if (redirectUrl) {
         if (enrolled) {
           router.push(`${redirectUrl}?enrolled=${enrolled}`);
@@ -53,8 +55,6 @@ export function LoginForm({
       } else {
         router.refresh();
       }
-      console.log({ user: res.data });
-      dispatch(initializeUser(res.data));
     } catch (error) {
       console.log("error while logging in: ", error);
       return;

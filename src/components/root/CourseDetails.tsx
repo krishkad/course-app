@@ -266,14 +266,22 @@ const CourseDetail = ({
       current_course?.title &&
       click_on_enroll_ref.current !== null
     ) {
+      if (
+        lessons.filter(
+          (lesson) =>
+            lesson.isPaid === true && typeof lesson.videoUrl === "string"
+        )
+      ) {
+        return;
+      }
       click_on_enroll_ref.current?.click();
-      alert(click_on_enroll_ref);
     }
   }, [
     enrolled_click,
     current_course,
     current_course?.title,
     click_on_enroll_ref.current,
+    lessons
   ]);
 
   if (!current_course) {
@@ -813,7 +821,7 @@ const CourseDetail = ({
                     }
                     signIn={
                       <>
-                        <Link 
+                        <Link
                           href={`/sign-in?redirect=${pathname}&enroll=true`}
                         >
                           <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">
