@@ -189,6 +189,14 @@ model Rating {
   @@unique([userId, eventId])
 }
 
+model PlatformSettings {
+  id           String   @id @default(uuid())
+  platformName String
+  supportEmail String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 enum Role {
   ADMIN
   STUDENT

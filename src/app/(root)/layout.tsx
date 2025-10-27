@@ -6,10 +6,12 @@ import React, { ReactNode } from "react";
 export const dynamic = "force-dynamic"; // Add this to force dynamic rendering
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
-  const { courses, events, users, display, lessonProgress } = await getData();
+  const { platform, courses, events, users, display, lessonProgress } =
+    await getData();
   return (
     <div className="w-full">
       <ReduxProviderInitializer
+        platform={platform}
         courses={courses}
         events={events}
         user={users}
@@ -31,6 +33,7 @@ const getData = async () => {
 
     // Define API URLs
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const platformUrl = `${baseUrl}/api/platform/get`;
     const coursesUrl = `${baseUrl}/api/course/get-all`;
     const eventsUrl = `${baseUrl}/api/event/get-all`;
     const userUrl = `${baseUrl}/api/user/get-user`;
@@ -47,25 +50,40 @@ const getData = async () => {
     };
 
     // Fetch both APIs in parallel
-    const [CoursesRes, eventsRes, userRes, displayRes, lessonProgressRes] =
-      await Promise.all([
-        fetch(coursesUrl, fetchOptions),
-        fetch(eventsUrl, fetchOptions),
-        fetch(userUrl, fetchOptions),
-        fetch(displayUrl, fetchOptions),
-        fetch(lessonProgressUrl, fetchOptions),
-      ]);
+    const [
+      platformRes,
+      CoursesRes,
+      eventsRes,
+      userRes,
+      displayRes,
+      lessonProgressRes,
+    ] = await Promise.all([
+      fetch(platformUrl, fetchOptions),
+      fetch(coursesUrl, fetchOptions),
+      fetch(eventsUrl, fetchOptions),
+      fetch(userUrl, fetchOptions),
+      fetch(displayUrl, fetchOptions),
+      fetch(lessonProgressUrl, fetchOptions),
+    ]);
 
-    const [CoursesJson, eventsJson, userJson, displayJson, lessonProgressJson] =
-      await Promise.all([
-        CoursesRes.json(),
-        eventsRes.json(),
-        userRes.json(),
-        displayRes.json(),
-        lessonProgressRes.json(),
-      ]);
+    const [
+      platformJson,
+      CoursesJson,
+      eventsJson,
+      userJson,
+      displayJson,
+      lessonProgressJson,
+    ] = await Promise.all([
+      platformRes.json(),
+      CoursesRes.json(),
+      eventsRes.json(),
+      userRes.json(),
+      displayRes.json(),
+      lessonProgressRes.json(),
+    ]);
 
     // Check success status of both
+    const platformData = platformJson.success ? platformJson.data : {};
     const displayData = displayJson.success ? displayJson.data : {};
     const coursesData = displayData.view_courses
       ? CoursesJson.success
@@ -84,9 +102,10 @@ const getData = async () => {
       : [];
     const userData = userJson.success ? userJson.data : {};
 
-    console.log({ courses: coursesData });
+    console.log({ platformData });
 
     return {
+      platform: platformData,
       courses: coursesData,
       events: eventsData,
       users: userData,
@@ -96,6 +115,7 @@ const getData = async () => {
   } catch (error) {
     console.error("Error while fetching data:", error);
     return {
+      platform: [],
       courses: [],
       events: [],
       user: {} as User,

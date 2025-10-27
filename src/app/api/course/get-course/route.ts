@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     const course = await prisma.course.findFirst({
       where: { id: courseId },
-      include: {Rating: true}
+      include: { Rating: true },
     });
 
     if (!course) {
@@ -89,12 +89,10 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      const purchase = await prisma.purchase.findFirst({
+      const purchase = await prisma.purchase.findMany({
         where: { courseId: course.id, userId: token_data.id },
         include: { payment: true },
       });
-
-      console.log({purchase, payment: purchase?.payment})
 
       if (!purchase) {
         return NextResponse.json({
@@ -104,9 +102,12 @@ export async function GET(req: NextRequest) {
           lessons: display_course_lessons,
         });
       }
-      console.log({ status: purchase.payment?.status });
+      // console.log({ status: purchase.payment });
 
-      if (purchase.payment?.status !== "SUCCESS") {
+      if (
+        purchase.find((purch) => purch.payment?.status === "SUCCESS")?.payment
+          ?.status !== "SUCCESS"
+      ) {
         return NextResponse.json({
           success: true,
           message: "payment is not successful",

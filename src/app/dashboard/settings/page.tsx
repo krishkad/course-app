@@ -59,21 +59,30 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
-
-
 export default function SettingsPage() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const students = useSelector((state: RootState) => state.students.students);
   const display = useSelector(
     (state: RootState) => state.display_state.display
   );
+  const platform = useSelector(
+    (state: RootState) => state.admin_platform_setting.platform
+  );
   const [display_show, setDisplay_show] = useState<Display>({} as Display);
+  const [platform_edit, setPlatform_edit] = useState({
+    platformName: "",
+    supportEmail: "",
+  });
   const [isDisplaySaving, setIsDisplaySaving] = useState(false);
 
   const dispatch = useDispatch();
   useEffect(() => {
-    if (display) {
+    if (display && platform) {
       setDisplay_show(display);
+      setPlatform_edit({
+        platformName: platform.platformName,
+        supportEmail: platform.supportEmail,
+      });
       console.log({ display });
     }
   }, [display]);
@@ -150,7 +159,7 @@ export default function SettingsPage() {
                     <Label htmlFor="platform-name">Platform Name</Label>
                     <Input
                       id="platform-name"
-                      defaultValue="EduPlatform"
+                      defaultValue={platform_edit.platformName}
                       className="mt-1"
                     />
                   </div>
@@ -158,13 +167,11 @@ export default function SettingsPage() {
                     <Label htmlFor="support-email">Support Email</Label>
                     <Input
                       id="support-email"
-                      defaultValue="support@eduplatform.com"
+                      defaultValue={platform_edit.supportEmail}
                       className="mt-1"
                     />
                   </div>
                 </div>
-
-            
 
                 <div className="flex justify-end pt-4">
                   <Button className="w-full sm:w-auto">
@@ -259,7 +266,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-6 p-4 sm:p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <Label htmlFor="stripe-key">Stripe Publishable Key</Label>
+                    <Label htmlFor="stripe-key">Razorpay Publishable Key</Label>
                     <Input
                       id="stripe-key"
                       placeholder="pk_test_..."
@@ -267,7 +274,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="stripe-secret">Stripe Secret Key</Label>
+                    <Label htmlFor="stripe-secret">Razorpay Secret Key</Label>
                     <Input
                       id="stripe-secret"
                       type="password"
@@ -382,7 +389,6 @@ export default function SettingsPage() {
                             <TableCell>
                               <div className="flex items-center space-x-3">
                                 <Avatar className="w-8 h-8">
-                                 
                                   <AvatarFallback>
                                     {admin.fname.charAt(0).toUpperCase()}
                                   </AvatarFallback>

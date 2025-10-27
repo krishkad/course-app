@@ -12,11 +12,14 @@ import PaymentsSlice from "./admin/slice/payment";
 import LessonProgressSlice from "./slices/lessons-progress";
 import Display_Slice from "./admin/slice/display";
 import AllLessonProgress from "./admin/slice/all-lesson-progress";
-import AllLessonsSlice from "./admin/slice/all-lessons"
+import AllLessonsSlice from "./admin/slice/all-lessons";
+import Admin_PlatformSettings from "./admin/slice/platform";
+import PlatformSettingsSlice from "./slices/platform";
 
 export const makeStore = () =>
   configureStore({
     reducer: {
+      admin_platform_setting: Admin_PlatformSettings,
       all_events: AllEvents,
       all_lessonProgress: AllLessonProgress,
       all_lessons: AllLessonsSlice,
@@ -30,6 +33,7 @@ export const makeStore = () =>
       lessons: LessonsSlice,
       user: UserSlice,
       lessonsProgress: LessonProgressSlice,
+      platform: PlatformSettingsSlice,
     },
   });
 

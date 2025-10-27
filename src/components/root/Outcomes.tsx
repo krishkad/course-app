@@ -65,7 +65,7 @@ const Outcomes = () => {
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-6">
           {cards.map((card, i) => {
             return (
-              <div className="w-full h-full p-6 rounded-lg shadow-xl border-l-4 border-primary bg-background" key={i}>
+              <div className="w-full h-full p-6 rounded-lg shadow-xl border-l-4 border-primary bg-background shadow-primary/20" key={i}>
                 <h1 className="text-lg font-semibold">{card.headline}</h1>
                 <p className="text-muted-foreground font-medium mt-1">
                   {card.description}

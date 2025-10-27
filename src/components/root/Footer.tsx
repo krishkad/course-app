@@ -1,3 +1,5 @@
+"use client";
+import { RootState } from "@/redux/store";
 import {
   Facebook,
   Twitter,
@@ -8,10 +10,11 @@ import {
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
+import { useSelector } from "react-redux";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
+  const platform = useSelector((state: RootState) => state.platform.platform);
   return (
     <footer className="bg-muted/50 border-t">
       <div className="container mx-auto px-4 pt-16 pb-4">
@@ -25,7 +28,7 @@ const Footer = () => {
                   L
                 </span>
               </div>
-              <span className="text-xl font-bold">LearnPro</span>
+              <span className="text-xl font-bold">{platform.platformName}</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Empowering every individual — not just tech experts — to harness

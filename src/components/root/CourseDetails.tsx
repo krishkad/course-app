@@ -638,6 +638,82 @@ const CourseDetail = ({
                       </ul>
                     </AccordionContent>
                   </AccordionItem>
+                  <AccordionItem value="reviews">
+                    <AccordionTrigger className="text-xl font-semibold">
+                      Reviews
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {current_course.Rating &&
+                      current_course.Rating.length > 0 ? (
+                        <ul className="space-y-4">
+                          {current_course.Rating.map((review, index) => (
+                            <li
+                              key={index}
+                              className="flex flex-col border border-border rounded-lg p-4 bg-background"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  {/* User Avatar (if available) */}
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+                                    {"Anonymous"?.charAt(0).toUpperCase() ||
+                                      "U"}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">{"Anonymous"}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {new Date(
+                                        review.createdAt
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Rating stars */}
+                                <div className="flex space-x-1">
+                                  {Array.from({ length: review.rating }).map(
+                                    (_, i) => (
+                                      <svg
+                                        key={i}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill={
+                                          i < review.rating
+                                            ? "currentColor"
+                                            : "none"
+                                        }
+                                        stroke="currentColor"
+                                        className={`w-4 h-4 ${
+                                          i < review.rating
+                                            ? "text-yellow-400"
+                                            : "text-gray-300"
+                                        }`}
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={1.5}
+                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.09 3.36a1 1 0 00.95.69h3.53c.969 0 1.371 1.24.588 1.81l-2.857 2.074a1 1 0 00-.364 1.118l1.09 3.36c.3.921-.755 1.688-1.54 1.118L10 14.347l-2.938 2.11c-.784.57-1.838-.197-1.539-1.118l1.09-3.36a1 1 0 00-.364-1.118L3.392 8.787c-.783-.57-.38-1.81.588-1.81h3.53a1 1 0 00.95-.69l1.09-3.36z"
+                                        />
+                                      </svg>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Review Text */}
+                              <p className="mt-3 text-sm text-muted-foreground">
+                                {review.content}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">
+                          No reviews yet for this course.
+                        </p>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
                 </Accordion>
               </div>
             </div>
@@ -722,7 +798,7 @@ const CourseDetail = ({
                             lesson.isPaid === true &&
                             typeof lesson.videoUrl === "string"
                         ).length > 0 ? (
-                          <Button className="w-full mb-6 bg-yellow-500 hover:opacity-90 shadow-glow h-12 text-lg">
+                          <Button className="w-full mb-6 bg-yellow-500 hover:bg-yellow-500 hover:opacity-90 shadow-glow h-12 text-lg">
                             Enrolled
                           </Button>
                         ) : (
@@ -737,7 +813,7 @@ const CourseDetail = ({
                     }
                     signIn={
                       <>
-                        <Link
+                        <Link 
                           href={`/sign-in?redirect=${pathname}&enroll=true`}
                         >
                           <Button className="w-full mb-6 bg-gradient-primary hover:opacity-90 shadow-glow h-12 text-lg">

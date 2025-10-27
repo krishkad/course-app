@@ -20,6 +20,7 @@ import { NavigationMenuDemo } from "./NavigationMenu";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const user = useSelector((state: RootState) => state.user.user);
+  const platform = useSelector((state: RootState) => state.platform.platform);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -32,7 +33,7 @@ const Navigation = () => {
                 L
               </span>
             </div>
-            <span className="text-xl font-bold">LearnPro</span>
+            <span className="text-xl font-bold">{platform.platformName}</span>
           </div>
         </Link>
 
@@ -116,7 +117,7 @@ const Navigation = () => {
                         L
                       </span>
                     </div>
-                    <span className="text-xl font-bold">LearnPro</span>
+                    <span className="text-xl font-bold">{platform.platformName}</span>
                   </div>
                 </SheetTitle>
               </SheetHeader>

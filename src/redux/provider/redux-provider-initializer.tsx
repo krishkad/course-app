@@ -5,10 +5,16 @@ import { useDispatch } from "react-redux";
 import { ICourse, initialiseCourses } from "../slices/courses";
 import { IEvent, initializeEvents } from "../slices/events";
 import ReduxProvider from "./redux-provider";
-import { Display, LessonProgress, User } from "@prisma/client";
+import {
+  Display,
+  LessonProgress,
+  PlatformSettings,
+  User,
+} from "@prisma/client";
 import { initializeUser } from "../slices/user";
 import { initializeDisplay } from "../slices/display";
 import { initializeLessonProgress } from "../slices/lessons-progress";
+import { initializePlatform } from "../slices/platform";
 
 interface Props {
   children: ReactNode;
@@ -16,7 +22,8 @@ interface Props {
   events: IEvent[] | null;
   user: User | null;
   display: Display;
-  lessonProgress: LessonProgress[]
+  lessonProgress: LessonProgress[];
+  platform: PlatformSettings;
 }
 
 const ReduxProviderInitializer = ({
@@ -25,7 +32,8 @@ const ReduxProviderInitializer = ({
   events,
   user,
   display,
-  lessonProgress
+  lessonProgress,
+  platform,
 }: Props) => {
   return (
     <ReduxProvider>
@@ -35,6 +43,7 @@ const ReduxProviderInitializer = ({
         user={user}
         display={display}
         lessonProgress={lessonProgress}
+        platform={platform}
       />
       {children}
     </ReduxProvider>
@@ -48,13 +57,15 @@ const Initializer = ({
   events,
   user,
   display,
-  lessonProgress
+  lessonProgress,
+  platform,
 }: {
   courses: Props["courses"];
   events: Props["events"];
   user: Props["user"];
   display: Props["display"];
-  lessonProgress:Props["lessonProgress"]
+  lessonProgress: Props["lessonProgress"];
+  platform: Props["platform"];
 }) => {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -73,7 +84,10 @@ const Initializer = ({
     if (lessonProgress) {
       dispatch(initializeLessonProgress(lessonProgress));
     }
-  }, [courses, events, user, display, lessonProgress]);
+    if (platform) {
+      dispatch(initializePlatform(platform));
+    }
+  }, [courses, events, user, display, lessonProgress, platform]);
 
   return null;
 };

@@ -7,6 +7,7 @@ import React, { ReactNode } from "react";
 
 const DashboardLayout = async ({ children }: { children: ReactNode }) => {
   const {
+    platform,
     students,
     courses,
     events,
@@ -17,6 +18,7 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
   } = await getData();
   return (
     <AdminProviderInit
+      platform={platform}
       students={students}
       all_courses={courses}
       events={events}
@@ -52,6 +54,7 @@ const getData = async () => {
 
     // Define API URLs
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const platformUrl = `${baseUrl}/api/platform/get`;
     const studentsUrl = `${baseUrl}/api/user/get-all`;
     const coursesUrl = `${baseUrl}/api/course/get-all-admin`;
     const eventsUrl = `${baseUrl}/api/event/get-all-admin`;
@@ -71,6 +74,7 @@ const getData = async () => {
 
     // Fetch both APIs in parallel
     const [
+      platformRes,
       studentsRes,
       coursesRes,
       eventsRes,
@@ -79,6 +83,7 @@ const getData = async () => {
       lessonProgressRes,
       lessonsRes,
     ] = await Promise.all([
+      fetch(platformUrl, fetchOptions),
       fetch(studentsUrl, fetchOptions),
       fetch(coursesUrl, fetchOptions),
       fetch(eventsUrl, fetchOptions),
@@ -89,6 +94,7 @@ const getData = async () => {
     ]);
 
     const [
+      platformJson,
       studentsJson,
       coursesJson,
       eventsJson,
@@ -97,6 +103,7 @@ const getData = async () => {
       lessonProgressJson,
       lessonsJson,
     ] = await Promise.all([
+      platformRes.json(),
       studentsRes.json(),
       coursesRes.json(),
       eventsRes.json(),
@@ -109,6 +116,7 @@ const getData = async () => {
     console.log({ displayJson });
 
     // Check success status of both
+    const platformData = platformJson.success ? platformJson.data : [];
     const studentsData = studentsJson.success ? studentsJson.data : [];
     const coursesData = coursesJson.success ? coursesJson.data : [];
     const eventsData = eventsJson.success ? eventsJson.data : [];
@@ -121,6 +129,7 @@ const getData = async () => {
 
     console.log({ lessonsData });
     return {
+      platform: platformData,
       students: studentsData,
       courses: coursesData,
       events: eventsData,
@@ -132,6 +141,7 @@ const getData = async () => {
   } catch (error) {
     console.error("Error while fetching data:", error);
     return {
+      platform: [],
       students: [],
       courses: [],
       events: [],

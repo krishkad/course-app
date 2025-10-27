@@ -1,6 +1,6 @@
 "use client";
 
-import { Display, Lesson, LessonProgress, User } from "@prisma/client";
+import { Display, Lesson, LessonProgress, PlatformSettings, User } from "@prisma/client";
 import { ReactNode, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import AdminReduxProvider from "./AdminProvider";
@@ -11,6 +11,7 @@ import { initialize_display } from "./slice/display";
 import { initializePayments, IPayment } from "./slice/payment";
 import { initialize_all_lesson_progress } from "./slice/all-lesson-progress";
 import { initialize_all_lessons } from "./slice/all-lessons";
+import { initializePlatform } from "./slice/platform";
 
 interface Props {
   children: ReactNode;
@@ -21,6 +22,7 @@ interface Props {
   display: Display;
   lessonProgress: LessonProgress[];
   lessons: Lesson[];
+  platform: PlatformSettings
 }
 
 const AdminProviderInit = ({
@@ -32,6 +34,7 @@ const AdminProviderInit = ({
   display,
   lessonProgress,
   lessons,
+  platform
 }: Props) => {
   return (
     <AdminReduxProvider>
@@ -43,6 +46,7 @@ const AdminProviderInit = ({
         display={display}
         lessonProgress={lessonProgress}
         lessons={lessons}
+        platform={platform}
       />
       {children}
     </AdminReduxProvider>
@@ -59,6 +63,7 @@ const Initializer = ({
   display,
   lessonProgress,
   lessons,
+  platform
 }: {
   students: Props["students"];
   all_courses: Props["all_courses"];
@@ -67,6 +72,7 @@ const Initializer = ({
   display: Props["display"];
   lessonProgress: Props["lessonProgress"];
   lessons: Props["lessons"];
+  platform: Props["platform"]
 }) => {
   const dispatch = useDispatch();
 
@@ -78,8 +84,10 @@ const Initializer = ({
       payments ||
       display ||
       lessonProgress ||
-      lessons
+      lessons ||
+      platform
     ) {
+      dispatch(initializePlatform(platform));
       dispatch(initialize_all_students(students));
       dispatch(initializeAllCourses(all_courses));
       dispatch(initialize_all_events(events));
