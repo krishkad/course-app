@@ -89,8 +89,8 @@ const Navigation = () => {
               <Link href={"/profile"}>
                 <Avatar>
                   <AvatarImage src="" />
-                  <AvatarFallback>
-                    {user.fname?.slice(0, 1).toUpperCase()}
+                  <AvatarFallback className="bg-primary/80 text-white">
+                    {user.fname?.slice(0, 1).toUpperCase()}{user.lname?.slice(0,1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>

@@ -72,7 +72,7 @@ const CareerAccelaration = () => {
           {cards.map((card, i) => {
             const IconComponent = iconMap[card.icon];
             return (
-              <div className="w-full h-full p-6 rounded-lg shadow-xl" key={i}>
+              <div className="w-full h-full p-6 rounded-lg shadow-xl hover:shadow-primary/20" key={i}>
                 <div className="w-max h-max">
                   <div className="bg-primary p-4 rounded-xl">
                     {IconComponent && (

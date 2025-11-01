@@ -1,22 +1,22 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Footer from "@/components/root/Footer";
+import Navigation from "@/components/root/Navigation";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Mail,
-  Phone,
-  MapPin,
   Clock,
-  Send,
-  MessageSquare,
-  Users,
   Headphones,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+  Send,
+  Users,
 } from "lucide-react";
-import Navigation from "@/components/root/Navigation";
-import Footer from "@/components/root/Footer";
+import { useState } from "react";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -110,7 +110,7 @@ const Contact = () => {
   ];
 
   return (
-    <Suspense fallback={<>Loading...</>}>
+    // <Suspense fallback={<>Loading...</>}>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
         <Navigation />
 
@@ -330,7 +330,7 @@ const Contact = () => {
         </section>
         <Footer />
       </div>
-    </Suspense>
+    // </Suspense>
   );
 };
 

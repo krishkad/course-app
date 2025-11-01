@@ -124,7 +124,7 @@ const AllCourses = () => {
     const searchText = (
       course.title +
       " " +
-      course.description +
+      // course.description +
       " " +
       course.keywords.toString() +
       course.profession +

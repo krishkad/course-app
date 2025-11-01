@@ -102,7 +102,8 @@
   --shadow-card-hover: 0 10px 15px hsl(221 83% 53% / 0.1),
     0 4px 6px hsl(0 0% 0% / 0.05);
   --shadow-hero: 0 20px 25px hsl(221 83% 53% / 0.15);
-  --shadow-glow: 0 0 20px hsl(221 83% 53% / 0.3);
+  --shadow-glow: 0 0 20px hsla(268, 83%, 53%, 0.3);
+  /* --shadow-glow: 0 0 20px hsl(221 83% 53% / 0.3); */
 }
 
 .dark {

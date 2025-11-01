@@ -1,19 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import Footer from "@/components/root/Footer";
+import Navigation from "@/components/root/Navigation";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Users,
-  Target,
   Award,
-  TrendingUp,
   BookOpen,
   Globe,
   Heart,
+  Target,
+  TrendingUp,
+  Users,
   Zap,
 } from "lucide-react";
-import Navigation from "@/components/root/Navigation";
-import Footer from "@/components/root/Footer";
-import { Suspense } from "react";
 
 const About = () => {
   const stats = [
@@ -82,7 +81,7 @@ const About = () => {
   ];
 
   return (
-    <Suspense fallback={<>Loading...</>}>
+    // <Suspense fallback={<>Loading...</>}>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
         <Navigation />
 
@@ -334,7 +333,7 @@ const About = () => {
 
         <Footer />
       </div>
-    </Suspense>
+    // </Suspense>
   );
 };
 

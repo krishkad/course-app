@@ -169,7 +169,7 @@ const CareerGrowthSection = () => {
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                     {card.description}
                   </p>
-                  <button className="text-sm font-medium text-primary hover:text-primary/80 flex items-center space-x-2 group/btn">
+                  <button className="text-sm font-medium text-primary hover:text-primary/80 flex items-center space-x-2 group/btn cursor-pointer">
                     <span>Learn More</span>
                     <ArrowRight className="h-3 w-3 transition-transform group-hover/btn:translate-x-1" />
                   </button>
