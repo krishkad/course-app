@@ -32,13 +32,11 @@ const AllCourses = () => {
 
     const q = fullUrl.split("q=")[1];
     if (q) {
-      const base64Decode = decodeURI(q);
+      const base64Decode = decodeURIComponent(q);
       setSearchTerm(base64Decode);
     }
     console.log({ q });
   }, []);
-
-  
 
   function advancedStemming(word: string) {
     if (!word || word.length < 3) return word;
@@ -128,11 +126,17 @@ const AllCourses = () => {
       " " +
       course.description +
       " " +
-      course.keywords.toString() + course.profession + course.profession.includes("All")
+      course.keywords.toString() +
+      course.profession +
+      course.profession.includes("All")
     ).toLowerCase();
 
     return findSimilarWords(searchTerm, searchText);
   });
+
+
+
+  
   return (
     <Suspense fallback={<>Loading...</>}>
       <div className="min-h-screen bg-background">

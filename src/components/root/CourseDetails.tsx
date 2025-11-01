@@ -13,7 +13,7 @@ import { cn, getRating, sortByIdAscending } from "@/lib/utils";
 import { ICourse } from "@/redux/slices/courses";
 import { initializeLessonProgress } from "@/redux/slices/lessons-progress";
 import { RootState } from "@/redux/store";
-import { Lesson } from "@prisma/client";
+import { Lesson, Rating } from "@prisma/client";
 import {
   ArrowLeft,
   CheckCircle,
@@ -33,6 +33,8 @@ import RazorpayButton from "./RazorpayButton";
 import YouTubeEmbed from "./YoutubeEmbed";
 import AuthComponent from "../auth/AuthComponent";
 import Link from "next/link";
+import { toast } from "sonner";
+import { CourseReviewDialog } from "./ReviewDialog";
 
 const CourseDetail = ({
   courseId,
@@ -281,8 +283,41 @@ const CourseDetail = ({
     current_course,
     current_course?.title,
     click_on_enroll_ref.current,
-    lessons
+    lessons,
   ]);
+
+  const handleReview = async (review: { stars: number; content: string }) => {
+    try {
+      if (
+        !current_course ||
+        !current_course.id ||
+        lessons.filter(
+          (lesson) => lesson.isPaid && typeof lesson.videoUrl === "string"
+        ).length < 1
+      )
+        return;
+      const response = await fetch("/api/course/rating/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...review, courseId: current_course.id }),
+        credentials: "include",
+      });
+
+      const res = await response.json();
+
+      console.log({ rating_response: res });
+      if (!res.success) {
+        toast.warning(res.message);
+      }
+
+      toast.success(res.message === "ok" ? "review created": res.message);
+    } catch (error) {
+      console.log("error creating review: ", error);
+      toast.warning("failed to review");
+    }
+  };
 
   if (!current_course) {
     return (
@@ -866,6 +901,8 @@ const CourseDetail = ({
                         </div>
                       </div>
                     )}
+
+                    <CourseReviewDialog handleSubmit={handleReview} />
                   </div>
                 </CardContent>
               </Card>

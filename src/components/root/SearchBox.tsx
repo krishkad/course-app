@@ -6,22 +6,16 @@ import { Search } from "lucide-react"; // adjust based on your icon import
 import { useRouter } from "next/navigation";
 
 export const professions = [
-  "Software Engineer",
-  "Software Developer",
-  "Marketing Manager",
-  "Data Analyst",
-  "Business Analyst",
-  "Financial Analyst",
-  "Lawyer",
-  "Graphic Designer",
-  "Content Writer",
-  "Teacher",
-  "Educator",
+  "Software Engineer / Developer",
+  "Marketing Specialist / Digital Marketer",
+  "Data Analyst / Business Analyst",
+  "Financial Analyst / Investment Professional",
+  "Legal Professional (Lawyer / Paralegal)",
+  "Content Creator / Graphic Designer",
+  "Educator / Learning Designer",
   "UX/UI Designer",
-  "Journalist",
-  "Writer",
-  "Entrepreneur",
-  "Business Owner",
+  "Journalist / Research Writer",
+  "Entrepreneur / Business Owner",
 ];
 
 export const ProfessionSearch = () => {
@@ -54,7 +48,10 @@ export const ProfessionSearch = () => {
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };

@@ -104,10 +104,10 @@ const Navigation = () => {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-full p-6"
+            className="w-full h-full p-6"
             aria-describedby={undefined}
           >
-            <div className="flex flex-col space-y-6">
+            <div className="flex  h-full flex-col space-y-6">
               <SheetHeader className="p-0">
                 {/* Mobile Logo */}
                 <SheetTitle className="p-0">
@@ -117,82 +117,85 @@ const Navigation = () => {
                         L
                       </span>
                     </div>
-                    <span className="text-xl font-bold">{platform.platformName}</span>
+                    <span className="text-xl font-bold">
+                      {platform.platformName}
+                    </span>
                   </div>
                 </SheetTitle>
               </SheetHeader>
 
               {/* Mobile Links */}
-              <div className="flex flex-col space-y-4 mt-8">
-                <Link
-                  href="/courses"
-                  className="text-sm hover:text-primary transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  COURSES
-                </Link>
+              <div className="w-full mt-24">
+                <div className="flex flex-col h-full justify-center items-center space-y-8 px-8">
+                  <Link
+                    href="/courses"
+                    className="text-xl font-medium text-stone hover:text-coral transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    COURSES
+                  </Link>
 
-                <Link
-                  href="/about"
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  About Us
-                </Link>
-                <Link
-                  href="/events"
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Events
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Contact
-                </Link>
-              </div>
-
-              {/* Mobile Auth */}
-              <div className="flex flex-col space-y-3 pt-4 border-t">
-                <AuthComponent
-                  signIn={
-                    <>
-                      <Link href={"/sign-in"}>
+                  <Link
+                    href="/about"
+                    className="text-xl font-medium text-stone hover:text-coral transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    About Us
+                  </Link>
+                  <Link
+                    href="/events"
+                    className="text-xl font-medium text-stone hover:text-coral transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Events
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="text-xl font-medium text-stone hover:text-coral transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Contact
+                  </Link>
+                  <AuthComponent
+                    signIn={
+                      <>
+                        <Link href={"/sign-in"}>
+                          <Button
+                            variant="ghost"
+                            className="justify-start"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            <LogIn className="h-4 w-4 mr-2" />
+                            Login
+                          </Button>
+                        </Link>
+                        <Link href={"/sign-up"}>
+                          <Button
+                            className="bg-gradient-primary hover:opacity-90"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            Sign Up
+                          </Button>
+                        </Link>
+                      </>
+                    }
+                    signOut={
+                      <Link href={"/profile"}>
                         <Button
-                          variant="ghost"
-                          className="justify-start"
+                          size={"sm"}
+                          variant={"ghost"}
                           onClick={() => setIsOpen(false)}
                         >
-                          <LogIn className="h-4 w-4 mr-2" />
-                          Login
+                          <UserIcon className="inline-flex mr-1.5" />
+                          Profile
                         </Button>
                       </Link>
-                      <Link href={"/sign-up"}>
-                        <Button
-                          className="bg-gradient-primary hover:opacity-90"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          Sign Up
-                        </Button>
-                      </Link>
-                    </>
-                  }
-                  signOut={
-                    <Link href={"/profile"}>
-                      <Button
-                        size={"sm"}
-                        variant={"ghost"}
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <UserIcon className="inline-flex mr-1.5" />
-                        Profile
-                      </Button>
-                    </Link>
-                  }
-                />
+                    }
+                  />
+                </div>
+
+                {/* Mobile Auth */}
+                <div className="flex flex-col space-y-3 pt-4 border-t"></div>
               </div>
             </div>
           </SheetContent>

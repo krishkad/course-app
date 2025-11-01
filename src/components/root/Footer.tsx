@@ -13,208 +13,85 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
+  const year = new Date().getFullYear();
   const platform = useSelector((state: RootState) => state.platform.platform);
+
   return (
-    <footer className="bg-muted/50 border-t">
-      <div className="container mx-auto px-4 pt-16 pb-4">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          {/* Company Info */}
-          <div className="space-y-4">
+    <footer className="border-t bg-muted/50">
+      <div className="container mx-auto px-4 py-10 flex flex-col md:flex-row md:justify-between md:items-start gap-8">
+        {/* Logo & Tagline */}
+        <div className="flex flex-col items-start space-y-2">
+          <div className="flex items-center space-x-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground font-bold">
+              L
+            </div>
+            <span className="text-lg font-semibold">
+              {platform.platformName}
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Empowering everyone to learn, create, and innovate with AI.
+          </p>
+        </div>
+
+        {/* Quick Links */}
+        <div className="flex flex-col md:flex-row md:flex-wrap gap-2 md:gap-4 text-sm text-muted-foreground">
+          <Link href="/about" className="hover:text-primary transition-colors">
+            About
+          </Link>
+          <Link href="/courses" className="hover:text-primary transition-colors">
+            Courses
+          </Link>
+          <Link href="/events" className="hover:text-primary transition-colors">
+            Events
+          </Link>
+          <Link href="/refund-policy" className="hover:text-primary transition-colors">
+            Refund
+          </Link>
+          <Link href="/disclaimer" className="hover:text-primary transition-colors">
+            Disclaimer
+          </Link>
+          <Link href="/terms-and-conditions" className="hover:text-primary transition-colors">
+            Terms
+          </Link>
+          <Link href="/privacy-policy" className="hover:text-primary transition-colors">
+            Privacy
+          </Link>
+          <Link href="/contact" className="hover:text-primary transition-colors">
+            Contact
+          </Link>
+        </div>
+
+        {/* Social Icons & Contact Info */}
+        <div className="flex flex-col  items-start md:items-end gap-3">
+          <div className="flex space-x-4 text-muted-foreground">
+            {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+              <Icon
+                key={i}
+                className="h-5 w-5 cursor-pointer hover:text-primary transition-colors"
+              />
+            ))}
+          </div>
+          <div className="space-y-1 text-xs text-muted-foreground text-left md:text-right">
             <div className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
-                <span className="text-sm font-bold text-primary-foreground">
-                  L
-                </span>
-              </div>
-              <span className="text-xl font-bold">{platform.platformName}</span>
+              <Mail className="h-3.5 w-3.5" />
+              <span>support@learnpro.com</span>
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Empowering every individual — not just tech experts — to harness
-              AI responsibly and creatively
-            </p>
-            <div className="flex space-x-4">
-              <Facebook className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-              <Twitter className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-              <Instagram className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-              <Linkedin className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
+            <div className="flex items-center space-x-2">
+              <Phone className="h-3.5 w-3.5" />
+              <span>1-800-LEARN-PRO</span>
             </div>
-          </div>
-
-          {/* About Us */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">About Us</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Our Story
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Mission & Vision
-                </Link>
-              </li>
-             
-              <li>
-                <Link
-                  href="/courses"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Course Catalog
-                </Link>
-              </li>
-              {/* <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Press & Media
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Partner with Us
-                </a>
-              </li> */}
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/courses"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Courses
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/events"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Events
-                </Link>
-              </li>
-              {/* <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  FAQs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Community
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Student Success
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Course Catalog
-                </a>
-              </li> */}
-            </ul>
-          </div>
-
-          {/* Legal & Contact */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Legal & Contact</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/terms-and-conditions"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy-policy"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-             
-              <li>
-                <Link
-                  href="/refund-policy"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/disclaimer"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Disclaimer
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-
-            <div className="space-y-2 pt-4">
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>support@learnpro.com</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>1-800-LEARN-PRO</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>San Francisco, CA</span>
-              </div>
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-3.5 w-3.5" />
+              <span>San Francisco, CA</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t pt-8 flex flex-col md:flex-row justify-center items-center">
-          <div className="text-sm text-muted-foreground">
-            © {currentYear} LearnPro. All rights reserved.
-          </div>
-        </div>
+      {/* Bottom Bar */}
+      <div className="border-t text-left py-4 text-xs text-muted-foreground px-4 md:text-center">
+        © {year} {platform.platformName}. All rights reserved.
       </div>
     </footer>
   );

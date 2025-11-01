@@ -186,8 +186,8 @@ const CareerGrowthSection = () => {
               <p className="text-4xl font-semibold mb-4 text-black">
                 Ready to accelerate your career growth?
               </p>
-              <Link href={"/courses"}>
-                <button className="px-8 py-3 bg-white text-white font-semibold rounded-lg bg-gradient-primary hover:bg-white/90 transition-colors shadow-lg flex items-center space-x-2">
+              <Link href={"/courses"} className="cursor-pointer">
+                <button className="px-8 py-3 bg-white text-white font-semibold rounded-lg bg-gradient-primary hover:bg-white/90 transition-colors cursor-pointer shadow-lg flex items-center space-x-2">
                   <span>Get Started Today</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
