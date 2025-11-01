@@ -21,6 +21,7 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const user = useSelector((state: RootState) => state.user.user);
   const platform = useSelector((state: RootState) => state.platform.platform);
+  const display = useSelector((state: RootState) => state.display.display);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -47,12 +48,14 @@ const Navigation = () => {
           >
             About Us
           </Link>
-          <Link
-            href="/events"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            Events
-          </Link>
+          {display.view_events && (
+            <Link
+              href="/events"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Events
+            </Link>
+          )}
           <Link
             href="/contact"
             className="text-sm font-medium hover:text-primary transition-colors"
@@ -142,13 +145,15 @@ const Navigation = () => {
                   >
                     About Us
                   </Link>
-                  <Link
-                    href="/events"
-                    className="text-xl font-medium text-stone hover:text-coral transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Events
-                  </Link>
+                  {display.view_events && (
+                    <Link
+                      href="/events"
+                      className="text-xl font-medium text-stone hover:text-coral transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Events
+                    </Link>
+                  )}
                   <Link
                     href="/contact"
                     className="text-xl font-medium text-stone hover:text-coral transition-colors"

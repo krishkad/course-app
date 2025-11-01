@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 const Footer = () => {
   const year = new Date().getFullYear();
   const platform = useSelector((state: RootState) => state.platform.platform);
+  const display = useSelector((state: RootState) => state.display.display);
 
   return (
     <footer className="border-t bg-muted/50">
@@ -39,25 +40,48 @@ const Footer = () => {
           <Link href="/about" className="hover:text-primary transition-colors">
             About
           </Link>
-          <Link href="/courses" className="hover:text-primary transition-colors">
+          <Link
+            href="/courses"
+            className="hover:text-primary transition-colors"
+          >
             Courses
           </Link>
-          <Link href="/events" className="hover:text-primary transition-colors">
-            Events
-          </Link>
-          <Link href="/refund-policy" className="hover:text-primary transition-colors">
+          {display.view_events && (
+            <Link
+              href="/events"
+              className="hover:text-primary transition-colors"
+            >
+              Events
+            </Link>
+          )}
+          <Link
+            href="/refund-policy"
+            className="hover:text-primary transition-colors"
+          >
             Refund
           </Link>
-          <Link href="/disclaimer" className="hover:text-primary transition-colors">
+          <Link
+            href="/disclaimer"
+            className="hover:text-primary transition-colors"
+          >
             Disclaimer
           </Link>
-          <Link href="/terms-and-conditions" className="hover:text-primary transition-colors">
+          <Link
+            href="/terms-and-conditions"
+            className="hover:text-primary transition-colors"
+          >
             Terms
           </Link>
-          <Link href="/privacy-policy" className="hover:text-primary transition-colors">
+          <Link
+            href="/privacy-policy"
+            className="hover:text-primary transition-colors"
+          >
             Privacy
           </Link>
-          <Link href="/contact" className="hover:text-primary transition-colors">
+          <Link
+            href="/contact"
+            className="hover:text-primary transition-colors"
+          >
             Contact
           </Link>
         </div>
