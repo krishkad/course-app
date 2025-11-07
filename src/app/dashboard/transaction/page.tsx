@@ -49,6 +49,7 @@ import { IPayment } from "@/redux/admin/slice/payment";
 import { User } from "@prisma/client";
 import { ICourse } from "@/redux/admin/slice/all-courses";
 import { IEvent } from "@/redux/admin/slice/all-events";
+import { exportTransactionsToExcel } from "@/lib/export-transactions";
 
 // Mock transaction data
 const transactions = [
@@ -281,7 +282,16 @@ export default function AdminTransactions() {
               Monitor and manage all payment transactions
             </p>
           </div>
-          <Button>
+          <Button
+            onClick={() =>
+              exportTransactionsToExcel(
+                all_transactions,
+                students,
+                all_courses,
+                all_events
+              )
+            }
+          >
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>

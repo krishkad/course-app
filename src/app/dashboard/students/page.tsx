@@ -390,6 +390,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { exportStudentsToExcel } from "@/lib/export-students";
 import { getPaidStudentsCount } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import { User } from "@prisma/client";
@@ -405,6 +406,12 @@ export default function StudentsPage() {
 
   const all_students = useSelector(
     (state: RootState) => state.students.students
+  );
+  const all_courses = useSelector(
+    (state: RootState) => state.all_courses.all_courses
+  );
+  const all_events = useSelector(
+    (state: RootState) => state.all_events.all_events
   );
   const payments = useSelector((state: RootState) => state.payments.payments);
 
@@ -529,7 +536,16 @@ export default function StudentsPage() {
               Manage and monitor student progress
             </p>
           </div>
-          <Button>
+          <Button
+            onClick={() =>
+              exportStudentsToExcel(
+                all_students,
+                payments,
+                all_courses,
+                all_events
+              )
+            }
+          >
             <Download className="w-4 h-4 mr-2" />
             Export Data
           </Button>
