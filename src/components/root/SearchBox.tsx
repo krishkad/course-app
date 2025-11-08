@@ -6,6 +6,7 @@ import { Search } from "lucide-react"; // adjust based on your icon import
 import { useRouter } from "next/navigation";
 
 export const professions = [
+  "For Everyone",
   "Software Engineer / Developer",
   "Marketing Specialist / Digital Marketer",
   "Data Analyst / Business Analyst",

@@ -48,7 +48,7 @@ const CallToActionSection = () => {
           </div>
 
           {/* Success Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="max-w-md mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
                 50K+
@@ -57,14 +57,14 @@ const CallToActionSection = () => {
                 Successful Graduates
               </div>
             </div>
-            <div className="text-center">
+            {/* <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
                 95%
               </div>
               <div className="text-primary-foreground/80">
                 Job Placement Rate
               </div>
-            </div>
+            </div> */}
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
                 4.9/5
@@ -96,9 +96,9 @@ const CallToActionSection = () => {
           </div>
 
           {/* Additional Incentive */}
-          <p className="text-primary-foreground/80 mt-6 text-sm">
+          {/* <p className="text-primary-foreground/80 mt-6 text-sm">
             💡 No credit card required • 7-day free trial • Cancel anytime
-          </p>
+          </p> */}
         </div>
       </div>
     </section>

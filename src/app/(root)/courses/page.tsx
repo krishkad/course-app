@@ -131,12 +131,12 @@ const AllCourses = () => {
       course.profession.includes("All")
     ).toLowerCase();
 
+    if (searchTerm === "For Everyone") {
+      return courses;
+    }
     return findSimilarWords(searchTerm, searchText);
   });
 
-
-
-  
   return (
     <Suspense fallback={<>Loading...</>}>
       <div className="min-h-screen bg-background">

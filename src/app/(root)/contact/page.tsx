@@ -229,8 +229,7 @@ const Contact = () => {
               </Card>
 
               {/* Support Types & FAQ */}
-              <div className="space-y-8">
-                {/* Support Types */}
+              {/* <div className="space-y-8">
                 <Card className="bg-card/50 backdrop-blur-sm border-border/50">
                   <CardHeader>
                     <CardTitle className="text-xl bg-gradient-primary bg-clip-text text-transparent">
@@ -257,7 +256,6 @@ const Contact = () => {
                   </CardContent>
                 </Card>
 
-                {/* Quick Links */}
                 <Card className="bg-card/50 backdrop-blur-sm border-border/50">
                   <CardHeader>
                     <CardTitle className="text-xl bg-gradient-primary bg-clip-text text-transparent">
@@ -283,7 +281,6 @@ const Contact = () => {
                   </CardContent>
                 </Card>
 
-                {/* Response Time */}
                 <Card className="bg-gradient-primary text-white">
                   <CardContent className="pt-6">
                     <div className="text-center">
@@ -299,7 +296,7 @@ const Contact = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
+              </div> */}
             </div>
           </div>
         </section>

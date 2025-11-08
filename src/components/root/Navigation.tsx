@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { RootState } from "@/redux/store";
-import { LogIn, Menu, UserIcon } from "lucide-react";
+import { LogIn, Menu, UserIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -89,8 +89,9 @@ const Navigation = () => {
               <Link href={"/profile"}>
                 <Avatar>
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary/80 text-white">
-                    {user.fname?.slice(0, 1).toUpperCase()}{user.lname?.slice(0,1).toUpperCase()}
+                  <AvatarFallback className="relative bg-primary/80 text-gray-100">
+                    {/* {user.fname?.slice(0, 1).toUpperCase()}{user.lname?.slice(0,1).toUpperCase()} */}
+                    <UserIcon className="w-8 h-8 shrink-0 fill-gray-100 absolute -bottom-[4px]" />
                   </AvatarFallback>
                 </Avatar>
               </Link>

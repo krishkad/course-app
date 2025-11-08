@@ -16,10 +16,10 @@ import {
 
 const About = () => {
   const stats = [
-    { number: "50K+", label: "Students Enrolled", icon: Users },
-    { number: "200+", label: "Expert Instructors", icon: Award },
+    { number: "1000+", label: "Students Enrolled", icon: Users },
+    { number: "20+", label: "Expert Instructors", icon: Award },
     { number: "95%", label: "Success Rate", icon: TrendingUp },
-    { number: "100+", label: "Countries Served", icon: Globe },
+    { number: "10+", label: "Countries Served", icon: Globe },
   ];
 
   const values = [
@@ -135,7 +135,7 @@ const About = () => {
                   <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
                     Our Mission
                   </h2>
-                  <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                  <p className="text-muted-foreground leading-relaxed mb-6">
                     At [Your Platform Name], our mission is to make Artificial
                     Intelligence education accessible, practical, and
                     transformative for every professional in India and beyond.
@@ -213,7 +213,7 @@ const About = () => {
                   <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
                     Our Vision
                   </h2>
-                  <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                  <p className="text-muted-foreground leading-relaxed mb-6">
                     Our vision is to create a future where every Indian
                     professional is AI-empowered — capable of leveraging
                     technology to innovate, solve problems, and shape the
@@ -287,7 +287,7 @@ const About = () => {
         </section>
 
         {/* Team Section */}
-        <section className="px-4 pb-20">
+        {/* <section className="px-4 pb-20">
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
@@ -329,7 +329,7 @@ const About = () => {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         <Footer />
       </div>
