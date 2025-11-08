@@ -165,20 +165,22 @@ const Navigation = () => {
                   <AuthComponent
                     signIn={
                       <>
-                        <Link href={"/sign-in"}>
+                        <Link href={"/sign-in"} className="w-full">
                           <Button
                             variant="ghost"
-                            className="justify-start"
+                            className="justify-star w-full"
+                            size={"lg"}
                             onClick={() => setIsOpen(false)}
                           >
                             <LogIn className="h-4 w-4 mr-2" />
                             Login
                           </Button>
                         </Link>
-                        <Link href={"/sign-up"}>
+                        <Link href={"/sign-up"} className="w-full">
                           <Button
-                            className="bg-gradient-primary hover:opacity-90"
+                            className="bg-gradient-primary hover:opacity-90 w-full"
                             onClick={() => setIsOpen(false)}
+                            size={"lg"}
                           >
                             Sign Up
                           </Button>
