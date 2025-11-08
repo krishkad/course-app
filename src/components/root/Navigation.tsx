@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { RootState } from "@/redux/store";
-import { LogIn, Menu, UserIcon, UserRoundIcon } from "lucide-react";
+import { LogIn, Menu, UserIcon, UserRoundIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -110,11 +110,13 @@ const Navigation = () => {
             side="right"
             className="w-full h-full p-6"
             aria-describedby={undefined}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            showCloseButton={false}
           >
             <div className="flex  h-full flex-col space-y-6">
               <SheetHeader className="p-0">
                 {/* Mobile Logo */}
-                <SheetTitle className="p-0">
+                <SheetTitle className="p-0 w-full flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
                       <span className="text-sm font-bold text-primary-foreground">
@@ -125,6 +127,14 @@ const Navigation = () => {
                       {platform.platformName}
                     </span>
                   </div>
+
+                  <Button
+                    variant={"outline"}
+                    size={"icon"}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <XIcon />
+                  </Button>
                 </SheetTitle>
               </SheetHeader>
 
